@@ -6,6 +6,7 @@
 
 ## FAQ
 
+>
 ### Lying是什么鬼？
 >Lying是我学习PHP的时候写的一个MVC小框架。
 ### Lying好用吗？
