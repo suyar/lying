@@ -1,7 +1,4 @@
 # ['Lying' => 'A simple PHP framework']
-@(PHP)[Framework]
-
-[TOC]
 
 ## Lying简介
 
