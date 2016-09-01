@@ -6,14 +6,7 @@ namespace core;
  * @version 1.0
  */
 use \App;
-abstract class Model {
-    
-    /**
-     * 此方法应该返回一个关联的表名
-     * @return string
-     */
-    abstract static function tableName();
-    
+class Model {
     /**
      * 用来存各个表的结构
      * @var array
