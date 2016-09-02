@@ -20,9 +20,9 @@ final class App {
     
     /**
      * 数据库连接
-     * @var \PDO
+     * @var array
      */
-    private static $db;
+    private static $connection = [];
     
     /**
      * 自动加载,文件路径和命名空间对应
@@ -50,13 +50,16 @@ final class App {
     
     /**
      * 返回PDO实例
+     * @param $dbname 要使用的数据库配置,默认'db'
      * @return PDO
      */
-    public static function db() {
-        if (!self::$db instanceof \PDO) {
-            self::$db = new \PDO(self::$config['db']['dsn'], self::$config['db']['user'], self::$config['db']['pwd']);
+    public static function db($dbname = 'db') {
+        if (!isset(self::$connection[$dbname]) || (!self::$connection[$dbname] instanceof \PDO)) {
+            $cfg = self::$config['database'][$dbname];
+            self::$connection[$dbname] = new \PDO($cfg['dsn'], $cfg['username'], $cfg['password']);
+            if ($cfg['charset'] && self::$connection[$dbname]->exec('SET NAMES '.$cfg['charset']) === false) throw new \Exception("Fail to set charset".$cfg['charset']);
         }
-        return self::$db;
+        return self::$connection[$dbname];
     }
     
     /**

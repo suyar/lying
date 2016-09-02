@@ -1,10 +1,6 @@
 <?php
 return [
-    'db' => [
-        'dsn'  => 'mysql:host=127.0.0.1;dbname=e',
-        'user' => 'root',
-        'pwd'  => 'root'
-    ],
+    'database' => require __DIR__.'/database.php',
     'log' => [
         'maxSize' => 0.5*1024*1024,
     ],
