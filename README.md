@@ -2,7 +2,7 @@
 
 ## Lying简介
 
-> Lying 是朕在学习PHP的时候写的一个MVC框架，它非常的简陋不规范但是我会坚持来维护这个不堪入目的框架。由于代码量非常少，又是学习使用，所以希望它能给正在学习PHP的同学一点启发，那再好不过了。现在还没空来写文档，所以有什么不明白的地方，可以点击这里联系我→_→<a target="_blank" href="http://wpa.qq.com/msgrd?v=3&uin=296399959&site=qq&menu=yes"><img border="0" src="http://wpa.qq.com/pa?p=2:296399959:52" alt="点击这里给我发消息" title="点击这里给我发消息"/></a>
+> Lying 是朕在学习PHP的时候写的一个MVC框架，它非常的简陋不规范但是我喜欢。由于代码量非常少，又是学习使用，所以如果它能给正在学习PHP的同学一点启发，那再好不过了。现在还没空来写文档，所以有什么不明白的地方，可以点击这里联系我→_→<a target="_blank" href="http://wpa.qq.com/msgrd?v=3&uin=296399959&site=qq&menu=yes"><img border="0" src="http://wpa.qq.com/pa?p=2:296399959:52" alt="点击这里给我发消息" title="点击这里给我发消息"/></a>
 
 ## FAQ
 
@@ -10,9 +10,9 @@
 ### Lying是什么鬼？
 >Lying是我学习PHP的时候写的一个MVC小框架。
 ### Lying好用吗？
->不好用。没有强大的功能（Active Record、SQL Builder）也没有详细的文档，但是勉强能用。
+>不好用。没有强大的功能（Active Record、SQL Builder等等等）也没有详细的文档，但是勉强能用。
 ###Lying有什么优点？
->没有。如果你不屑这种不入流的个人框架，请移步Yii等其他框架。如果非要说有，就是代码量少，灵活（你爱怎么改怎么改，完全重写也没问题）。
+>没有。如果你不喜欢这个框架，请移步Yii等其他框架。如果非要说有，就是代码量少，灵活（你爱怎么改怎么改，完全重写也没问题）。
 ###Lying为什么叫Lying？
 >因为Flying = Framework Lying啊（简直是歪理）。
 ###Lying源码能拿来学习用吗？
