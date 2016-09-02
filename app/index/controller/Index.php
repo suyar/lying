@@ -6,6 +6,7 @@ class Index extends Controller{
     public function index() {
         $user = new User();
         $res = $user->get();
-        //var_dump($res);
+        $res->password = '259758';
+        var_dump($res->save());
     }
 }

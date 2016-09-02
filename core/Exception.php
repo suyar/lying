@@ -10,7 +10,7 @@ class Exception {
      * 注册异常处理函数
      * @param \Exception $exception
      */
-    public static function exceptionHandle(\Exception $exception) {
+    public static function exceptionHandle($exception) {
         $msg = self::replaceRoot($exception->getMessage())." in ".self::replaceRoot($exception->getFile())." on line ".$exception->getLine();
         $trace = $exception->getTrace();
         self::show($msg, self::listTrace($trace));
