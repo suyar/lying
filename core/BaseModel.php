@@ -16,12 +16,6 @@ class BaseModel {
     private $_isNew = true;
     
     /**
-     * 主键的值
-     * @var mixed
-     */
-    private $_pk = null;
-    
-    /**
      * 用来存放纪录
      * @var array
      */
@@ -36,7 +30,7 @@ class BaseModel {
     /**
      * 返回表的结构
      * @throws \Exception
-     * @return array
+     * @return Struct
      */
     private static function _struct() {
         $tableName = self::_tableName();
@@ -48,7 +42,7 @@ class BaseModel {
         $pk = array_filter($fieldInfo, function($v) { return $v['Key'] === 'PRI'; });
         $pk = array_shift($pk);
         $tmp['key'] = $pk ? $pk['Field'] : null;
-        self::$_struct[$tableName] = (object)$tmp;
+        self::$_struct[$tableName] = new Struct($tmp);
         return self::$_struct[$tableName];
     }
     
@@ -90,34 +84,54 @@ class BaseModel {
         return isset($this->_data[$name]) ? $this->_data[$name] : null;
     }
     
-    
-    private function _update() {
-        
-        
+    /**
+     * 插入一条数据
+     * @return boolean 成功返回true,失败返回false
+     */
+    private function _insert() {
+        $struct = self::_struct();
+        $keys = array_keys($this->_data);
+        $vals = array_fill(0, count($keys), "?");
+        $sql = "INSERT INTO $struct->name (" . implode(", ", $keys) . ") VALUES (" . implode(", ", $vals) . ")";
+        return self::_connection()->prepare($sql)->execute(array_values($this->_data));
     }
     
+    /**
+     * 更新一条数据
+     * @param string $condition 条件
+     * @param array $params 参数
+     */
+    private function _update($condition = false, $params = []) {
+        $struct = self::_struct();
+        $keys = array_map(function($v) { return "$v = ?"; }, array_keys($this->_data));
+        $vals = array_values($this->_data);
+        if ($condition) $vals = array_merge($vals, $params);
+        $sql = "UPDATE $struct->name SET " . implode(", ", $keys) . $condition;
+        return self::_connection()->prepare($sql)->execute($vals);
+    }
     
+    /**
+     * 新增或者保存一条记录
+     * @param string $condition 更新时带入的WHERE条件
+     * 如果对象里有主键并且主键的值存在,传入此参数和$params参数并没有什么乱用
+     * 如果对象里没有主键或者主键的值不存在,请传入此参数,并且把所有的值用“?”表示
+     * 如："id = ? AND sex = ?"
+     * @param array $params 代替$condition里的“?”的数组
+     * 此参数的长度必须跟上面?的个数一样多,并且按照顺序填入,否则出错
+     * @return boolean
+     */
     public function save($condition = "", $params = []) {
         $struct = self::_struct();
-        $fields = $struct->fields;
-        $data = $update = [];
-        foreach ($this->_data as $k => $v) {
-            if (in_array($k, $fields)) {
-                $update[] = "$k = ?";
-                $data[] = $v;
-            }
-        }
-        $update = implode(", ", $update);
-        if ($struct->key) {
+        if ($this->_isNew === false) return $this->_insert();
+        if ($struct->key !== null && isset($this->_data[$struct])) {
+            //主键存在并且数据中有主键存在
             $condition = " WHERE $struct->key = ?";
-            $data[] = $this->_data[$struct->key];
-        }else if ($condition) {
+            $params = [$this->_data[$struct]];
+        }else {
+            //没有主键或者主键没有在数据中
             $condition = " WHERE $condition";
         }
-        $sql = "UPDATE $struct->name SET $update$condition";
-        return $sth = self::_connection()->prepare($sql)->execute($data);
-        
-        $sql = "INSET INTO $struct->name (" . implode(", ", $update) . ") VALUES (" .implode(", ", $data);
+        return $this->_update($condition, $params);
     }
     
     /**
