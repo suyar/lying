@@ -101,7 +101,7 @@ class BaseModel {
      * @param string $condition 条件
      * @param array $params 参数
      */
-    private function _update($condition = false, $params = []) {
+    private function _update($condition, $params) {
         $struct = self::_struct();
         $keys = array_map(function($v) { return "$v = ?"; }, array_keys($this->_data));
         $vals = array_values($this->_data);
@@ -120,7 +120,7 @@ class BaseModel {
      * 此参数的长度必须跟上面?的个数一样多,并且按照顺序填入,否则出错
      * @return boolean
      */
-    public function save($condition = "", $params = []) {
+    public function save($condition = '', $params = []) {
         $struct = self::_struct();
         if ($this->_isNew === false) return $this->_insert();
         if ($struct->key !== null && isset($this->_data[$struct])) {
@@ -132,6 +132,10 @@ class BaseModel {
             $condition = " WHERE $condition";
         }
         return $this->_update($condition, $params);
+    }
+    
+    public function delete($condition = '', $params = []) {
+        
     }
     
     /**
