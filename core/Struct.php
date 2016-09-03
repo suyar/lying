@@ -1,5 +1,9 @@
 <?php
 namespace core;
+/**
+ * 数据表的结构
+ * @author Carol
+ */
 class Struct {
     public $name = null;
     public $fields = [];

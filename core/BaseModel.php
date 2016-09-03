@@ -111,9 +111,21 @@ class BaseModel {
     }
     
     /**
+     * 删除一条记录
+     * @param string $condition 查询条件
+     * @param array $params 参数
+     * @return boolean
+     */
+    private function _delete($condition, $params) {
+        $struct = self::_struct();
+        $sql = "DELETE FROM $struct->name" . $condition;
+        return self::_connection()->prepare($sql)->execute($params);
+    }
+    
+    /**
      * 新增或者保存一条记录
      * @param string $condition 更新时带入的WHERE条件
-     * 如果对象里有主键并且主键的值存在,传入此参数和$params参数并没有什么乱用
+     * 如果对象里有主键并且主键的值存在,传入此参数和$params参数并没有什么卵用
      * 如果对象里没有主键或者主键的值不存在,请传入此参数,并且把所有的值用“?”表示
      * 如："id = ? AND sex = ?"
      * @param array $params 代替$condition里的“?”的数组
@@ -122,11 +134,11 @@ class BaseModel {
      */
     public function save($condition = '', $params = []) {
         $struct = self::_struct();
-        if ($this->_isNew === false) return $this->_insert();
-        if ($struct->key !== null && isset($this->_data[$struct])) {
+        if ($this->_isNew === true) return $this->_insert();
+        if ($struct->key !== null && isset($this->_data[$struct->key])) {
             //主键存在并且数据中有主键存在
             $condition = " WHERE $struct->key = ?";
-            $params = [$this->_data[$struct]];
+            $params = [$this->_data[$struct->key]];
         }else {
             //没有主键或者主键没有在数据中
             $condition = " WHERE $condition";
@@ -134,16 +146,38 @@ class BaseModel {
         return $this->_update($condition, $params);
     }
     
+    /**
+     * 删除记录
+     * @param string $condition 删除时带入的WHERE条件
+     * 如果对象里有主键并且主键的值存在,传入此参数和$params参数并没有什么卵用
+     * 如果对象里没有主键或者主键的值不存在,请传入此参数,并且把所有的值用“?”表示
+     * 如："id = ? AND sex = ?"
+     * @param array $params 代替$condition里的“?”的数组
+     * 此参数的长度必须跟上面?的个数一样多,并且按照顺序填入,否则出错
+     * @return boolean
+     */
     public function delete($condition = '', $params = []) {
-        
+        $struct = self::_struct();
+        if ($struct->key !== null && isset($this->_data[$struct->key])) {
+            $condition = " WHERE $struct->key = ?";
+            $params = [$this->_data[$struct->key]];
+        }else {
+            $condition = " WHERE $condition";
+        }
+        return $this->_delete($condition, $params);
     }
+    
+    
+    
+    
+    
     
     /**
      * 
      * @return $this|boolean
      */
     public function get() {
-        $sql = "select * from user where id = 1";
+        $sql = "select * from user where id = 2";
         $class = get_class($this);
         $result = self::_connection()->query($sql)->fetchObject($class);
         if ($result instanceof $class) $result->_isNew = false;

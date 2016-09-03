@@ -6,7 +6,15 @@ class Index extends Controller{
     public function index() {
         $user = new User();
         $res = $user->get();
-        $res->id = '3';
+        $res->username = 'xlq';
         var_dump($res->save());
+    }
+    
+    public function add() {
+        $user = new User();
+        $user->username = "add";
+        $user->password = "this is add";
+        $user->sex = 1;
+        var_dump($user->save());
     }
 }
