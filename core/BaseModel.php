@@ -74,11 +74,11 @@ class BaseModel {
     
     /**
      * 设置属性
-     * @param string $name 属性名
+     * @param string $name 属性名,只有当属性名在表的字段中有的时候,属性才会设置成功
      * @param mixed $value 属性值
      */
     public function __set($name, $value) {
-        $this->_data[$name] = $value;
+        if(in_array($name, $this->_struct()->fields)) $this->_data[$name] = $value;
     }
     
     /**
@@ -88,6 +88,12 @@ class BaseModel {
      */
     public function __get($name) {
         return isset($this->_data[$name]) ? $this->_data[$name] : null;
+    }
+    
+    
+    private function _update() {
+        
+        
     }
     
     
@@ -110,6 +116,8 @@ class BaseModel {
         }
         $sql = "UPDATE $struct->name SET $update$condition";
         return $sth = self::_connection()->prepare($sql)->execute($data);
+        
+        $sql = "INSET INTO $struct->name (" . implode(", ", $update) . ") VALUES (" .implode(", ", $data);
     }
     
     /**
