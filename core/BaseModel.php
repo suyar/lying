@@ -167,7 +167,37 @@ class BaseModel {
         return $this->_delete($condition, $params);
     }
     
+    /**
+     * 过滤返回需要的字段
+     * @param array $fields 要查询的字段
+     * @param boolean $exclude 是否排除
+     * @return string
+     */
+    private static function _fields($fields, $exclude) {
+        $struct = self::_struct();
+        $fields = $exclude ? array_diff($struct->fields, $fields) : array_intersect($struct->fields, $fields);
+        return $fields ? implode(", ", $fields) : implode(", ", $struct->fields);
+    }
     
+    /**
+     * 根据主键值来查询一条记录
+     * @param mixed $val 主键值
+     * @param array $fields 要查询的字段,会自动过滤表中没有的字段
+     * @param string $exclude 是否为排除字段
+     * @return self|boolean
+     */
+    public static function findByPk($val, $fields = [], $exclude = false) {
+        $struct = self::_struct();
+        if ($struct->key === null) return false;
+        $fields = self::_fields($fields, $exclude);
+        $sql = "SELECT $fields FROM $struct->name WHERE $struct->key = ?";
+        $sth = self::_connection()->prepare($sql);
+        $res = $sth->execute([$val]);
+        if ($res === false) return false;
+        $res = $sth->fetchObject(get_called_class());
+        $sth->closeCursor();
+        return $res;
+    }
     
     
     
