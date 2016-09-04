@@ -75,4 +75,16 @@ class Request {
         return isset($_SERVER['REQUEST_SCHEME']) ? $_SERVER['REQUEST_SCHEME'] : ($_SERVER['SERVER_PORT'] == '443' ? 'https' : 'http');
     }
     
+    /**
+     * 根据IP获取详细地址
+     * @param string $ip 不写默认为remoteIp
+     * @return mixed
+     */
+    public function ipInfo($ip = false) {
+        if ($ip === false) $ip = self::remoteIp();
+        $url = "http://whois.pconline.com.cn/ipJson.jsp?callback=ip&ip=$ip&json=true";
+        $json = Http::getInstance()->httpGet($url);
+        return json_decode(iconv('GBK', 'utf-8', $json));
+    }
+    
 }

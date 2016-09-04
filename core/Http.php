@@ -30,7 +30,8 @@ class Http {
         if ($ch === false) return $ch;
         $opt = [
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_HEADER => false
+            CURLOPT_HEADER => false,
+            CURLOPT_TIMEOUT => 3
         ];
         $opt = $options ? $options : $opt;
         $res = curl_setopt_array($ch, $opt);
@@ -53,6 +54,7 @@ class Http {
             CURLOPT_HEADER => false,
             CURLOPT_SSL_VERIFYPEER => false,
             CURLOPT_SSL_VERIFYHOST => 0,
+            CURLOPT_TIMEOUT => 3
         ];
         $opt = $options ? $options : $opt;
         $res = curl_setopt_array($ch, $opt);
@@ -75,7 +77,8 @@ class Http {
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_HEADER => false,
             CURLOPT_POST => true,
-            CURLOPT_POSTFIELDS => $data
+            CURLOPT_POSTFIELDS => $data,
+            CURLOPT_TIMEOUT => 3
         ];
         $opt = $options ? $options : $opt;
         $res = curl_setopt_array($ch, $opt);
@@ -100,7 +103,8 @@ class Http {
             CURLOPT_SSL_VERIFYPEER => false,
             CURLOPT_SSL_VERIFYHOST => 0,
             CURLOPT_POST => true,
-            CURLOPT_POSTFIELDS => $data
+            CURLOPT_POSTFIELDS => $data,
+            CURLOPT_TIMEOUT => 3
         ];
         $opt = $options ? $options : $opt;
         $res = curl_setopt_array($ch, $opt);

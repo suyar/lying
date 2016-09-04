@@ -1,8 +1,7 @@
 <?php
 namespace app\index\model;
-use core\BaseModel;
-class User extends BaseModel {
-    
+use core\Model;
+class User extends Model {
     
     public static function tableName() {
         return 'user';
