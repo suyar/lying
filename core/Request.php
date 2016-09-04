@@ -23,6 +23,7 @@ class Request {
     public function serverIp($port = false) {
         $ip = isset($_SERVER['SERVER_ADDR']) ? $_SERVER['SERVER_ADDR'] : false;
         if ($port && $ip) $ip .= ':'.$_SERVER['SERVER_PORT'];
+        return $ip;
     }
     
     /**
@@ -33,6 +34,7 @@ class Request {
     public function remoteIp($port = false) {
         $ip = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : false;
         if ($port && $ip) $ip .= ':'.$_SERVER['REMOTE_PORT'];
+        return $ip;
     }
     
     /**
