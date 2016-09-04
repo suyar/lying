@@ -182,7 +182,7 @@ class BaseModel {
     /**
      * 根据主键值来查询一条记录
      * @param mixed $val 主键值
-     * @param array $fields 要查询的字段,会自动过滤表中没有的字段
+     * @param array $fields 要查询的字段,会自动过滤表中没有的字段,默认查询所有字段
      * @param string $exclude 是否为排除字段
      * @return self|boolean
      */
@@ -199,23 +199,64 @@ class BaseModel {
         return $res;
     }
     
-    
-    
-    
     /**
-     * 
-     * @return $this|boolean
+     * 返回条件语句
+     * @param string|array &$condition
+     * @param array &$params
      */
-    public function get() {
-        $sql = "select * from user where id = 2";
-        $class = get_class($this);
-        $result = self::_connection()->query($sql)->fetchObject($class);
-        if ($result instanceof $class) $result->_isNew = false;
-        return $result;
+    private static function _buildCondition(&$condition, &$params) {
+        if (is_array($condition)) {
+            $keys = array_map(function($v) { return "$v = ?"; }, array_keys($condition));
+            $params = array_values($condition);
+            $condition = ' WHERE ' . implode(' AND ', $keys);
+        }elseif (is_string($condition)) {
+            $condition = ' WHERE ' . $condition;
+        }else {
+            $condition = '';
+        }
     }
     
-    
-    
-    
+    /**
+     * 数据查询
+     * @param string|array $condition 要查询的条件,可以为字符串或者关联数组,如果不写,默认为查询全部
+     * @param array $params 如果查询条件为字符串并且有“?”,此参数为代替“?”的数据,并且按照顺序排列
+     * @param array $fields 要查询的字段列表,默认为查询所有字段
+     * @param string $exclude 是否为排除字段
+     * @return boolean|array 返回结果集对象的数组
+     */
+    public static function find($condition = null, $params = [], $fields = [], $exclude = false) {
+        $struct = self::_struct();
+        self::_buildCondition($condition, $params);
+        $fields = self::_fields($fields, $exclude);
+        $sql = "SELECT $fields FROM $struct->name$condition";
+        $sth = self::_connection()->prepare($sql);
+        $res = $sth->execute($params);
+        if ($res === false) return false;
+        $res = $sth->fetchAll(\PDO::FETCH_CLASS, get_called_class());
+        $sth->closeCursor();
+        return $res;
+    }
+
+    /**
+     * 不管查询条件查询多少条记录,只返回一条记录
+     * @param string|array $condition 要查询的条件,可以为字符串或者关联数组,如果不写,默认为查询全部
+     * @param array $params 如果查询条件为字符串并且有“?”,此参数为代替“?”的数据,并且按照顺序排列
+     * @param array $fields 要查询的字段列表,默认为查询所有字段
+     * @param string $exclude 是否为排除字段
+     * @return boolean|self 返回结果集对象
+     */
+    public static function findOne($condition = null, $params = [], $fields = [], $exclude = false) {
+        $struct = self::_struct();
+        self::_buildCondition($condition, $params);
+        $fields = self::_fields($fields, $exclude);
+        $sql = "SELECT $fields FROM $struct->name$condition";
+        $sth = self::_connection()->prepare($sql);
+        $res = $sth->execute($params);
+        if ($res === false) return false;
+        $res = $sth->fetchObject(get_called_class());
+        $sth->closeCursor();
+        return $res;
+    }
+
     
 }
