@@ -1,9 +1,11 @@
 <?php
 namespace app\index\controller;
 use core\Controller;
+use extend\CodeLine;
 class Index extends Controller{
     public function index() {
-        var_dump(\App::request()->ipInfo());
+        $code = new CodeLine();
+        var_dump($code->countLine(ROOT));
     }
     
 }
