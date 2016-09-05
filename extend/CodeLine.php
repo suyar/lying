@@ -39,7 +39,7 @@ class CodeLine {
     }
     
     /**
-     * 代码行数统计
+     * 代码行数、文件大小统计
      * @param string $dir 要开始统计的目录
      * @param array $type 要统计的文件后缀名
      * @param string $exclude 要排除的目录或者文件,请用正则表达式
@@ -48,11 +48,13 @@ class CodeLine {
     public function countLine($dir, $type = ['php'], $exclude = '/^\..*|backup(_\d+)?$/') {
         if (!is_dir($dir)) return false;
         $count = array_combine($type, array_fill(0, count($type), ['line'=>0, 'space'=>0]));
+        $count['size'] = 0;
         $dirList = scandir($dir);
         foreach ($dirList as $d) {
             if ($d === '.' || $d === '..' || preg_match($exclude, $d)) continue;
             $path = "$dir/$d";
             if (is_file($path) && in_array(($extension = pathinfo($path, PATHINFO_EXTENSION)), $type)) {
+                $count['size'] += filesize($path);
                 $handle = fopen($path, 'r');
                 while (($buffer = fgets($handle, 8192)) !== false) {
                     if (trim($buffer) === '') $count[$extension]['space']++;
@@ -61,6 +63,7 @@ class CodeLine {
                 fclose($handle);
             }else if (is_dir($path)) {
                 $res = $this->countLine($path, $type, $exclude);
+                $count['size'] += $res['size'];
                 foreach ($type as $t) {
                     $count[$t]['line'] += $res[$t]['line'];
                     $count[$t]['space'] += $res[$t]['space'];
