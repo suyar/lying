@@ -43,7 +43,7 @@ class Session {
     }
     
     /**
-     * 销毁session
+     * 销毁所有session
      */
     public function destroy() {
         session_destroy();
