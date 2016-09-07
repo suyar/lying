@@ -13,7 +13,7 @@ class Exception {
     public static function exceptionHandle($exception) {
         $msg = self::replaceRoot($exception->getMessage())." in ".self::replaceRoot($exception->getFile())." on line ".$exception->getLine();
         $trace = $exception->getTrace();
-        self::show($msg, self::listTrace($trace));
+        self::show($msg, self::listTrace($trace), $exception->getCode());
     }
     
     /**
@@ -27,7 +27,18 @@ class Exception {
     public static function errorHandle($errno, $errstr, $errfile, $errline, $errcontext) {
         $msg = self::replaceRoot($errstr)." in ".self::replaceRoot($errfile)." on line ".$errline;
         $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
-        self::show($msg, self::listTrace($trace));
+        self::show($msg, self::listTrace($trace), $errno);
+    }
+    
+    /**
+     * 注册脚本结束运行时函数,这里主要用来输出致命错误
+     */
+    public static function shutdownHandle() {
+        $err = error_get_last();
+        if ($err !== NULL) {
+            header('HTTP/1.1 500 Internal Server Error');
+            self::show($err['message'], self::listTrace([$err]), $err['type']);
+        }
     }
     
     /**
@@ -57,23 +68,29 @@ class Exception {
     }
     
     /**
-     * 获取错误视图文件
+     * 获取错误视图文件;
+     * 如果要自定义错误代码对应的模板,把模板命名为“错误代码.php”并放置在lying/view目录下;
+     * 模板接受3个变量,和show函数的参数一致
+     * @param int $code 错误代码
      * @return string
      */
-    private static function getView() {
-        return ROOT . "/view/trace.php";
+    private static function getView($code) {
+        $viewPath = ROOT.'/view';
+        return $viewPath.(is_file($viewPath."/$code.php") ? "/$code.php" : '/trace.php');
     }
     
     /**
      * 显示错误trace
      * @param string $msg
      * @param array $trace
+     * @param int $code
      */
-    private static function show($msg, $trace = []) {
+    private static function show($msg, $trace, $code) {
         while (ob_get_level() !== 0) ob_end_clean();
+        $code == 404 ? header('HTTP/1.1 404 Not Found') : header('HTTP/1.1 500 Internal Server Error');
         ob_start();
         ob_implicit_flush(false);
-        require self::getView();
+        require self::getView($code);
         ob_end_flush();
         flush();
         die;

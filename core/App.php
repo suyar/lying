@@ -114,3 +114,4 @@ App::$config = require ROOT . '/config/config.php';
 spl_autoload_register("App::autoload");
 set_exception_handler([core\Exception::class, 'exceptionHandle']);
 set_error_handler([core\Exception::class, 'errorHandle']);
+register_shutdown_function([core\Exception::class, 'shutdownHandle']);
