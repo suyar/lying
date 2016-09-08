@@ -378,4 +378,15 @@ class Model {
         $sql = "DELETE FROM $tableName" . $condition;
         return self::_connection()->prepare($sql)->execute($params);
     }
+    
+    /**
+     * 为一条记录复制,传入一个关联数组,下标为字段名
+     * @param array $attr
+     */
+    public function load($attr) {
+        $struct = self::_struct();
+        foreach ($attr as $k=>$v) {
+            $this->$k = $v;
+        }
+    }
 }
