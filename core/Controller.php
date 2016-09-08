@@ -77,4 +77,44 @@ class Controller {
     protected function reflectionClass() {
         return new \ReflectionClass($this);
     }
+    
+    /**
+     * 302跳转
+     * @param string|array $url 要跳转的url;
+     * 如果为数组：
+     * ['admin/index/index'] 跳转到当前域名下admin/index/index.html;
+     * ['admin/index'] 跳转到当前域名下__MODULE__/admin/index.html;
+     * ['admin'] 跳转到当前域名下__MODULE__/__CONTROLLER_/admin.html;
+     * 如果为字符串,直接填写url
+     * @param array $params 要附加在网址后的参数,传入关联数组
+     * @param boolean $checkAjax 判断是否PJAX或者AJAX
+     * @throws \Exception
+     */
+    protected function redirect($url, $params = [], $checkAjax = false) {
+        if (is_array($url)) {
+            $path = explode('/', $url[0]);
+            switch (count($path)) {
+                case 1:$url = __MODULE__.'/'.__CONTROLLER__.'/'.$path[0].'.html';break;
+                case 2:$url = __MODULE__.'/'.$path[0].'/'.$path[1].'.html';break;
+                case 3:$url = $path[0].'/'.$path[1].'/'.$path[2].'.html';break;
+                default:$url = __MODULE__.'/'.__CONTROLLER__.'/'.__ACTION__.'.html';
+            }
+            $url = '/'.$url;
+        }
+        $params = $params ? http_build_query($params, 'arg', '&', PHP_QUERY_RFC3986) : false;
+        $url .= $params ? '?'.$params : '';
+        http_response_code(302);
+        if ($checkAjax) {
+            if (Request::getInstance()->isPjax()) {
+                header('X-Pjax-Url: '.$url);
+            }elseif (Request::getInstance()->isAjax()) {
+                header('X-Redirect: '.$url);
+            }else {
+                header('Location: '.$url);
+            }
+        }else {
+            header('Location: '.$url);
+        }
+        exit;
+    }
 }

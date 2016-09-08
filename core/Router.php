@@ -35,13 +35,16 @@ class Router {
                 $a = array_shift($path);
         }
         $class = 'app\\' . strtolower($m) . '\\controller\\' . ucfirst(strtolower($c));
+        define('__MODULE__', $m);
+        define('__CONTROLLER__', strtolower((new \ReflectionClass($class))->getShortName()));
+        define('__ACTION__', $a);
         self::collectReq($path);
         return [$class, $a];
     }
     
     /**
      * 把PATHINFO里的参数解析出来
-     * @param unknown $path
+     * @param array $path
      */
     public static function collectReq($path) {
         isset($_GET) && $_GET ? array_shift($_GET) : '';
