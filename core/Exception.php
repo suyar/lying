@@ -36,7 +36,7 @@ class Exception {
     public static function shutdownHandle() {
         $err = error_get_last();
         if ($err !== NULL) {
-            header('HTTP/1.1 500 Internal Server Error');
+            http_response_code(500);
             self::show($err['message'], self::listTrace([$err]), $err['type']);
         }
     }
@@ -87,7 +87,7 @@ class Exception {
      */
     private static function show($msg, $trace, $code) {
         while (ob_get_level() !== 0) ob_end_clean();
-        $code == 404 ? header('HTTP/1.1 404 Not Found') : header('HTTP/1.1 500 Internal Server Error');
+        $code == 404 ? http_response_code(404) : http_response_code(500);
         ob_start();
         ob_implicit_flush(false);
         require self::getView($code);
