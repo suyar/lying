@@ -51,7 +51,7 @@ final class App {
     /**
      * 返回PDO实例
      * @param $dbname 要使用的数据库配置,默认'db'
-     * @return PDO
+     * @return \PDO
      */
     public static function db($dbname = 'db') {
         if (!isset(self::$connection[$dbname]) || (!self::$connection[$dbname] instanceof \PDO)) {

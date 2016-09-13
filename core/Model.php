@@ -27,6 +27,11 @@ class Model {
      */
     private static $_struct = [];
     
+    public function __construct() {
+        $args = func_get_args();
+        if ($args && $args[0] === 'pdo') $this->_isNew = false;
+    }
+    
     /**
      * 返回表的结构
      * @throws \Exception
@@ -59,9 +64,9 @@ class Model {
     
     /**
      * 获取PDO连接
-     * @return PDO
+     * @return \PDO
      */
-    private static function _connection() {
+    public static function _connection() {
         $called_class = get_called_class();
         return method_exists($called_class, 'db') ? \App::db($called_class::db()) : \App::db();
     }
@@ -123,7 +128,8 @@ class Model {
     }
     
     /**
-     * 新增或者保存一条记录
+     * 新增或者保存一条记录;
+     * 如果更改了主键的值,请设置$condition参数
      * @param string $condition 更新时带入的WHERE条件
      * 如果对象里有主键并且主键的值存在,传入此参数和$params参数并没有什么卵用;
      * 如果对象里没有主键或者主键的值不存在,请传入此参数;
@@ -196,7 +202,7 @@ class Model {
         $sth = self::_connection()->prepare($sql);
         $res = $sth->execute([$val]);
         if ($res === false) return false;
-        $res = $sth->fetchObject(get_called_class());
+        $res = $sth->fetchObject(get_called_class(), ['pdo']);
         $sth->closeCursor();
         return $res;
     }
@@ -237,7 +243,7 @@ class Model {
         $sth = self::_connection()->prepare($sql);
         $res = $sth->execute($params);
         if ($res === false) return false;
-        $res = $sth->fetchAll(\PDO::FETCH_CLASS, get_called_class());
+        $res = $sth->fetchAll(\PDO::FETCH_CLASS, get_called_class(), 'pdo');
         $sth->closeCursor();
         return $res;
     }
@@ -261,7 +267,7 @@ class Model {
         $sth = self::_connection()->prepare($sql);
         $res = $sth->execute($params);
         if ($res === false) return false;
-        $res = $sth->fetchObject(get_called_class());
+        $res = $sth->fetchObject(get_called_class(), 'pdo');
         $sth->closeCursor();
         return $res;
     }
@@ -380,13 +386,29 @@ class Model {
     }
     
     /**
-     * 为一条记录复制,传入一个关联数组,下标为字段名
-     * @param array $attr
+     * 为一条记录赋值
+     * @param array $attr 传入一个关联数组,下标为字段名
      */
     public function load($attr) {
         $struct = self::_struct();
         foreach ($attr as $k=>$v) {
             $this->$k = $v;
         }
+    }
+    
+    /**
+     * 启动一个事务
+     * @return boolean 成功返回true,失败返回false
+     */
+    public static function beginTransaction() {
+        return self::_connection()->beginTransaction();
+    }
+    
+    /**
+     * 提交一个事务
+     * @return boolean 成功返回true,失败返回false
+     */
+    public static function commit() {
+        return self::_connection()->commit();
     }
 }
