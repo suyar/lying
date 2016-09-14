@@ -98,7 +98,13 @@ class Model {
         $keys = array_keys($this->_data);
         $vals = array_fill(0, count($keys), "?");
         $sql = "INSERT INTO $struct->name (" . implode(", ", $keys) . ") VALUES (" . implode(", ", $vals) . ")";
-        return self::_connection()->prepare($sql)->execute(array_values($this->_data));
+        $res = self::_connection()->prepare($sql)->execute(array_values($this->_data));
+        if ($res) {
+            $this->_isNew = false;
+            $lastInsertId = self::_connection()->lastInsertId();
+            if ($lastInsertId !== 0 && $struct->key) $this->_data[$struct->key] = $lastInsertId;
+        }
+        return $res;
     }
     
     /**
@@ -129,7 +135,8 @@ class Model {
     
     /**
      * 新增或者保存一条记录;
-     * 如果更改了主键的值,请设置$condition参数
+     * 如果更改了主键的值,请设置$condition参数;
+     * 如果是新记录且主键为自增,save这条记录会带主键参数(不管有没有设置主键值)
      * @param string $condition 更新时带入的WHERE条件
      * 如果对象里有主键并且主键的值存在,传入此参数和$params参数并没有什么卵用;
      * 如果对象里没有主键或者主键的值不存在,请传入此参数;
