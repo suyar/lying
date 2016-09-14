@@ -342,18 +342,20 @@ class Model {
      * 注意：此函数并不会对要插入的字段进行过滤(是否为表的字段),所以请自行确认$columns为表中的字段
      * @param array $data 要插入的数据,一个二维数组:[ ['su', '123456', 1], ['xie', '654321', 0] ];
      * 注意：请确认每条数据的长度和$columns一样,否则出错
-     * @return int 返回受影响的行数
+     * @return int 成功返回true,失败返回falses
      */
     public static function batchInsert1($columns, $data) {
         $placeholders = array_fill(0, count($columns), '?');
         $tableName = self::_struct()->name;
         $sql = "INSERT INTO $tableName (" . implode(', ', $columns) . ') VALUES (' . implode(', ', $placeholders) . ')';
+        self::beginTransaction();
         $sth = self::_connection()->prepare($sql);
-        $num = 0;
         foreach ($data as $row) {
-            $num += $sth->execute($row);
+            $sth->execute($row);
         }
-        return $num;
+        $res = self::commit();
+        if (!$res) self::rollBack();
+        return $res;
     }
     
     /**
@@ -417,5 +419,13 @@ class Model {
      */
     public static function commit() {
         return self::_connection()->commit();
+    }
+    
+    /**
+     * 回滚一个事务
+     * @return boolean 成功返回true,失败返回false
+     */
+    public static function rollBack() {
+        return self::_connection()->rollBack();
     }
 }
