@@ -63,13 +63,11 @@ class WechatEncrypt {
 	public function encryptMsg($replyMsg, $timeStamp, $nonce, &$encryptMsg) {
 		//加密
 		$array = $this->encrypt($replyMsg, $this->appId, $this->encodingAesKey);
-		$ret = $array[0];
-		if ($ret != 0) return $ret;
+		if ($array[0] != 0) return $array[0];
 		$encrypt = $array[1];
 		//生成安全签名
 		$array = $this->getSHA1($this->token, $timeStamp, $nonce, $encrypt);
-		$ret = $array[0];
-		if ($ret != 0) return $ret;
+		if ($array[0] != 0) return $array[0];
 		$signature = $array[1];
 		//生成发送的xml
 		$encryptMsg = $this->generate($encrypt, $signature, $timeStamp, $nonce);
@@ -86,19 +84,17 @@ class WechatEncrypt {
 	 * @param string $nonce 随机串,对应URL参数的nonce
 	 * @param string $postData 密文,对应POST请求的数据
 	 * @param string $msg 解密后的原文,当return返回0时有效
-	 * @return int 成功返回0,失败返回对应的错误码
+	 * @return int 成功返回0,失败返回错误码
 	 */
 	public function decryptMsg($msgSignature, $timestamp, $nonce, $postData, &$msg) {
         if (strlen($this->encodingAesKey) != 43) return self::$IllegalAesKey;
 		//提取密文
 		$array = $this->extract($postData);
-		$ret = $array[0];
-		if ($ret != 0) return $ret;
+		if ($array[0] != 0) return $array[0];
 		$encrypt = $array[1];
 		//验证安全签名
 		$array = $this->getSHA1($this->token, $timestamp, $nonce, $encrypt);
-		$ret = $array[0];
-		if ($ret != 0) return $ret;
+		if ($array[0] != 0) return $array[0];
 		$signature = $array[1];
 		if ($signature != $msgSignature) return self::$ValidateSignatureError;
 		$result = $this->decrypt($encrypt, $this->appId, $this->encodingAesKey);
@@ -117,7 +113,7 @@ class WechatEncrypt {
 	 * @param string $encrypt_msg 密文消息
 	 * @return array
 	 */
-	public function getSHA1($token, $timestamp, $nonce, $encrypt_msg) {
+	private function getSHA1($token, $timestamp, $nonce, $encrypt_msg) {
 	    try {
 	        $array = array($encrypt_msg, $token, $timestamp, $nonce);
 	        sort($array, SORT_STRING);
@@ -135,7 +131,7 @@ class WechatEncrypt {
 	 * @param string $xmltext 待提取的xml字符串
 	 * @return array 提取出的加密消息字符串
 	 */
-	public function extract($xmltext) {
+	private function extract($xmltext) {
 	    try {
 	        $xml = simplexml_load_string($xmltext, 'SimpleXMLElement', LIBXML_NOCDATA);
 	        $encrypt = $xml->Encrypt;
@@ -153,7 +149,7 @@ class WechatEncrypt {
 	 * @param string $nonce 随机字符串
 	 * @return string
 	 */
-	public function generate($encrypt, $signature, $timestamp, $nonce) {
+	private function generate($encrypt, $signature, $timestamp, $nonce) {
 	    $format = "<xml>
                    <Encrypt><![CDATA[%s]]></Encrypt>
                    <MsgSignature><![CDATA[%s]]></MsgSignature>
@@ -170,7 +166,7 @@ class WechatEncrypt {
 	 * @param string $text 需要进行填充补位操作的明文
 	 * @return string 补齐明文字符串
 	 */
-	function encode($text) {
+	private function encode($text) {
 	    $block_size = 32;
 	    $text_length = strlen($text);
 	    //计算需要填充的位数
@@ -180,7 +176,7 @@ class WechatEncrypt {
 	    }
 	    //获得补位所用的字符
 	    $pad_chr = chr($amount_to_pad);
-	    $tmp = "";
+	    $tmp = '';
 	    for ($index = 0; $index < $amount_to_pad; $index++) {
 	        $tmp .= $pad_chr;
 	    }
@@ -192,7 +188,7 @@ class WechatEncrypt {
 	 * @param string $text 解密后的明文
 	 * @return string 删除填充补位后的明文
 	 */
-	function decode($text) {
+	private function decode($text) {
 	    $pad = ord(substr($text, -1));
 	    if ($pad < 1 || $pad > 32) $pad = 0;
 	    return substr($text, 0, (strlen($text) - $pad));
@@ -207,12 +203,12 @@ class WechatEncrypt {
 	 * @param string $key aesKey
 	 * @return array 加密后的密文
 	 */
-	public function encrypt($text, $appid, $key) {
-	    $key = base64_decode($key . "=");
+	private function encrypt($text, $appid, $key) {
+	    $key = base64_decode($key . '=');
 	    try {
 	        //获得16位随机字符串,填充到明文之前
 	        $random = $this->getRandomStr();
-	        $text = $random . pack("N", strlen($text)) . $text . $appid;
+	        $text = $random . pack('N', strlen($text)) . $text . $appid;
 	        //网络字节序
 	        $size = mcrypt_get_block_size(MCRYPT_RIJNDAEL_128, MCRYPT_MODE_CBC);
 	        $module = mcrypt_module_open(MCRYPT_RIJNDAEL_128, '', MCRYPT_MODE_CBC, '');
@@ -239,8 +235,8 @@ class WechatEncrypt {
 	 * @param string $key aesKey
 	 * @return array 解密得到的明文
 	 */
-	public function decrypt($encrypted, $appid, $key) {
-	    $key = base64_decode($key . "=");
+	private function decrypt($encrypted, $appid, $key) {
+	    $key = base64_decode($key . '=');
 	    try {
 	        //使用BASE64对需要解密的字符串进行解码
 	        $ciphertext_dec = base64_decode($encrypted);
@@ -258,7 +254,7 @@ class WechatEncrypt {
 	        //去除补位字符
 	        $result = $this->decode($decrypted);
 	        //去除16位随机字符串,网络字节序和AppId
-	        if (strlen($result) < 16) return array(self::$DecryptAESError, null);
+	        if (strlen($result) < 16) return array(self::$IllegalBuffer, null);
 	        $content = substr($result, 16, strlen($result));
 	        $len_list = unpack("N", substr($content, 0, 4));
 	        $xml_len = $len_list[1];
@@ -267,21 +263,18 @@ class WechatEncrypt {
 	    } catch (\Exception $e) {
 	        return array(self::$IllegalBuffer, null);
 	    }
-	    if ($from_appid != $appid) return array(self::$ValidateAppidError, null);
-	    return array(0, $xml_content);
+	    return $from_appid != $appid ? array(self::$ValidateAppidError, null) : array(0, $xml_content);
 	}
 	
 	/**
 	 * 随机生成16位字符串
 	 * @return string 生成的字符串
 	 */
-	function getRandomStr() {
-	    $str = "";
-	    $str_pol = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz";
+	private function getRandomStr() {
+	    $str = '';
+	    $str_pol = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz';
 	    $max = strlen($str_pol) - 1;
-	    for ($i = 0; $i < 16; $i++) {
-	        $str .= $str_pol[mt_rand(0, $max)];
-	    }
+	    for ($i = 0; $i < 16; $i++) $str .= $str_pol[mt_rand(0, $max)];
 	    return $str;
 	}
 }
