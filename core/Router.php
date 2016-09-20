@@ -24,22 +24,22 @@ class Router {
                 $m = $c = $a = 'index';
                 break;
             case 1:
-                $m = array_shift($path);
+                $m = strtolower(array_shift($path));
                 $c = $a = 'index';
                 break;
             case 2:
-                $m = array_shift($path);
-                $c = array_shift($path);
+                $m = strtolower(array_shift($path));
+                $c = strtolower(array_shift($path));
                 $a = 'index';
                 break;
             default:
-                $m = array_shift($path);
-                $c = array_shift($path);
-                $a = array_shift($path);
+                $m = strtolower(array_shift($path));
+                $c = strtolower(array_shift($path));
+                $a = strtolower(array_shift($path));
         }
-        $class = 'app\\' . strtolower($m) . '\\controller\\' . ucfirst(strtolower($c));
+        $class = 'app\\' . $m . '\\controller\\' . ucfirst($c);
         define('__MODULE__', $m);
-        define('__CONTROLLER__', strtolower((new \ReflectionClass($class))->getShortName()));
+        define('__CONTROLLER__', $c);
         define('__ACTION__', $a);
         self::collectGet($path, $query);
         return [$class, $a];
