@@ -32,7 +32,7 @@ final class App {
     public static function autoload($class) {
         $classFile = ROOT . '/' . str_replace('\\', '/', $class) . '.php';
         if (!file_exists($classFile)) throw new \Exception("Class $class not found", 404);
-        require_once($classFile);
+        require($classFile);
     }
     
     /**
@@ -110,7 +110,7 @@ final class App {
         return Http::getInstance();
     }
 }
-App::$config = require ROOT . '/config/config.php';
+App::$config = require(ROOT . '/config/config.php');
 spl_autoload_register("App::autoload");
 set_exception_handler([core\Exception::class, 'exceptionHandle']);
 set_error_handler([core\Exception::class, 'errorHandle']);

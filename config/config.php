@@ -1,6 +1,6 @@
 <?php
 return [
-    'database' => require __DIR__.'/database.php',
+    'database' => require(__DIR__.'/database.php'),
     'log' => [
         //单个log文件限制为500K
         'maxSize' => 0.5*1024*1024,

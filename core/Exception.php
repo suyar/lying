@@ -90,7 +90,7 @@ class Exception {
         $code == 404 ? http_response_code(404) : http_response_code(500);
         ob_start();
         ob_implicit_flush(false);
-        require self::getView($code);
+        require(self::getView($code));
         ob_end_flush();
         flush();
         die;

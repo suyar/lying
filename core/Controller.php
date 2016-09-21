@@ -44,7 +44,7 @@ class Controller {
         ob_start();
         ob_implicit_flush(false);
         $params === [] ? '' : extract($params);
-        require $file;
+        require($file);
         return ob_get_clean();
     }
     
