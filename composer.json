@@ -1,0 +1,12 @@
+{
+	"name": "carolkey/lying",
+	"require":{
+		"php":">=5.5.0"
+	},
+	"repositories": [
+        {
+            "type":"vcs",
+            "url":"https://github.com/carolkey/lying"
+        }
+    ]
+}
