@@ -1,0 +1,13 @@
+{
+	"name":"carolkey/lying",
+	"version":"dev-dev",
+	"require":{
+		"php":">=5.5.0"
+	},
+	"repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/carolkey/lying"
+        }
+    ]
+}
