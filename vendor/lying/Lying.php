@@ -1,12 +1,13 @@
 <?php
+require __DIR__ . '/BaseLying.php';
 
-final class Lying
+class Lying extends Lying\BaseLying
 {
-    public static function autoload($className)
-    {
-        var_dump(self::class);
-    }
 }
 spl_autoload_register([Lying::class, 'autoload']);
+set_exception_handler([\lying\core\Exception::class, 'exceptionHandler']);
+set_error_handler([lying\core\Exception::class, 'errorHandler']);
+register_shutdown_function([\lying\core\Exception::class, 'shutdownHandler']);
+
 
 
