@@ -1,5 +1,6 @@
 <?php
 
 return [
-    'yii\core\exception'=>'/core/exception.php',
+    'lying\core\Exception'=>'/core/Exception.php',
+    
 ];
