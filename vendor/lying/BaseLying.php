@@ -8,6 +8,8 @@ class BaseLying
     
     public static $classes = [];
     
+    public static $container;
+    
     public static function autoload($className)
     {
         if (isset(self::$classes[$className])) {
@@ -19,9 +21,9 @@ class BaseLying
         require $classFile;
     }
     
-    public static function run($cfg = [])
+    public static function Request()
     {
-        
+        return self::$container->get('Request');
     }
 }
 
