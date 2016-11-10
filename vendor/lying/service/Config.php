@@ -1,7 +1,7 @@
 <?php
 namespace lying\core;
 
-class Config
+class Config implements Service
 {
     private static $config = [];
     
