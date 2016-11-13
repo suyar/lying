@@ -1,12 +1,10 @@
 <?php
-namespace lying\core;
+namespace lying\service;
 
-class Request implements Service
+class Request
 {
-    public $name;
-    
-    public function get($name = null)
+    public function __construct($params)
     {
-        var_dump($name);
+        var_dump($params);
     }
 }

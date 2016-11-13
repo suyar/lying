@@ -6,3 +6,5 @@ define('WEB_ROOT', __DIR__);
 define('ROOT', dirname(WEB_ROOT));
 require ROOT . '/vendor/autoload.php';
 require ROOT . '/vendor/lying/Lying.php';
+
+var_dump(Lying::$service->get('request'));

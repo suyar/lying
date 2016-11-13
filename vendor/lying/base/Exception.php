@@ -1,5 +1,5 @@
 <?php
-namespace lying\core;
+namespace lying\base;
 
 class Exception
 {
