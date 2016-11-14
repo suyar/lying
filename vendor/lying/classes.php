@@ -3,7 +3,7 @@
 return [
     'lying\base\Ctrl' => LYING_ROOT . '/base/Ctrl.php',
     'lying\base\Exception' => LYING_ROOT . '/base/Exception.php',
-    'lying\base\Model' => LYING_ROOT . '/core/Model.php',
+    'lying\base\Model' => LYING_ROOT . '/base/Model.php',
     'lying\base\Router' => LYING_ROOT . '/base/Router.php',
     
     'lying\cache\Cache' => LYING_ROOT . '/cache/Cache.php',
