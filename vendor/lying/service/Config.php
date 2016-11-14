@@ -5,7 +5,7 @@ class Config
 {
     private $config = [];
     
-    public function get($config)
+    public function load($config)
     {
         if (isset($this->config[$config])) {
             return $this->config[$config];

@@ -3,8 +3,15 @@ namespace lying\service;
 
 class Request
 {
-    public function __construct($params)
+    public function uri()
     {
-        var_dump($params);
+        return $_SERVER['REQUEST_URI'];
     }
+    
+    public function host()
+    {
+        return $_SERVER['HTTP_HOST'];
+    }
+    
+    //public function 
 }

@@ -1,15 +1,17 @@
 <?php
 return [
+    //以下不要更改
     'config'=>'lying\service\Config',
     'cookie'=>[
         'class'=>'lying\service\Cookie',
         'key'=>'',
     ],
     'request'=>'lying\service\Request',
+    'router'=>'lying\service\Router',
     'secure'=>'lying\service\Secure',
     'session'=>'lying\service\Session',
     
-    
+    //以下可以更改
     'cache'=>[
         'class'=>'lying\cache\FileCache',
     ],

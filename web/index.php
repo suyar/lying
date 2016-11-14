@@ -5,6 +5,5 @@ define('DEV', true);
 define('WEB_ROOT', __DIR__);
 define('ROOT', dirname(WEB_ROOT));
 require ROOT . '/vendor/autoload.php';
-require ROOT . '/vendor/lying/Lying.php';
-
-(new app\index\ctrl\IndexCtrl())->index();
+require ROOT . '/vendor/lying/init.php';
+Lying::run();
