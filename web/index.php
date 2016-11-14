@@ -7,3 +7,4 @@ define('ROOT', dirname(WEB_ROOT));
 require ROOT . '/vendor/autoload.php';
 require ROOT . '/vendor/lying/Lying.php';
 
+(new app\index\ctrl\IndexCtrl())->index();

@@ -13,6 +13,8 @@ class Base
     {
         if (isset(self::$classes[$className])) {
             require self::$classes[$className];
+        }else {
+            require ROOT . '/' . str_replace('\\', '/', $className) . '.php';
         }
     }
     
