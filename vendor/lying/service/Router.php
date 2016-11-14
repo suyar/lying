@@ -16,7 +16,7 @@ class Router extends Service
         $host = $request->host();
         $conf = $this->get('config')->load('router');
         
-        $this->resolve($parse['path']);
+        $this->split($parse['path']);
         
         if (isset($conf[$host])) {
             $m = $conf[$host]['module'];
@@ -24,7 +24,7 @@ class Router extends Service
         }
     }
     
-    public function resolve($path)
+    public function split($path)
     {
         var_dump($path);
     }
