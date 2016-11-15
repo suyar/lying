@@ -1,4 +1,5 @@
 <?php
+session_start();
 define('LYING_ROOT', __DIR__);
 
 require LYING_ROOT . '/Lying.php';

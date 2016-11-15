@@ -24,7 +24,9 @@ class Lying
     public static function run()
     {
         $router = self::$container->get('router');
-        $router->parse();
+        list($m, $c, $a) = $router->parse();
+        var_dump($_GET);
+        
     }
     
     
