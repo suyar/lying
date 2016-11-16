@@ -1,10 +1,10 @@
 <?php
 
 return [
-    'lying\base\Container' => LYING_ROOT . '/base/Container.php',
     'lying\base\Ctrl' => LYING_ROOT . '/base/Ctrl.php',
     'lying\base\Exception' => LYING_ROOT . '/base/Exception.php',
     'lying\base\Model' => LYING_ROOT . '/base/Model.php',
+    'lying\base\View' => LYING_ROOT . '/base/View.php',
     
     'lying\cache\Cache' => LYING_ROOT . '/cache/Cache.php',
     'lying\cache\DbCache' => LYING_ROOT . '/cache/DbCache.php',
@@ -20,6 +20,7 @@ return [
     'lying\logger\Logger' => LYING_ROOT . '/logger/Logger.php',
     
     'lying\service\Config' => LYING_ROOT . '/service/Config.php',
+    'lying\service\Container' => LYING_ROOT . '/service/Container.php',
     'lying\service\Cookie' => LYING_ROOT . '/service/Cookie.php',
     'lying\service\Request' => LYING_ROOT . '/service/Request.php',
     'lying\service\Router' => LYING_ROOT . '/service/Router.php',

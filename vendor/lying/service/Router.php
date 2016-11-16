@@ -61,9 +61,6 @@ class Router extends Service
         
         //查找mudule
         $m = isset($conf['module']) && $conf['module'] ? $conf['module'] : array_shift($t);
-        if ($m === null) {
-            throw new \Exception('Unknown module.', 404);
-        }
         
         //确定controller和action
         $length = count($t);
@@ -81,6 +78,9 @@ class Router extends Service
                 $a = array_shift($t);
                 $this->resolveGet($t);
         }
+        define('__MODULE__', $m);
+        define('__CTRL__', $c);
+        define('__ACTION__', $a);
         return [$m, ucfirst($c).'Ctrl', $a];
     }
     

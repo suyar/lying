@@ -5,8 +5,8 @@ class Lying
     public static $classes = [];
     
     /**
-     * 框架服务类
-     * @var lying\base\Container
+     * 框架单例容器
+     * @var lying\service\Container
      */
     public static $container;
     
@@ -17,15 +17,22 @@ class Lying
         }else {
             $file = ROOT . '/' . str_replace('\\', '/', $className) . '.php';
         }
-        
-        require $file;
+        if (file_exists($file)) {
+            require $file;
+        }
     }
     
     public static function run()
     {
         $router = self::$container->get('router');
         list($m, $c, $a) = $router->parse();
-        var_dump($_GET);
+        $class = "app\\$m\\ctrl\\$c";
+        
+        if (class_exists($class) && method_exists($class, $a) && (new \ReflectionMethod($class, $a))->isPublic()) {
+            echo (new $class())->$a();
+        }else {
+            throw new \Exception('Page not found.', 404);
+        }
         
     }
     

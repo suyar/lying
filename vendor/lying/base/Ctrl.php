@@ -1,7 +1,7 @@
 <?php
 namespace lying\base;
 
-class Ctrl
+class Ctrl extends View
 {
     
 }

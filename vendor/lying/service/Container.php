@@ -1,5 +1,5 @@
 <?php
-namespace lying\base;
+namespace lying\service;
 
 class Container
 {
