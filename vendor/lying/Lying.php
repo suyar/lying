@@ -27,7 +27,6 @@ class Lying
         $router = self::$container->get('router');
         list($m, $c, $a) = $router->parse();
         $class = "app\\$m\\ctrl\\$c";
-        
         if (class_exists($class) && method_exists($class, $a) && (new \ReflectionMethod($class, $a))->isPublic()) {
             echo (new $class())->$a();
         }else {

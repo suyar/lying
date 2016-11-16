@@ -5,9 +5,14 @@ class View
 {
     public $layout = false;
     
-    public $layoutParams = [];
-    
-    final public function render($view, $params= [])
+    /**
+     * 渲染视图文件
+     * @param string $view
+     * @param array $params
+     * @param array $layoutParams
+     * @return string
+     */
+    final public function render($view, $params= [], $layoutParams = [])
     {
         $file = $this->findViewPath($view);
         $content = $this->renderFile($file, $params);
@@ -15,9 +20,15 @@ class View
             return $content;
         }else {
             $layoutFile = $this->findLayoutFile($this->layout);
-            return $this->renderFile($layoutFile, array_merge($this->layoutParams, ['container'=>$content]));
+            return $this->renderFile($layoutFile, array_merge($layoutParams, ['container'=>$content]));
         }
     }
+    
+    final public function import()
+    {
+        
+    }
+    
     
     private function renderFile($file, $params)
     {
@@ -28,13 +39,23 @@ class View
         return ob_get_clean();
     }
     
-    
+    /**
+     * 查找模板的路径
+     * @param string $layout
+     * @return string
+     */
     private function findLayoutFile($layout)
     {
         return $this->findViewPath($layout, true);
     }
     
-    
+    /**
+     * 查找视图文件、模板的路径
+     * @param string $view
+     * @param string $layout
+     * @throws \Exception
+     * @return string
+     */
     private function findViewPath($view, $layout = false)
     {
         if (false !== strpos($view, '/')) {
@@ -62,5 +83,4 @@ class View
             throw new \Exception("The view file does not exist: $file", 500);
         }
     }
-    
 }
