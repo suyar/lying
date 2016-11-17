@@ -3,33 +3,43 @@ namespace lying\base;
 
 class View
 {
-    public $layout = false;
-    
     /**
      * 渲染视图文件
-     * @param string $view
-     * @param array $params
-     * @param array $layoutParams
+     * @param string $view 视图文件名称
+     * @param array $params 视图文件参数
+     * @param string|boolean $layout layout文件
+     * @param array $layoutParams layout参数
      * @return string
      */
-    final public function render($view, $params= [], $layoutParams = [])
+    public function render($view, $params, $layout,$layoutParams)
     {
         $file = $this->findViewPath($view);
         $content = $this->renderFile($file, $params);
-        if (false === $this->layout) {
+        if (false === $layout) {
             return $content;
         }else {
-            $layoutFile = $this->findLayoutFile($this->layout);
+            $layoutFile = $this->findViewPath($layout, true);
             return $this->renderFile($layoutFile, array_merge($layoutParams, ['container'=>$content]));
         }
     }
     
-    final public function import()
+    /**
+     * 导入其他视图文件
+     * @param string $view 视图文件名称
+     * @param array $params 视图文件参数
+     * @return string
+     */
+    public function import($view, $params = [])
     {
-        
+        return $this->render($view, $params, false, []);
     }
     
-    
+    /**
+     * 渲染视图文件
+     * @param string $file 视图文件绝对路径
+     * @param array $params 视图文件参数
+     * @return string
+     */
     private function renderFile($file, $params)
     {
         ob_start();
@@ -40,19 +50,9 @@ class View
     }
     
     /**
-     * 查找模板的路径
-     * @param string $layout
-     * @return string
-     */
-    private function findLayoutFile($layout)
-    {
-        return $this->findViewPath($layout, true);
-    }
-    
-    /**
      * 查找视图文件、模板的路径
-     * @param string $view
-     * @param string $layout
+     * @param string $view 视图文件名称
+     * @param boolean $layout 是否查找layout
      * @throws \Exception
      * @return string
      */
