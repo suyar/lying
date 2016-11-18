@@ -18,8 +18,11 @@ class Router extends Service
         
         //查找域名配置
         $host = $request->host();
-        $conf = $this->get('config')->load('router');
+        $config = $this->get('config');
+        $conf = $config->load('router');
         $conf = isset($conf[$host]) ? $conf[$host] : $conf['default'];
+        //设置路由配置为当前配置
+        $config->reset('router', $conf);
         
         //分割
         return $this->split(strtolower($parse['path']), $conf);
@@ -34,6 +37,8 @@ class Router extends Service
      */
     public function split($path, $conf)
     {
+        $path = '/' . trim($path, '/');
+        
         //判断后缀名
         if ($path !== '/' && isset($conf['suffix']) && $conf['suffix']) {
             if (preg_match('/\\'. $conf['suffix'] .'$/', $path)) {
@@ -101,22 +106,27 @@ class Router extends Service
     
     /**
      * 生成url
-     * @param string $path 形如"post"、"post/index"、"admin/post/index",否则报错
+     * @param string $path 形如"post"、"post/index"、"admin/post/index"或者完整网址,否则报错
      * @param array $params 要带的参数，使用path模式/id/1/name/carol.
-     * 此参数只接受数组+字母组成的键/值,包含非数字、字母的键/值会被忽略.
-     * @param string $after 如果为true,则$params参数编码后放在"?"之后，如/index.html?id=1.
-     * 如果此参数为false（默认）,则所有的参数作为path模式;如果此参数为数组,次参数作为常规模式编码后放在"?"之后.
-     * 所有带有特殊字符(+、空格、|、&、<、>等)的参数，不管是键/值都应该放在此参数，或者把此参数设置为true.
+     * 此参数只接受数组+字母组成的键/值,包含非数字、字母的参数会被忽略.
+     * 注意：如果此参数的键值为纯数字，则键值将会被忽略，如createUrl('post', [1])将会变成/path/1而不是/path/0/1.
+     * @param string $query 接受一个数组，此数组的参数会被编码成get参数的形式放在"?"之后.
+     * 所有带有特殊字符(+、空格、|、/、?、%、#、&、<、>等)的键/值对，都应该放在此参数.
      * @throws \Exception
      * @return string
      */
-    public function createUrl($path, $params = [], $after = false)
+    public function createUrl($path, $params = [], $query = [])
     {
-        $tmp = explode('/', trim($path, '/'));
+        //如果是常规连接就带参数返回
+        if (strncmp($path, 'http://', 7) === 0 || strncmp($path, 'https://', 8) === 0) {
+            $query = $params ? http_build_query($params, '', '&', PHP_QUERY_RFC3986) : false;
+            return $path .= ($query ? "?$query" : '');
+        }
         
+        $tmp = explode('/', $path);
+        //查询当前对应的配置
         $host = $this->get('request')->host();
         $conf = $this->get('config')->load('router');
-        $conf = isset($conf[$host]) ? $conf[$host] : $conf['default'];
         $suffix = isset($conf['suffix']) && $conf['suffix'] ? $conf['suffix'] : '';
         $module = isset($conf['module']) && $conf['module'];
         
@@ -134,18 +144,16 @@ class Router extends Service
                 throw new \Exception('The URL format is not correct', 500);
         }
         
-        if ($after === true) {
-            $after = http_build_query($params, '', '&', PHP_QUERY_RFC3986);
-        }else {
-            foreach ($params as $key=>$param) {
-                if (ctype_alnum($key) && ctype_alnum($param)) {
-                    $url .= is_numeric($key) ? "/$param" : "/$key/$param";
-                }
+        //设置path形式的参数
+        foreach ($params as $key=>$param) {
+            if (ctype_alnum($key) && ctype_alnum($param)) {
+                $url .= is_numeric($key) ? "/$param" : "/$key/$param";
             }
-            $after = is_array($after) ? http_build_query($after, '', '&', PHP_QUERY_RFC3986) : '';
         }
+        //设置格式化的query参数
+        $query = $query ? http_build_query($query, '', '&', PHP_QUERY_RFC3986) : false;
         
-        $url .= $suffix . ($after ? "?$after" : '');
+        $url .= $suffix . ($query ? "?$query" : '');
         return $url;
     }
 }

@@ -5,11 +5,13 @@ use lying\base\Ctrl;
 
 class IndexCtrl extends Ctrl
 {
-    
+    public $layout = 'admin/main';
     public function index()
     {
-        $this->layout = 'admin/main';
-        $this->redirect(['admin/index/index'], ['dsds&'=>3, 'dddd'=>'50%','name1'=>'suyaqi'], ['name'=>'su/yaqi']);
+        \Lying::$container->get('cookie')->send('name', '苏亚琦');
+        
+        var_dump(\Lying::$container->get('cookie')->find('name'));
+        //$this->redirect(['admin/index/index'], ['dsds&'=>3, 'dddd'=>'50%','name1'=>'suyaqi'], ['name'=>'su=yaqi']);
         /*return $this->render('index', [
             'name'=>'su',
             'ad'=>['name'=>'阿里云广告']

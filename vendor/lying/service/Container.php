@@ -3,15 +3,33 @@ namespace lying\service;
 
 class Container
 {
+    /**
+     * 已经实例化的服务
+     * @var array
+     */
     private $instance = [];
     
+    /**
+     * 注册的服务
+     * @var array
+     */
     private $register = [];
     
+    /**
+     * 实例化的时候注册进去
+     * @param array $params
+     */
     public function __construct($params)
     {
         $this->register = $params;
     }
     
+    /**
+     * 获取服务
+     * @param string $id 服务id
+     * @throws \Exception
+     * @return mixed
+     */
     public function get($id)
     {
         if (isset($this->instance[$id])) {
