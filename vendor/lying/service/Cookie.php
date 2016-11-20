@@ -38,6 +38,6 @@ class Cookie extends Service
      * @return boolean
      */
     public function remove($name, $path = '/') {
-        return isset($_COOKIE[$name]) ? $this->set($name, '', time() - 1, $path) : false;
+        return isset($_COOKIE[$name]) ? $this->send($name, '', time() - 1, $path) : false;
     }
 }
