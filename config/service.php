@@ -4,7 +4,7 @@ return [
     'config'=>'lying\service\Config',
     'cookie'=>[
         'class'=>'lying\service\Cookie',
-        'key'=>'123456',
+        'key'=>'AAAAAAAABBBBBBBBCCCCCCCCDDDDDDDD',
     ],
     'request'=>'lying\service\Request',
     'router'=>'lying\service\Router',

@@ -28,6 +28,7 @@ class Cookie extends Service
      * @return string
      */
     public function find($name, $defaultValue = null) {
+        var_dump($_COOKIE[$name]);
         return isset($_COOKIE[$name]) ? $this->get('secure')->AES_decrypt(base64_decode($_COOKIE[$name]), $this->key, md5($name, true)) : $defaultValue;
     }
     

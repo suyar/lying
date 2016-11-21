@@ -36,8 +36,6 @@ class Lying
     }
     
     
-    
-    
 }
 
 

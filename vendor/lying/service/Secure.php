@@ -4,7 +4,7 @@ namespace lying\service;
 class Secure
 {
     /**
-     * AEC加密
+     * AES加密
      * @param string $data 要加密的数据
      * @param string $key 加密密钥
      * @param string $iv 初始向量
