@@ -16,20 +16,19 @@ class Cookie extends Service
      * @param boolean $httponly cookie只能通过http请求访问,javascript将不能访问
      * @return boolean
      */
-    public function send($name, $value, $expire = 0, $path = '/', $domain = '', $secure = false, $httponly = false) {
-        $value = base64_encode($this->get('secure')->AES_encrypt($value, $this->key, md5($name, true)));
+    public function set($name, $value, $expire = 0, $path = '/', $domain = '', $secure = false, $httponly = false) {
+        $value = $this->make()->getSecure()->encrypt($value, $this->key);
         return setcookie($name, $value, $expire, $path, $domain, $secure, $httponly);
     }
     
     /**
      * 获取cookie
-     * @param string $name
-     * @param string $defaultValue
+     * @param string $name cookie名称
+     * @param string $defaultValue 默认值
      * @return string
      */
-    public function find($name, $defaultValue = null) {
-        var_dump($_COOKIE[$name]);
-        return isset($_COOKIE[$name]) ? $this->get('secure')->AES_decrypt(base64_decode($_COOKIE[$name]), $this->key, md5($name, true)) : $defaultValue;
+    public function get($name, $defaultValue = null) {
+        return isset($_COOKIE[$name]) ? $this->make()->getSecure()->decrypt($_COOKIE[$name], $this->key) : $defaultValue;
     }
     
     /**
@@ -39,6 +38,6 @@ class Cookie extends Service
      * @return boolean
      */
     public function remove($name, $path = '/') {
-        return isset($_COOKIE[$name]) ? $this->send($name, '', time() - 1, $path) : false;
+        return isset($_COOKIE[$name]) ? $this->set($name, '', time() - 1, $path) : false;
     }
 }

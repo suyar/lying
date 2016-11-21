@@ -6,7 +6,7 @@ define('__APP__', ROOT . '/app');
 
 require LYING_ROOT . '/Lying.php';
 
-spl_autoload_register([Lying::class, 'autoload']);
+spl_autoload_register(['\Lying', 'autoload']);
 Lying::$classes = require LYING_ROOT . '/classes.php';
 set_exception_handler(['lying\base\Exception', 'exceptionHandler']);
 set_error_handler(['lying\base\Exception', 'errorHandler']);

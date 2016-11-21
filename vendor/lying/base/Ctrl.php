@@ -1,7 +1,9 @@
 <?php
 namespace lying\base;
 
-class Ctrl
+use lying\service\Service;
+
+class Ctrl extends Service
 {
     /**
      * layout参数
@@ -31,8 +33,8 @@ class Ctrl
      */
     final protected function redirect($url, $params = [], $query = [])
     {
-        $url = \Lying::$container->get('router')->createUrl(is_array($url) ? $url[0] : $url, $params, $query);
-        $request = \Lying::$container->get('request');
+        $url = $this->make()->getRouter()->createUrl(is_array($url) ? $url[0] : $url, $params, $query);
+        $request = $this->make()->getRequest();
         while (ob_get_level() !== 0) ob_end_clean();
         if ($request->isPjax()) {
             header("X-Pjax-Url: $url");

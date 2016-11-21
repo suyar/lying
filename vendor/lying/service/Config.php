@@ -14,7 +14,7 @@ class Config
      * @param string $config 配置文件名
      * @return array
      */
-    public function load($config)
+    public function get($config)
     {
         if (isset($this->config[$config])) {
             return $this->config[$config];
@@ -29,7 +29,7 @@ class Config
      * @param string $key 配置文件名
      * @param string $params 参数数组，默认为空
      */
-    public function reset($key, $params = [])
+    public function set($key, $params = [])
     {
         if (isset($this->config[$key])) {
             $this->config[$key] = $params;

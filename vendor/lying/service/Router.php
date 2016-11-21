@@ -9,7 +9,7 @@ class Router extends Service
      */
     public function parse()
     {
-        $request = $this->get('request');
+        $request = $this->make()->getRequest();
         $uri = $request->uri();
         $parse = parse_url($uri);
         
@@ -18,11 +18,11 @@ class Router extends Service
         
         //查找域名配置
         $host = $request->host();
-        $config = $this->get('config');
-        $conf = $config->load('router');
+        $config = $this->make()->getConfig();
+        $conf = $config->get('router');
         $conf = isset($conf[$host]) ? $conf[$host] : $conf['default'];
         //设置路由配置为当前配置
-        $config->reset('router', $conf);
+        $config->set('router', $conf);
         
         //分割
         return $this->split(strtolower($parse['path']), $conf);
@@ -125,8 +125,8 @@ class Router extends Service
         
         $tmp = explode('/', $path);
         //查询当前对应的配置
-        $host = $this->get('request')->host();
-        $conf = $this->get('config')->load('router');
+        $host = $this->make()->getRequest()->host();
+        $conf = $this->make()->getConfig()->get('router');
         $suffix = isset($conf['suffix']) && $conf['suffix'] ? $conf['suffix'] : '';
         $module = isset($conf['module']) && $conf['module'];
         

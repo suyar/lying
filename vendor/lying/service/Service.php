@@ -3,6 +3,10 @@ namespace lying\service;
 
 class Service
 {
+    /**
+     * 初始化成员变量
+     * @param array $params 参数,key/value形式的数组
+     */
     final public function __construct($params = [])
     {
         if ($params) {
@@ -10,10 +14,17 @@ class Service
                 $this->$key = $param;
             }
         }
+        if (method_exists($this, 'init')) {
+            $this->init($params);
+        }
     }
     
-    final public function get($id)
+    /**
+     * 返回Lying实例
+     * @return \Lying
+     */
+    final public function make()
     {
-        return \Lying::$container->get($id);
+        return \Lying::instance();
     }
 }

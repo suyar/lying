@@ -17,7 +17,7 @@ class Container
     
     /**
      * 实例化的时候注册进去
-     * @param array $params
+     * @param array $params 配置
      */
     public function __construct($params)
     {
@@ -28,9 +28,9 @@ class Container
      * 获取服务
      * @param string $id 服务id
      * @throws \Exception
-     * @return mixed
+     * @return mixed 返回对应服务的实例
      */
-    public function get($id)
+    public function make($id)
     {
         if (isset($this->instance[$id])) {
             return $this->instance[$id];
