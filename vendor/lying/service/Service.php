@@ -7,7 +7,7 @@ class Service
      * 初始化成员变量
      * @param array $params 参数,key/value形式的数组
      */
-    final public function __construct($params = [])
+    public function __construct($params = [])
     {
         if ($params) {
             foreach ($params as $key=>$param) {

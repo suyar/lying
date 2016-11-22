@@ -20,6 +20,9 @@ class Lying
      */
     public static $container;
     
+    /**
+     * 初始化自身实例
+     */
     public function __construct()
     {
         self::$instance = $this;

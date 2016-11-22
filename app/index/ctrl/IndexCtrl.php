@@ -14,9 +14,7 @@ class IndexCtrl extends Ctrl
     
     public function index()
     {
-        $cookie = $this->make()->getCookie();
-        var_dump($cookie);
-        $_SESSION['cookie'] = serialize($cookie);
+        
         
         //$this->redirect(['admin/index/index'], ['dsds&'=>3, 'dddd'=>'50%','name1'=>'suyaqi'], ['name'=>'su=yaqi']);
         return $this->render('index', [
@@ -28,8 +26,5 @@ class IndexCtrl extends Ctrl
         ]);
     }
     
-    public function cookie()
-    {
-        var_dump(unserialize($_SESSION['cookie']));
-    }
+    
 }
