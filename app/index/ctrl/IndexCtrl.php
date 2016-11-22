@@ -15,7 +15,7 @@ class IndexCtrl extends Ctrl
     public function index()
     {
         
-        
+        $this->make()->getLogger();
         //$this->redirect(['admin/index/index'], ['dsds&'=>3, 'dddd'=>'50%','name1'=>'suyaqi'], ['name'=>'su=yaqi']);
         return $this->render('index', [
             'name'=>'su',
@@ -25,6 +25,7 @@ class IndexCtrl extends Ctrl
             'ad'=>['name'=>'鳄鱼鳄鱼男装']
         ]);
     }
+    
     
     
 }

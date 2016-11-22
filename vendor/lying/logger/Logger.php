@@ -1,7 +1,13 @@
 <?php
 namespace lying\logger;
 
-class Logger
+use lying\service\Service;
+
+abstract class Logger extends Service
 {
+    protected $box = [];
+    
+    
+    
     
 }

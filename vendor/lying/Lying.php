@@ -73,7 +73,7 @@ class Lying
      * 获取配置类实例
      * @return lying\service\Config
      */
-    public static function getConfig()
+    public function getConfig()
     {
         return self::$container->make('config');
     }
@@ -82,7 +82,7 @@ class Lying
      * 获取路由类实例
      * @return lying\service\Router
      */
-    public static function getRouter()
+    public function getRouter()
     {
         return self::$container->make('router');
     }
@@ -100,7 +100,7 @@ class Lying
      * 获取加密类实例
      * @return lying\service\Secure
      */
-    public static function getSecure()
+    public function getSecure()
     {
         return self::$container->make('secure');
     }
@@ -109,7 +109,7 @@ class Lying
      * 获取cookie类实例
      * @return lying\service\Cookie
      */
-    public static function getCookie()
+    public function getCookie()
     {
         return self::$container->make('cookie');
     }
@@ -118,9 +118,19 @@ class Lying
      * 获取session类实例
      * @return lying\service\Session
      */
-    public static function getSession()
+    public function getSession()
     {
         return self::$container->make('session');
+    }
+    
+    /**
+     * 返回log类实例
+     * @param string $id log的id
+     * @return lying\logger\Logger
+     */
+    public function getLogger($id = 'logger')
+    {
+        return self::$container->make($id);
     }
     
     

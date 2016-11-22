@@ -69,13 +69,13 @@ class View
                     }else {
                         $m = __MODULE__;
                     }
-                    $file = __APP__ . "/$m/view/$tmp[0]/$tmp[1].php";
+                    $file = DIR_APP . "/$m/view/$tmp[0]/$tmp[1].php";
                     break;
                 default:
-                    $file = __APP__ . '/'  . $tmp[0] . "/view/$tmp[1]/$tmp[2].php";
+                    $file = DIR_APP . '/'  . $tmp[0] . "/view/$tmp[1]/$tmp[2].php";
             }
         }else {
-            $file = __APP__ . '/' . __MODULE__ . "/view/" . ($layout ? 'layout' : __CTRL__) . "/$view.php";
+            $file = DIR_APP . '/' . __MODULE__ . "/view/" . ($layout ? 'layout' : __CTRL__) . "/$view.php";
         }
         if (file_exists($file)) {
             return $file;

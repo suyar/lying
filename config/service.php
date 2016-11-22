@@ -25,7 +25,7 @@ return [
         'class'=>'lying\logger\FileLog',
         'file'=>'default',
         'maxLength'=>100,
-        'maxSize'=>5,
+        'maxSize'=>10240,
     ],
     
     

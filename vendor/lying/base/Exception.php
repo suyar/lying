@@ -3,6 +3,13 @@ namespace lying\base;
 
 class Exception
 {
+    public static function register()
+    {
+        set_exception_handler([self::class, 'exceptionHandler']);
+        set_error_handler([self::class, 'errorHandler']);
+        register_shutdown_function([self::class, 'shutdownHandler']);
+    }
+    
     public static function exceptionHandler($exception)
     {
         echo '异常';
