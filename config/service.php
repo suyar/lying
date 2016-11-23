@@ -24,8 +24,10 @@ return [
     'logger'=>[
         'class'=>'lying\logger\FileLog',
         'file'=>'default',
-        'maxLength'=>100,
+        'maxLength'=>500,
         'maxSize'=>10240,
+        'maxFile'=>5,
+        'level'=>['debug', 'info', 'warning', 'error'],
     ],
     
     
