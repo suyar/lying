@@ -5,11 +5,11 @@ class Request
 {
     /**
      * 返回请求的url，不包含host和#后面的参数
-     * @return string 形如：/index.html?r=11
+     * @return null|string 形如:/index.html?r=11
      */
     public function uri()
     {
-        return $_SERVER['REQUEST_URI'];
+        return isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : null;
     }
     
     /**
@@ -23,11 +23,11 @@ class Request
     
     /**
      * 返回host
-     * @return string 形如：lying.com，不带端口和协议类型
+     * @return null|string 形如：lying.com，不带端口和协议类型
      */
     public function host()
     {
-        return $_SERVER['HTTP_HOST'];
+        return isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : null;
     }
     
     /**
@@ -41,36 +41,36 @@ class Request
     
     /**
      * 获取服务器的IP地址
-     * @return string|boolean
+     * @return string|null
      */
     public function serverIp() {
-        return isset($_SERVER['SERVER_ADDR']) ? $_SERVER['SERVER_ADDR'] : false;
+        return isset($_SERVER['SERVER_ADDR']) ? $_SERVER['SERVER_ADDR'] : null;
     }
     
     /**
-     * 获取客户端IP地址,失败返回false
-     * @return string
+     * 获取客户端IP地址,失败返回null
+     * @return string|null
      */
     public function remoteIp() {
-        return $_SERVER['REMOTE_ADDR'];
+        return isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : null;
     }
     
     /**
      * 返回浏览器UA
-     * @return string|boolean
+     * @return string|null
      */
     public function UA()
     {
-        return isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : false;
+        return isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : null;
     }
     
     /**
      * 返回请求的方法
-     * @return string "GET", "HEAD", "POST", "PUT"
+     * @return string|null "GET", "HEAD", "POST", "PUT"
      */
     public function method()
     {
-        return $_SERVER['REQUEST_METHOD'];
+        return isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : null;
     }
     
     /**

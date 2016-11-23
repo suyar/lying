@@ -3,12 +3,29 @@ namespace lying\logger;
 
 class FileLog extends Logger
 {
+    /**
+     * 日志文件名/日志路径
+     * @var string
+     */
     protected $file = 'default';
     
+    /**
+     * 单个日志文件的最大值(kb)
+     * @var integer
+     */
     protected $maxSize = 10240;
     
+    /**
+     * 最大的日志文件个数
+     * @var integer
+     */
     protected $maxFile = 5;
     
+    /**
+     * 初始化文件路径
+     * {@inheritDoc}
+     * @see \lying\logger\Logger::init()
+     */
     protected function init()
     {
         try {
@@ -20,46 +37,25 @@ class FileLog extends Logger
                 }
             }
             $this->file = $path . "/$this->file.log";
-            //register_shutdown_function([$this, 'flush']);
+            register_shutdown_function([$this, 'flush']);
         }catch (\Exception $e) {
             if (DEV) throw $e;
         }
     }
     
-    public function __destruct()
+    /**
+     * {@inheritDoc}
+     * @see \lying\logger\Logger::buildMsg()
+     */
+    protected function buildMsg($time, $ip, $level, $url, $file, $line, $content)
     {
-        $this->flush();
+        return "[$time][$ip][$level][$url] In file $file line $line" . PHP_EOL . $content . PHP_EOL;
     }
     
-    public function log($msg, $level = 'debug')
-    {
-        try {
-            if (in_array($level, $this->level)) {
-                if (!is_string($msg)) {
-                    ob_start();
-                    ob_implicit_flush(false);
-                    var_dump($msg);
-                    $msg = ob_get_clean();
-                }
-                $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1);
-                $request = $this->make()->getRequest();
-                $file = $trace[0]['file'];
-                $line = $trace[0]['line'];
-                $time = date('Y-m-d H:i:s');
-                $ip = $request->remoteIp();
-                $url = $request->uri();
-                $msg = "[$time][$ip][$level][$url] In file $file line $line" . PHP_EOL . $msg . PHP_EOL;
-                $this->box[] = $msg;
-                if (count($this->box) >= $this->maxLength) {
-                    $this->flush();
-                }
-            }
-        }catch (\Exception $e) {
-            if (DEV) throw $e;
-        }
-    }
-    
-    
+    /**
+     * {@inheritDoc}
+     * @see \lying\logger\Logger::flush()
+     */
     public function flush()
     {
         if ($this->box) {
@@ -72,6 +68,9 @@ class FileLog extends Logger
         }
     }
     
+    /**
+     * 删除/备份日志文件
+     */
     protected function replaceFile()
     {
         $file = $this->file;
@@ -79,7 +78,7 @@ class FileLog extends Logger
             $backfile = $file . ($i === 0 ? '' : ('.bak' . $i));
             var_dump($backfile);
             if (is_file($backfile)) {
-                if ($i == $this->maxFile) {
+                if ($i === $this->maxFile) {
                     unlink($backfile);
                     continue;
                 }
@@ -87,6 +86,4 @@ class FileLog extends Logger
             }
         }
     }
-    
-    
 }
