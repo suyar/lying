@@ -15,7 +15,7 @@ abstract class Logger extends Service
     protected function init()
     {
         if (!is_array($this->level)) {
-            throw new \Exception("日志配置项[level]必须为数组", 500);
+            throw new \Exception('Configuration item [level] must be an array.', 500);
         }
     }
     

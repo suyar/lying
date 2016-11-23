@@ -42,11 +42,13 @@ class FileLog extends Logger
                     $msg = ob_get_clean();
                 }
                 $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1);
+                $request = $this->make()->getRequest();
                 $file = $trace[0]['file'];
                 $line = $trace[0]['line'];
                 $time = date('Y-m-d H:i:s');
-                $ip = $_SERVER['REMOTE_ADDR'];
-                $msg = "[$time][$ip][$level] In file $file line $line" . PHP_EOL . $msg . PHP_EOL;
+                $ip = $request->remoteIp();
+                $url = $request->uri();
+                $msg = "[$time][$ip][$level][$url] In file $file line $line" . PHP_EOL . $msg . PHP_EOL;
                 $this->box[] = $msg;
                 if (count($this->box) >= $this->maxLength) {
                     $this->flush();

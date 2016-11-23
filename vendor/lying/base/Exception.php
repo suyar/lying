@@ -23,15 +23,14 @@ class Exception
     
     public static function shutdownHandler()
     {
-        echo '1';
         \Lying::instance()->getLogger()->log('关闭');
-        $err = error_get_last();
+        /*$err = error_get_last();
         if ($err) {
             while (ob_get_level() !== 0) ob_end_clean();
             echo '关闭出错';
             var_dump($err);
             exit;
-        }
+        }*/
     }
     
     
