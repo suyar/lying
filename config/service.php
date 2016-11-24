@@ -17,7 +17,7 @@ return [
     ],
     'db'=>[
         'class'=>'lying\db\Connection',
-        'dsn'=>'mysql:host=127.0.0.1;dbname=test',
+        'dsn'=>'mysql:host=127.0.0.1;dbname=e',
         'user'=>'root',
         'pass'=>'root',
     ],

@@ -133,6 +133,16 @@ class Lying
         return self::$container->make($id);
     }
     
+    /**
+     * 获取数据库连接实例
+     * @param string $id
+     * @return lying\db\Connection
+     */
+    public function getDb($id = 'db')
+    {
+        return self::$container->make($id);
+    }
+    
     
 }
 
