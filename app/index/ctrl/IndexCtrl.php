@@ -19,6 +19,7 @@ class IndexCtrl extends Ctrl
         $db->getSchema('user');
         
         
+        
         /*return $this->render('index', [
             'name'=>'su',
             'ad'=>['name'=>'阿里云广告']
