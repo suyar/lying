@@ -12,10 +12,14 @@ class Connection extends Service
     protected $pass;
     
     /**
-     * PDO实例
-     * @var \PDO
+     * @var \PDO PDO实例
      */
     private $dbh;
+    
+    /**
+     * @var Schema[] 表结构
+     */
+    private $tableSchema = [];
     
     
     protected function init()
@@ -32,17 +36,37 @@ class Connection extends Service
         if ($this->dbh instanceof \PDO) {
             return $this->dbh;
         } else {
-            $this->dbh = new \PDO($this->dsn, $this->user, $this->pass);
+            $this->dbh = new \PDO($this->dsn, $this->user, $this->pass, [
+                \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
+                \PDO::ATTR_EMULATE_PREPARES => false,
+                \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
+            ]);
             return $this->dbh;
         }
     }
     
-    
+    /**
+     * 获取表的结构
+     * @param string $table
+     * @return multitype:\lying\db\Schema
+     */
     public function getSchema($table)
     {
-        $sth = $this->PDO()->prepare("DESC $table");
-        $sth->execute();
-        var_dump($sth->fetchAll(\PDO::FETCH_ASSOC));
+        if (isset($this->tableSchema[$table])) {
+            return $this->tableSchema[$table];
+        }
+        $fieldSchema = $this->PDO()->query("DESC $table")->fetchAll();
+        $this->tableSchema[$table] = new Schema($fieldSchema);
+        return $this->tableSchema[$table];
+    }
+    
+    /**
+     * 
+     * @return \lying\db\QueryBuilder
+     */
+    public function createQuery()
+    {
+        return new QueryBuilder($this);
     }
     
     

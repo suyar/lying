@@ -16,7 +16,7 @@ class IndexCtrl extends Ctrl
     {
         $db = $this->make()->getDb();
         
-        $db->getSchema('user');
+        $db->createQuery()->from('user')->insert(['username'=>null, 'password'=>'123654']);
         
         
         
