@@ -51,11 +51,34 @@ class QueryBuilder
         return false;
     }
     
+    public function microtime()
+    {
+        list($msec, $sec) = explode(' ', microtime());
+        return $sec . ceil($msec * 1000);
+    }
+    
+    
     
     public function batchInsert($fields, $data = [])
     {
         if ($data) {
+            $fields = array_intersect($fields, $this->connection->getSchema($this->from)->fields);
+            $statement = "INSERT INTO `$this->from` (`" . implode('`, `', $fields) . "`) VALUES ";
+            //$counts = count($data);
+            $vals = [];
+            $params = [];
+            foreach ($data as $d) {
+                $counts = count($d);
+                $vals[] = "(" . implode(', ', array_fill(0, $counts, '?')) . ")";
+                foreach ($d as $v) {
+                    $params[] = $v;
+                }
+            }
+            $sth = $this->connection->PDO()->prepare($statement);
             
+            var_dump($params);
+            $statement .= implode(', ', $vals);
+            var_dump($statement);
         }
     }
     

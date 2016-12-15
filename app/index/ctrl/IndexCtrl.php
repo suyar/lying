@@ -16,9 +16,17 @@ class IndexCtrl extends Ctrl
     {
         $db = $this->make()->getDb();
         
-        $db->createQuery()->from('user')->insert(['username'=>null, 'password'=>'123654']);
-        
-        
+        //$db->createQuery()->from('user')->insert(['username'=>null, 'password'=>'123654']);
+        /*$db->createQuery()->from('user')->batchInsert([
+            ['username'=>'q', 'password'=>'qqq'],
+            ['username'=>'w', 'password'=>'www'],
+            ['username'=>'e', 'password'=>'eee'],
+        ]);*/
+        /*$db->createQuery()->from('user')->batchInsert(['username', 'password'], [
+            ['q', 'qqq'],
+            ['w', 'www'],
+            ['e', 'eee'],
+        ]);*/
         
         /*return $this->render('index', [
             'name'=>'su',
