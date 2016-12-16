@@ -13,6 +13,8 @@ class QueryBuilder
     
     private $select = "";
     
+    private $distinct;
+    
     private $params = [];
     
     
@@ -28,7 +30,7 @@ class QueryBuilder
     /**
      * 设置要操作的表
      * @param string $table
-     * @return \lying\db\QueryBuilder
+     * @return $this
      */
     public function from($table)
     {
@@ -39,6 +41,7 @@ class QueryBuilder
     /**
      * 设置要查询的字段
      * @param array $fields
+     * @return $this
      */
     public function select($fields)
     {
@@ -46,7 +49,27 @@ class QueryBuilder
         if (!$this->select) {
             $this->select = "*";
         }
+        return $this;
     }
+    
+    /**
+     * 去重
+     * @return $this
+     */
+    public function distinct()
+    {
+        $this->distinct = 'DISTINCT';
+        return $this;
+    }
+    
+    
+    public function where($condition, $params = [])
+    {
+        if (is_array($condition)) {
+            
+        }
+    }
+    
     
     
     /**
