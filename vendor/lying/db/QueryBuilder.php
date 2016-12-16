@@ -15,6 +15,8 @@ class QueryBuilder
     
     private $distinct;
     
+    private $condition;
+    
     private $params = [];
     
     
@@ -62,11 +64,94 @@ class QueryBuilder
         return $this;
     }
     
-    
+    /**
+     * 设置条件
+     * ```
+     * where("id = 1 AND name = 'lying'");
+     * where("id = :id AND name = :name", [':id'=>1, ':name'=>'suyaqi']);
+     * where(['id'=>1, 'name'=>'lying']);
+     * where([
+     *     ['=', 'id', 1],
+     *     ['<=', 'num', $num]
+     * ]);
+     * ```
+     * @param string|array $condition
+     * @param array $params
+     */
     public function where($condition, $params = [])
     {
         if (is_array($condition)) {
-            
+            $where = [];
+            foreach ($condition as $key=>$value) {
+                if (is_array($value)) {
+                    list($operation, $field, $val) = $value;
+                    switch (strtoupper($operation)) {
+                        case 'IN':
+                            $where[] = "`$field` IN (" . implode(', ', array_fill(0, count($val), '?')) . ")";
+                            $this->addParams($val);
+                            break;
+                        case 'NOT IN':
+                            $where[] = "`$field` NOT IN (" . implode(', ', array_fill(0, count($val), '?')) . ")";
+                            $this->addParams($val);
+                            break;
+                        case 'BETWEEN':
+                            $where[] = "`$field` BETWEEN ? AND ?";
+                            $this->addParams($val);
+                            break;
+                        case 'NOT BETWEEN':
+                            $where[] = "`$field` NOT BETWEEN ? AND ?";
+                            $this->addParams($val);
+                            break;
+                        case 'LIKE':
+                            $where[] = "`$field` LIKE ?";
+                            $this->addParam($val);
+                            break;
+                        case 'NOT LIKE':
+                            $where[] = "`$field` NOT LIKE ?";
+                            $this->addParam($val);
+                            break;
+                        case 'NULL':
+                            if ($val === true) {
+                                $where[] = "`$field` IS NULL";
+                            }else {
+                                $where[] = "`$field` IS NOT NULL";
+                            }
+                            break;
+                        default:
+                            $where[] = "`$field` $operation ?";
+                            $this->addParam($val);
+                    }
+                }else {
+                    $where[] = "`$key` = ?";
+                    $this->addParam($value);
+                }
+            }
+        }elseif (is_string($condition)) {
+            if ($params) {
+                $condition = str_replace(array_keys($params), '?', $condition);
+                $this->addParams($params);
+            }
+            $this->condition = $condition;
+        }
+        return $this;
+    }
+    
+    /**
+     * 添加一个绑定的参数
+     * @param string|int|null $param
+     */
+    public function addParam($param) {
+        $this->params[] = $param;
+    }
+    
+    /**
+     * 批量添加绑定的参数
+     * @param array $params
+     */
+    public function addParams($params)
+    {
+        foreach ($params as $p) {
+            $this->params[] = $p;
         }
     }
     

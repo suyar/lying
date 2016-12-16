@@ -22,11 +22,21 @@ class IndexCtrl extends Ctrl
             ['username'=>'w', 'password'=>'www'],
             ['username'=>'e', 'password'=>'eee'],
         ]);*/
-        $db->createQuery()->from('user')->batchInsert(['username', 'password'], [
+        /*$db->createQuery()->from('user')->batchInsert(['username', 'password'], [
             [null, 'qqq'],
             ['w', 'www'],
             ['e', 'eee'],
+        ]);*/
+        
+        $db->createQuery()->from('user')->where([
+            'id'=>1,
+            'username'=>'lying',
+            ['not in', 'id', [1,2,3,4]],
+            ['null', 'username', true],
         ]);
+        
+        
+        
         
         /*return $this->render('index', [
             'name'=>'su',
