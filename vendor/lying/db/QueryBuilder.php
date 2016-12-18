@@ -74,6 +74,18 @@ class QueryBuilder
      *     ['=', 'id', 1],
      *     ['<=', 'num', $num]
      * ]);
+     * where([
+     *     [
+     *         'and',
+     *         ['=', 'id', 1],
+     *         ['<=', 'num', $num]
+     *     ],
+     *     [
+     *         'or',
+     *         ['=', 'id', 2],
+     *         ['<=', 'num', $num]
+     *     ],
+     * ]);
      * ```
      * @param string|array $condition
      * @param array $params
@@ -134,6 +146,62 @@ class QueryBuilder
             $this->condition = $condition;
         }
         return $this;
+    }
+    
+    
+    public function buildCondition($condition, $op = 'AND')
+    {
+        $where = [];
+        if (isset($condition[0]) && is_string($condition[0]) && in_array(strtoupper($condition[0]), ['AND', 'OR'])) {
+            $op = strtoupper(array_shift($condition));
+            $where[] = $this->buildCondition($condition);
+        }else {
+            foreach ($condition as $key=>$value) {
+                if (is_array($value)) {
+                    list($operation, $field, $val) = $value;
+                    switch (strtoupper($operation)) {
+                        case 'IN':
+                            $where[] = "`$field` IN (" . implode(', ', array_fill(0, count($val), '?')) . ")";
+                            $this->addParams($val);
+                            break;
+                        case 'NOT IN':
+                            $where[] = "`$field` NOT IN (" . implode(', ', array_fill(0, count($val), '?')) . ")";
+                            $this->addParams($val);
+                            break;
+                        case 'BETWEEN':
+                            $where[] = "`$field` BETWEEN ? AND ?";
+                            $this->addParams($val);
+                            break;
+                        case 'NOT BETWEEN':
+                            $where[] = "`$field` NOT BETWEEN ? AND ?";
+                            $this->addParams($val);
+                            break;
+                        case 'LIKE':
+                            $where[] = "`$field` LIKE ?";
+                            $this->addParam($val);
+                            break;
+                        case 'NOT LIKE':
+                            $where[] = "`$field` NOT LIKE ?";
+                            $this->addParam($val);
+                            break;
+                        case 'NULL':
+                            if ($val === true) {
+                                $where[] = "`$field` IS NULL";
+                            }else {
+                                $where[] = "`$field` IS NOT NULL";
+                            }
+                            break;
+                        default:
+                            $where[] = "`$field` $operation ?";
+                            $this->addParam($val);
+                    }
+                }else {
+                    $where[] = "`$key` = ?";
+                    $this->addParam($value);
+                }
+            }
+        }
+        return implode(" $op ", $where);
     }
     
     /**
