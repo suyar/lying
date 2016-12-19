@@ -15,7 +15,11 @@ class IndexCtrl extends Ctrl
     public function index()
     {
         $db = $this->make()->getDb();
-        
+        $db->createQuery()->select([])
+        ->where(['or', 'id'=>1, ['in', 'id', [7, 8, 9]]])
+        ->andWhere("username = :username", [':username'=>'susu'])
+        ->orWhere(['>=', 'val - sex', 10])
+        ->getWhere();
         
     }
     

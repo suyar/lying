@@ -36,21 +36,27 @@ class QueryBuilder
      */
     public function from($table)
     {
-        $this->from = $table;
+        $this->from = "$table";
         return $this;
     }
     
     /**
      * 设置要查询的字段
-     * @param array $fields
+     * @param array $fields 如果为$key=>$value对的话,会被解析为$key as $val
      * @return $this
      */
     public function select($fields)
     {
-        $this->select = array_intersect($fields, $this->connection->getSchema($this->from));
-        if (!$this->select) {
-            $this->select = "*";
+        $select = [];
+        foreach ($fields as $key=>$field) {
+            if (is_string($key)) {
+                $select[] = "$key as $field";
+            }else {
+                $select[] = $field;
+            }
         }
+        $select = implode(', ', $select);
+        $this->select = $select ? $select : '*';
         return $this;
     }
     
@@ -62,6 +68,11 @@ class QueryBuilder
     {
         $this->distinct = 'DISTINCT';
         return $this;
+    }
+    
+    public function getWhere()
+    {
+        var_dump($this->where);
     }
     
     /**
