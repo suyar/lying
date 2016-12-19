@@ -15,7 +15,7 @@ class QueryBuilder
     
     private $distinct;
     
-    private $condition;
+    private $where;
     
     private $params = [];
     
@@ -69,12 +69,14 @@ class QueryBuilder
      * ```
      * where("id = 1 AND name = 'lying'");
      * where("id = :id AND name = :name", [':id'=>1, ':name'=>'suyaqi']);
-     * where(['id'=>1, 'name'=>'lying']);
+     * where(['id'=>1, 'name'=>null]); 注：'name'=>null的形式将被解析为name IS NULL
      * where([
      *     ['=', 'id', 1],
      *     ['<=', 'num', $num]
      * ]);
      * where([
+     *     'or',
+     *     'username'=>'lying',
      *     [
      *         'and',
      *         ['=', 'id', 1],
@@ -89,75 +91,80 @@ class QueryBuilder
      * ```
      * @param string|array $condition
      * @param array $params
+     * @return $this
      */
     public function where($condition, $params = [])
     {
+        $this->where = $this->buildWhere($condition, $params);
+        return $this;
+    }
+    
+    /**
+     * 添加AND条件
+     * @see \lying\db\QueryBuilder::where
+     * @param string|array $condition
+     * @param array $params
+     * @return $this
+     */
+    public function andWhere($condition, $params = [])
+    {
+        $where = $this->buildWhere($condition, $params);
+        $this->where .= ($this->where ? " AND $where" : $where);
+        return $this;
+    }
+    
+    /**
+     * 添加OR条件
+     * @see \lying\db\QueryBuilder::where
+     * @param string|array $condition
+     * @param array $params
+     * @return $this
+     */
+    public function orWhere($condition, $params = [])
+    {
+        $where = $this->buildWhere($condition, $params);
+        $this->where .= ($this->where ? " OR $where" : $where);
+        return $this;
+    }
+    
+    /**
+     * 组建where条件
+     * @param string|array $condition
+     * @param array $params
+     * @return string
+     */
+    private function buildWhere($condition, $params = [])
+    {
         if (is_array($condition)) {
-            $where = [];
-            foreach ($condition as $key=>$value) {
-                if (is_array($value)) {
-                    list($operation, $field, $val) = $value;
-                    switch (strtoupper($operation)) {
-                        case 'IN':
-                            $where[] = "`$field` IN (" . implode(', ', array_fill(0, count($val), '?')) . ")";
-                            $this->addParams($val);
-                            break;
-                        case 'NOT IN':
-                            $where[] = "`$field` NOT IN (" . implode(', ', array_fill(0, count($val), '?')) . ")";
-                            $this->addParams($val);
-                            break;
-                        case 'BETWEEN':
-                            $where[] = "`$field` BETWEEN ? AND ?";
-                            $this->addParams($val);
-                            break;
-                        case 'NOT BETWEEN':
-                            $where[] = "`$field` NOT BETWEEN ? AND ?";
-                            $this->addParams($val);
-                            break;
-                        case 'LIKE':
-                            $where[] = "`$field` LIKE ?";
-                            $this->addParam($val);
-                            break;
-                        case 'NOT LIKE':
-                            $where[] = "`$field` NOT LIKE ?";
-                            $this->addParam($val);
-                            break;
-                        case 'NULL':
-                            if ($val === true) {
-                                $where[] = "`$field` IS NULL";
-                            }else {
-                                $where[] = "`$field` IS NOT NULL";
-                            }
-                            break;
-                        default:
-                            $where[] = "`$field` $operation ?";
-                            $this->addParam($val);
-                    }
-                }else {
-                    $where[] = "`$key` = ?";
-                    $this->addParam($value);
-                }
-            }
+            return $this->buildCondition($condition);
         }elseif (is_string($condition)) {
             if ($params) {
                 $condition = str_replace(array_keys($params), '?', $condition);
                 $this->addParams($params);
             }
-            $this->condition = $condition;
+            return $condition;
+        }else {
+            return '';
         }
-        return $this;
     }
     
-    
-    public function buildCondition($condition, $op = 'AND')
+    /**
+     * 组建数组形式的条件
+     * @param array $condition
+     * @return string
+     */
+    private function buildCondition($condition)
     {
-        $where = [];
+        $op = 'AND';
         if (isset($condition[0]) && is_string($condition[0]) && in_array(strtoupper($condition[0]), ['AND', 'OR'])) {
             $op = strtoupper(array_shift($condition));
-            $where[] = $this->buildCondition($condition);
-        }else {
-            foreach ($condition as $key=>$value) {
-                if (is_array($value)) {
+        }
+        $where = [];
+        foreach ($condition as $key=>$value) {
+            if (is_array($value)) {
+                if (isset($value[0]) && is_string($value[0]) && in_array(strtoupper($value[0]), ['AND', 'OR'])) {
+                    $where[] = $this->buildCondition($value);
+                }else {
                     list($operation, $field, $val) = $value;
                     switch (strtoupper($operation)) {
                         case 'IN':
@@ -195,14 +202,19 @@ class QueryBuilder
                             $where[] = "`$field` $operation ?";
                             $this->addParam($val);
                     }
+                }
+            }else {
+                if ($value === null) {
+                    $where[] = "`$key` IS NULL";
                 }else {
                     $where[] = "`$key` = ?";
                     $this->addParam($value);
                 }
             }
         }
-        return implode(" $op ", $where);
+        return $op === 'OR' ? '(' . implode(" $op ", $where) . ')' : implode(" $op ", $where);
     }
+    
     
     /**
      * 添加一个绑定的参数
