@@ -77,7 +77,7 @@ class QueryBuilder
     
     /**
      * 设置条件
-     * ```
+     * 
      * where("id = 1 AND name = 'lying'");
      * where("id = :id AND name = :name", [':id'=>1, ':name'=>'suyaqi']);
      * where(['id'=>1, 'name'=>null]); 注：'name'=>null的形式将被解析为name IS NULL
@@ -99,7 +99,7 @@ class QueryBuilder
      *         ['<=', 'num', $num]
      *     ],
      * ]);
-     * ```
+     * 
      * @param string|array $condition
      * @param array $params
      * @return $this
@@ -167,8 +167,49 @@ class QueryBuilder
     private function buildCondition($condition)
     {
         $op = 'AND';
-        if (isset($condition[0]) && is_string($condition[0]) && in_array(strtoupper($condition[0]), ['AND', 'OR'])) {
-            $op = strtoupper(array_shift($condition));
+        if (isset($condition[0]) && is_string($condition[0])) {
+            if (in_array(strtoupper($condition[0]), ['AND', 'OR'])) {
+                $op = strtoupper(array_shift($condition));
+            }else {
+                list($operation, $field, $val) = $condition;
+                switch (strtoupper($operation)) {
+                    case 'IN':
+                        $where[] = "$field IN (" . implode(', ', array_fill(0, count($val), '?')) . ")";
+                        $this->addParams($val);
+                        break;
+                    case 'NOT IN':
+                        $where[] = "$field NOT IN (" . implode(', ', array_fill(0, count($val), '?')) . ")";
+                        $this->addParams($val);
+                        break;
+                    case 'BETWEEN':
+                        $where[] = "$field BETWEEN ? AND ?";
+                        $this->addParams($val);
+                        break;
+                    case 'NOT BETWEEN':
+                        $where[] = "$field NOT BETWEEN ? AND ?";
+                        $this->addParams($val);
+                        break;
+                    case 'LIKE':
+                        $where[] = "$field LIKE ?";
+                        $this->addParam($val);
+                        break;
+                    case 'NOT LIKE':
+                        $where[] = "$field NOT LIKE ?";
+                        $this->addParam($val);
+                        break;
+                    case 'NULL':
+                        if ($val === true) {
+                            $where[] = "$field IS NULL";
+                        }else {
+                            $where[] = "$field IS NOT NULL";
+                        }
+                        break;
+                    default:
+                        $where[] = "$field $operation ?";
+                        $this->addParam($val);
+                }
+                return implode(' AND ', $where);
+            }
         }
         $where = [];
         foreach ($condition as $key=>$value) {
@@ -179,46 +220,46 @@ class QueryBuilder
                     list($operation, $field, $val) = $value;
                     switch (strtoupper($operation)) {
                         case 'IN':
-                            $where[] = "`$field` IN (" . implode(', ', array_fill(0, count($val), '?')) . ")";
+                            $where[] = "$field IN (" . implode(', ', array_fill(0, count($val), '?')) . ")";
                             $this->addParams($val);
                             break;
                         case 'NOT IN':
-                            $where[] = "`$field` NOT IN (" . implode(', ', array_fill(0, count($val), '?')) . ")";
+                            $where[] = "$field NOT IN (" . implode(', ', array_fill(0, count($val), '?')) . ")";
                             $this->addParams($val);
                             break;
                         case 'BETWEEN':
-                            $where[] = "`$field` BETWEEN ? AND ?";
+                            $where[] = "$field BETWEEN ? AND ?";
                             $this->addParams($val);
                             break;
                         case 'NOT BETWEEN':
-                            $where[] = "`$field` NOT BETWEEN ? AND ?";
+                            $where[] = "$field NOT BETWEEN ? AND ?";
                             $this->addParams($val);
                             break;
                         case 'LIKE':
-                            $where[] = "`$field` LIKE ?";
+                            $where[] = "$field LIKE ?";
                             $this->addParam($val);
                             break;
                         case 'NOT LIKE':
-                            $where[] = "`$field` NOT LIKE ?";
+                            $where[] = "$field NOT LIKE ?";
                             $this->addParam($val);
                             break;
                         case 'NULL':
                             if ($val === true) {
-                                $where[] = "`$field` IS NULL";
+                                $where[] = "$field IS NULL";
                             }else {
-                                $where[] = "`$field` IS NOT NULL";
+                                $where[] = "$field IS NOT NULL";
                             }
                             break;
                         default:
-                            $where[] = "`$field` $operation ?";
+                            $where[] = "$field $operation ?";
                             $this->addParam($val);
                     }
                 }
             }else {
                 if ($value === null) {
-                    $where[] = "`$key` IS NULL";
+                    $where[] = "$key IS NULL";
                 }else {
-                    $where[] = "`$key` = ?";
+                    $where[] = "$key = ?";
                     $this->addParam($value);
                 }
             }
@@ -258,19 +299,19 @@ class QueryBuilder
         $this->filterData($data);
         $keys = array_keys($data);
         $placeholder = array_fill(0, count($data), '?');
-        $statement = "INSERT INTO `$this->from` (`" . implode('`, `', $keys) . "`) VALUES (" . implode(', ', $placeholder) . ")";
+        $statement = "INSERT INTO $this->from (" . implode(', ', $keys) . ") VALUES (" . implode(', ', $placeholder) . ")";
         return $this->connection->PDO()->prepare($statement)->execute(array_values($data));
     }
     
     /**
      * 批量插入数据
-     * ```
+     * 
      * $db->createQuery()->from('user')->batchInsert(['username', 'password'], [
      *     ['q', 'qqq'],
      *     ['w', 'www'],
      *     ['e', 'eee'],
      * ]);
-     * ```
+     * 
      * @param array $fields 要插入的字段,非表中的字段会被过滤掉.
      * @param array $data 要插入的数据,一个二维数组.数组的键值是什么病没有关系,但是第二维的数组的数量应该和字段的数量一致.
      * @return boolean
@@ -278,7 +319,7 @@ class QueryBuilder
     public function batchInsert($fields, $data)
     {
         $fields = array_intersect($fields, $this->connection->getSchema($this->from)->fields);
-        $statement = "INSERT INTO `$this->from` (`" . implode('`, `', $fields) . "`) VALUES ";
+        $statement = "INSERT INTO $this->from (" . implode(', ', $fields) . ") VALUES ";
         $fieldNum = count($fields);
         $placeholder = "(" . implode(', ', array_fill(0, $fieldNum, '?')) . ")";
         $params = $placeholders = [];
