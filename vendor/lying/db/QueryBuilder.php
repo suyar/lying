@@ -48,21 +48,30 @@ class QueryBuilder
     
     /**
      * 设置要查询的字段
-     * @param array $fields 如果为$key=>$value对的话,会被解析为$key as $val
+     * `
+     * select("id, username, password as pass");
+     * select(['id', 'username', 'password'=>'pass']);
+     * 
+     * `
+     * @param string|array $fields 如果为$key=>$value对的话,会被解析为$key as $val
      * @return $this
      */
     public function select($fields)
     {
-        $select = [];
-        foreach ($fields as $key=>$field) {
-            if (is_string($key)) {
-                $select[] = "$key as $field";
-            }else {
-                $select[] = $field;
+        if (is_string($fields)) {
+            $this->select = $fields;
+        }else {
+            $select = [];
+            foreach ($fields as $key=>$field) {
+                if (is_string($key)) {
+                    $select[] = "$key as $field";
+                }else {
+                    $select[] = $field;
+                }
             }
+            $select = implode(', ', $select);
+            $this->select = $select ? $select : '*';
         }
-        $select = implode(', ', $select);
-        $this->select = $select ? $select : '*';
         return $this;
     }
     
