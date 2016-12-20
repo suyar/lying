@@ -21,6 +21,8 @@ class QueryBuilder
     
     private $groupBy = '';
     
+    private $limit = '';
+    
     private $params = [];
     
     
@@ -65,7 +67,31 @@ class QueryBuilder
     }
     
     /**
+     * 设置查询条数限制
+     * `
+     * limit(1);
+     * limit('1, 2');
+     * limit([1, 2]);
+     * `
+     * @param int|string|array $limit
+     * @return $this
+     */
+    public function limit($limit)
+    {
+        if (is_array($limit)) {
+            $this->limit = "LIMIT $limit[0], $limit[1]";
+        }else {
+            $this->limit = "LIMIT $limit";
+        }
+        return $this;
+    }
+    
+    /**
      * 排序
+     * `
+     * orderBy('id ASC');
+     * orderBy(['id'=>SORT_DESC, 'name'=>SORT_ASC, 'sex']); //ORDER BY id DESC, name ASC, sex ASC
+     * `
      * @param string|array $sort
      * @return $this
      */
@@ -90,6 +116,10 @@ class QueryBuilder
     
     /**
      * 分组
+     * `
+     * groupBy('id, name');
+     * groupBy(['id', 'name']);
+     * `
      * @param string|array $columns
      * @return $this
      */
@@ -116,14 +146,16 @@ class QueryBuilder
     
     /**
      * 设置条件
-     * 
      * where("id = 1 AND name = 'lying'");
      * where("id = :id AND name = :name", [':id'=>1, ':name'=>'suyaqi']);
      * where(['id'=>1, 'name'=>null]); 注：'name'=>null的形式将被解析为name IS NULL
+     * where(['null', 'name', true]); //name IS NULL
+     * eg.//id = ? AND num <= ?
      * where([
      *     ['=', 'id', 1],
      *     ['<=', 'num', $num]
      * ]);
+     * eg.//username = ? OR id = ? AND num <= ? OR (id = ? OR num <= ?)
      * where([
      *     'or',
      *     'username'=>'lying',
@@ -138,7 +170,6 @@ class QueryBuilder
      *         ['<=', 'num', $num]
      *     ],
      * ]);
-     * 
      * @param string|array $condition
      * @param array $params
      * @return $this
@@ -292,16 +323,16 @@ class QueryBuilder
         }
     }
     
-    
-    
     /**
      * 插入一条数据
-     * @param array $data 接收一个关联数组,其中键为字段名,值为字段值.注:键名不在表的字段的数据将被过滤掉.
+     * `
+     * insert(['id'=>1, 'name'=>'su']);
+     * `
+     * @param array $data 接收一个关联数组,其中键为字段名,值为字段值.
      * @return boolean 成功返回true,失败返回false
      */
     public function insert($data)
     {
-        $this->filterData($data);
         $keys = array_keys($data);
         $placeholder = array_fill(0, count($data), '?');
         $statement = "INSERT INTO $this->from (" . implode(', ', $keys) . ") VALUES (" . implode(', ', $placeholder) . ")";
@@ -311,19 +342,18 @@ class QueryBuilder
     /**
      * 批量插入数据
      * 
-     * $db->createQuery()->from('user')->batchInsert(['username', 'password'], [
+     * batchInsert(['username', 'password'], [
      *     ['q', 'qqq'],
      *     ['w', 'www'],
      *     ['e', 'eee'],
      * ]);
      * 
-     * @param array $fields 要插入的字段,非表中的字段会被过滤掉.
-     * @param array $data 要插入的数据,一个二维数组.数组的键值是什么病没有关系,但是第二维的数组的数量应该和字段的数量一致.
+     * @param array $fields 要插入的字段
+     * @param array $data 要插入的数据,一个二维数组.数组的键值是什么并没有关系,但是第二维的数组的数量应该和字段的数量一致.
      * @return boolean
      */
     public function batchInsert($fields, $data)
     {
-        $fields = array_intersect($fields, $this->connection->getSchema($this->from)->fields);
         $statement = "INSERT INTO $this->from (" . implode(', ', $fields) . ") VALUES ";
         $fieldNum = count($fields);
         $placeholder = "(" . implode(', ', array_fill(0, $fieldNum, '?')) . ")";
@@ -336,20 +366,4 @@ class QueryBuilder
         }
         return $this->connection->PDO()->prepare($statement . implode(', ', $placeholders))->execute($params);
     }
-    
-    /**
-     * 过滤键值非标中字段的数据
-     * @param array $data
-     */
-    public function filterData(&$data)
-    {
-        $fields = $this->connection->getSchema($this->from)->fields;
-        foreach ($data as $k=>$v) {
-            if (!in_array($k, $fields)) {
-                unset($data[$k]);
-            }
-        }
-    }
-    
-    
 }
