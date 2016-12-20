@@ -25,7 +25,7 @@ class QueryBuilder
     
     private $params = [];
     
-    
+    private $having = '';
     
     /**
      * @param Connection $connection
@@ -151,6 +151,19 @@ class QueryBuilder
     public function getWhere()
     {
         var_dump($this->orderBy);
+    }
+    
+    /**
+     * 设置having条件
+     * @see \lying\db\QueryBuilder::where
+     * @param string|array $condition
+     * @param array $params
+     * @return $this
+     */
+    public function having($condition, $params = [])
+    {
+        $this->having = $this->buildWhere($condition);
+        return $this;
     }
     
     /**
