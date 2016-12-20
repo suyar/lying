@@ -19,6 +19,7 @@ class IndexCtrl extends Ctrl
         ->where(['or', 'id'=>1, ['in', 'id', [7, 8, 9]]])
         ->andWhere("username = :username", [':username'=>'susu'])
         ->orWhere(['>=', 'val - sex', 10])
+        ->orderBy(['id'=>SORT_DESC, 'name'])
         ->getWhere();
         
     }

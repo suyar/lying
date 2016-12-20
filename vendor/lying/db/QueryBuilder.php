@@ -15,7 +15,11 @@ class QueryBuilder
     
     private $distinct;
     
-    private $where;
+    private $where = '';
+    
+    private $orderBy = '';
+    
+    private $groupBy = '';
     
     private $params = [];
     
@@ -61,6 +65,41 @@ class QueryBuilder
     }
     
     /**
+     * 排序
+     * @param string|array $sort
+     * @return $this
+     */
+    public function orderBy($sort)
+    {
+        if (is_string($sort)) {
+            $this->orderBy = "ORDER BY $sort";
+        }else {
+            $sorts = [];
+            $sort_arr = [SORT_ASC=>'ASC', SORT_DESC=>'DESC'];
+            foreach ($sort as $k=>$v) {
+                if (is_string($k)) {
+                    $sorts[] = "$k $sort_arr[$v]";
+                }else {
+                    $sorts[] = "$v ASC";
+                }
+            }
+            $this->orderBy = 'ORDER BY ' . implode(', ', $sorts);
+        }
+        return $this;
+    }
+    
+    /**
+     * 分组
+     * @param string|array $columns
+     * @return $this
+     */
+    public function groupBy($columns)
+    {
+        $this->groupBy = 'GROUP BY ' . (is_string($columns) ? $columns : implode(', ', $columns));
+        return $this;
+    }
+    
+    /**
      * 去重
      * @return $this
      */
@@ -72,7 +111,7 @@ class QueryBuilder
     
     public function getWhere()
     {
-        var_dump($this->where);
+        var_dump($this->orderBy);
     }
     
     /**
@@ -171,44 +210,7 @@ class QueryBuilder
             if (in_array(strtoupper($condition[0]), ['AND', 'OR'])) {
                 $op = strtoupper(array_shift($condition));
             }else {
-                list($operation, $field, $val) = $condition;
-                switch (strtoupper($operation)) {
-                    case 'IN':
-                        $where[] = "$field IN (" . implode(', ', array_fill(0, count($val), '?')) . ")";
-                        $this->addParams($val);
-                        break;
-                    case 'NOT IN':
-                        $where[] = "$field NOT IN (" . implode(', ', array_fill(0, count($val), '?')) . ")";
-                        $this->addParams($val);
-                        break;
-                    case 'BETWEEN':
-                        $where[] = "$field BETWEEN ? AND ?";
-                        $this->addParams($val);
-                        break;
-                    case 'NOT BETWEEN':
-                        $where[] = "$field NOT BETWEEN ? AND ?";
-                        $this->addParams($val);
-                        break;
-                    case 'LIKE':
-                        $where[] = "$field LIKE ?";
-                        $this->addParam($val);
-                        break;
-                    case 'NOT LIKE':
-                        $where[] = "$field NOT LIKE ?";
-                        $this->addParam($val);
-                        break;
-                    case 'NULL':
-                        if ($val === true) {
-                            $where[] = "$field IS NULL";
-                        }else {
-                            $where[] = "$field IS NOT NULL";
-                        }
-                        break;
-                    default:
-                        $where[] = "$field $operation ?";
-                        $this->addParam($val);
-                }
-                return implode(' AND ', $where);
+                return $this->buildOperator($condition);
             }
         }
         $where = [];
@@ -217,43 +219,7 @@ class QueryBuilder
                 if (isset($value[0]) && is_string($value[0]) && in_array(strtoupper($value[0]), ['AND', 'OR'])) {
                     $where[] = $this->buildCondition($value);
                 }else {
-                    list($operation, $field, $val) = $value;
-                    switch (strtoupper($operation)) {
-                        case 'IN':
-                            $where[] = "$field IN (" . implode(', ', array_fill(0, count($val), '?')) . ")";
-                            $this->addParams($val);
-                            break;
-                        case 'NOT IN':
-                            $where[] = "$field NOT IN (" . implode(', ', array_fill(0, count($val), '?')) . ")";
-                            $this->addParams($val);
-                            break;
-                        case 'BETWEEN':
-                            $where[] = "$field BETWEEN ? AND ?";
-                            $this->addParams($val);
-                            break;
-                        case 'NOT BETWEEN':
-                            $where[] = "$field NOT BETWEEN ? AND ?";
-                            $this->addParams($val);
-                            break;
-                        case 'LIKE':
-                            $where[] = "$field LIKE ?";
-                            $this->addParam($val);
-                            break;
-                        case 'NOT LIKE':
-                            $where[] = "$field NOT LIKE ?";
-                            $this->addParam($val);
-                            break;
-                        case 'NULL':
-                            if ($val === true) {
-                                $where[] = "$field IS NULL";
-                            }else {
-                                $where[] = "$field IS NOT NULL";
-                            }
-                            break;
-                        default:
-                            $where[] = "$field $operation ?";
-                            $this->addParam($val);
-                    }
+                    $where[] = $this->buildOperator($value);
                 }
             }else {
                 if ($value === null) {
@@ -265,6 +231,45 @@ class QueryBuilder
             }
         }
         return $op === 'OR' ? '(' . implode(" $op ", $where) . ')' : implode(" $op ", $where);
+    }
+    
+    /**
+     * 组件条件运算符
+     * @param array $condition
+     * @return string
+     */
+    private function buildOperator(&$condition)
+    {
+        list($operation, $field, $val) = $condition;
+        switch (strtoupper($operation)) {
+            case 'IN':
+                $this->addParams($val);
+                return "$field IN (" . implode(', ', array_fill(0, count($val), '?')) . ")";
+            case 'NOT IN':
+                $this->addParams($val);
+                return "$field NOT IN (" . implode(', ', array_fill(0, count($val), '?')) . ")";
+            case 'BETWEEN':
+                $this->addParams($val);
+                return "$field BETWEEN ? AND ?";
+            case 'NOT BETWEEN':
+                $this->addParams($val);
+                return "$field NOT BETWEEN ? AND ?";
+            case 'LIKE':
+                $this->addParam($val);
+                return "$field LIKE ?";
+            case 'NOT LIKE':
+                $this->addParam($val);
+                return "$field NOT LIKE ?";
+            case 'NULL':
+                if ($val === true) {
+                    return "$field IS NULL";
+                }else {
+                    return "$field IS NOT NULL";
+                }
+            default:
+                $this->addParam($val);
+                return "$field $operation ?";
+        }
     }
     
     
