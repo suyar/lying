@@ -44,6 +44,28 @@ class QueryBuilder
     }
     
     /**
+     * 把"lying.user"转换成"`lying`.`user`"
+     * @param string $value
+     * @return string
+     */
+    private function quoteColumn(&$value)
+    {
+        if (is_string($value)) {
+            if (strpos($value, '.') === false) {
+                $value = "`$value`";
+            }else {
+                list($db, $tb) = explode('.', $value);
+                $value = "`$db`.`$tb`";
+            }
+        }else {
+            foreach ($value as $k=>&$v) {
+                $this->quoteColumn($v);
+            }
+        }
+        
+    }
+    
+    /**
      * 设置要操作的表
      * @param string|array $table
      * @return $this
@@ -53,10 +75,12 @@ class QueryBuilder
         if (is_array($table)) {
             $tb = [];
             foreach ($table as $k=>$t) {
+                $this->quoteColumn($t);
                 $tb[] = is_string($k) ? "$t as $k" : $t;
             }
             $this->from = implode(', ', $tb);
         }else {
+            $this->quoteColumn($table);
             $this->from = $table;
         }
         return $this;
@@ -98,10 +122,12 @@ class QueryBuilder
     private function combineSelect($fields)
     {
         if (is_string($fields)) {
+            $this->quoteColumn($fields);
             return $fields;
         }else {
             $select = [];
             foreach ($fields as $k=>$field) {
+                $this->quoteColumn($field);
                 $select[] = is_string($k) ? "$field as $k" : $field;
             }
             return implode(', ', $select);
@@ -136,11 +162,13 @@ class QueryBuilder
     public function orderBy($sort)
     {
         if (is_string($sort)) {
+            $this->quoteColumn($sort);
             $this->orderBy = "ORDER BY $sort";
         }else {
             $sorts = [];
             $sort_arr = [SORT_ASC=>'ASC', SORT_DESC=>'DESC'];
             foreach ($sort as $k=>$v) {
+                $this->quoteColumn($v);
                 $sorts[] = is_string($k) ? "$k $sort_arr[$v]" : "$v ASC";
             }
             $this->orderBy = 'ORDER BY ' . implode(', ', $sorts);
