@@ -170,7 +170,7 @@ class QueryBuilder
      */
     public function having($condition, $params = [])
     {
-        $this->having = $this->buildWhere($condition, $params, $this->havingParams);
+        $this->having = $this->buildCondition($condition, $params, $this->havingParams);
         return $this;
     }
     
@@ -183,7 +183,7 @@ class QueryBuilder
      */
     public function andHaving($condition, $params = [])
     {
-        $having = $this->buildWhere($condition, $params, $this->whereParams);
+        $having = $this->buildCondition($condition, $params, $this->whereParams);
         $this->having .= ($this->having ? " AND $having" : $having);
         return $this;
     }
@@ -197,7 +197,7 @@ class QueryBuilder
      */
     public function orHaving($condition, $params = [])
     {
-        $having = $this->buildWhere($condition, $params, $this->whereParams);
+        $having = $this->buildCondition($condition, $params, $this->whereParams);
         $this->having .= ($this->having ? " OR $having" : $having);
         return $this;
     }
@@ -234,7 +234,7 @@ class QueryBuilder
      */
     public function where($condition, $params = [])
     {
-        $this->where = $this->buildWhere($condition, $params, $this->whereParams);
+        $this->where = $this->buildCondition($condition, $params, $this->whereParams);
         return $this;
     }
     
@@ -247,7 +247,7 @@ class QueryBuilder
      */
     public function andWhere($condition, $params = [])
     {
-        $where = $this->buildWhere($condition, $params, $this->whereParams);
+        $where = $this->buildCondition($condition, $params, $this->whereParams);
         $this->where .= ($this->where ? " AND $where" : $where);
         return $this;
     }
@@ -261,21 +261,21 @@ class QueryBuilder
      */
     public function orWhere($condition, $params = [])
     {
-        $where = $this->buildWhere($condition, $params, $this->whereParams);
+        $where = $this->buildCondition($condition, $params, $this->whereParams);
         $this->where .= ($this->where ? " OR $where" : $where);
         return $this;
     }
     
     /**
-     * 组建where条件
+     * 组建where、having等条件
      * @param string|array $condition
      * @param array $params
      * @return string
      */
-    private function buildWhere(&$condition, &$params = [], &$paramsContainer)
+    private function buildCondition(&$condition, &$params = [], &$paramsContainer)
     {
         if (is_array($condition)) {
-            return $this->buildCondition($condition, $paramsContainer);
+            return $this->buildArrayCondition($condition, $paramsContainer);
         }elseif (is_string($condition)) {
             if ($params) {
                 $condition = str_replace(array_keys($params), '?', $condition);
@@ -292,7 +292,7 @@ class QueryBuilder
      * @param array $condition
      * @return string
      */
-    private function buildCondition(&$condition, &$paramsContainer)
+    private function buildArrayCondition(&$condition, &$paramsContainer)
     {
         $op = 'AND';
         if (isset($condition[0]) && is_string($condition[0])) {
@@ -306,7 +306,7 @@ class QueryBuilder
         foreach ($condition as $key=>$value) {
             if (is_array($value)) {
                 if (isset($value[0]) && is_string($value[0]) && in_array(strtoupper($value[0]), ['AND', 'OR'])) {
-                    $where[] = $this->buildCondition($value, $paramsContainer);
+                    $where[] = $this->buildArrayCondition($value, $paramsContainer);
                 }else {
                     $where[] = $this->buildOperator($value, $paramsContainer);
                 }
