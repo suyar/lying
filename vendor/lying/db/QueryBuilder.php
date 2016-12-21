@@ -272,7 +272,7 @@ class QueryBuilder
      * @param array $params
      * @return string
      */
-    private function buildCondition(&$condition, &$params = [], &$paramsContainer)
+    private function buildCondition($condition, $params = [], &$paramsContainer)
     {
         if (is_array($condition)) {
             return $this->buildArrayCondition($condition, $paramsContainer);
@@ -292,7 +292,7 @@ class QueryBuilder
      * @param array $condition
      * @return string
      */
-    private function buildArrayCondition(&$condition, &$paramsContainer)
+    private function buildArrayCondition($condition, &$paramsContainer)
     {
         $op = 'AND';
         if (isset($condition[0]) && is_string($condition[0])) {
@@ -327,7 +327,7 @@ class QueryBuilder
      * @param array $condition
      * @return string
      */
-    private function buildOperator(&$condition, &$paramsContainer)
+    private function buildOperator($condition, &$paramsContainer)
     {
         list($operation, $field, $val) = $condition;
         switch (strtoupper($operation)) {
