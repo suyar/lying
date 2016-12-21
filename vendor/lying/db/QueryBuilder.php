@@ -23,9 +23,17 @@ class QueryBuilder
     
     private $limit = '';
     
+    private $having = '';
+    
     private $params = [];
     
-    private $having = '';
+    private $whereParams = [];
+    
+    private $havingParams = [];
+    
+    private $joinParams = [];
+    
+    
     
     /**
      * @param Connection $connection
@@ -150,7 +158,7 @@ class QueryBuilder
     
     public function getWhere()
     {
-        var_dump($this->orderBy);
+        var_dump($this->where, $this->whereParams);
     }
     
     /**
@@ -162,7 +170,35 @@ class QueryBuilder
      */
     public function having($condition, $params = [])
     {
-        $this->having = $this->buildWhere($condition);
+        $this->having = $this->buildWhere($condition, $params, $this->havingParams);
+        return $this;
+    }
+    
+    /**
+     * 添加AND条件
+     * @see \lying\db\QueryBuilder::Having
+     * @param string|array $condition
+     * @param array $params
+     * @return $this
+     */
+    public function andHaving($condition, $params = [])
+    {
+        $having = $this->buildWhere($condition, $params, $this->whereParams);
+        $this->having .= ($this->having ? " AND $having" : $having);
+        return $this;
+    }
+    
+    /**
+     * 添加OR条件
+     * @see \lying\db\QueryBuilder::having
+     * @param string|array $condition
+     * @param array $params
+     * @return $this
+     */
+    public function orHaving($condition, $params = [])
+    {
+        $having = $this->buildWhere($condition, $params, $this->whereParams);
+        $this->having .= ($this->having ? " OR $having" : $having);
         return $this;
     }
     
@@ -198,7 +234,7 @@ class QueryBuilder
      */
     public function where($condition, $params = [])
     {
-        $this->where = $this->buildWhere($condition, $params);
+        $this->where = $this->buildWhere($condition, $params, $this->whereParams);
         return $this;
     }
     
@@ -211,7 +247,7 @@ class QueryBuilder
      */
     public function andWhere($condition, $params = [])
     {
-        $where = $this->buildWhere($condition, $params);
+        $where = $this->buildWhere($condition, $params, $this->whereParams);
         $this->where .= ($this->where ? " AND $where" : $where);
         return $this;
     }
@@ -225,7 +261,7 @@ class QueryBuilder
      */
     public function orWhere($condition, $params = [])
     {
-        $where = $this->buildWhere($condition, $params);
+        $where = $this->buildWhere($condition, $params, $this->whereParams);
         $this->where .= ($this->where ? " OR $where" : $where);
         return $this;
     }
@@ -236,14 +272,14 @@ class QueryBuilder
      * @param array $params
      * @return string
      */
-    private function buildWhere($condition, $params = [])
+    private function buildWhere(&$condition, &$params = [], &$paramsContainer)
     {
         if (is_array($condition)) {
-            return $this->buildCondition($condition);
+            return $this->buildCondition($condition, $paramsContainer);
         }elseif (is_string($condition)) {
             if ($params) {
                 $condition = str_replace(array_keys($params), '?', $condition);
-                $this->addParams($params);
+                $this->addParams($params, $paramsContainer);
             }
             return $condition;
         }else {
@@ -256,30 +292,30 @@ class QueryBuilder
      * @param array $condition
      * @return string
      */
-    private function buildCondition($condition)
+    private function buildCondition(&$condition, &$paramsContainer)
     {
         $op = 'AND';
         if (isset($condition[0]) && is_string($condition[0])) {
             if (in_array(strtoupper($condition[0]), ['AND', 'OR'])) {
                 $op = strtoupper(array_shift($condition));
             }else {
-                return $this->buildOperator($condition);
+                return $this->buildOperator($condition, $paramsContainer);
             }
         }
         $where = [];
         foreach ($condition as $key=>$value) {
             if (is_array($value)) {
                 if (isset($value[0]) && is_string($value[0]) && in_array(strtoupper($value[0]), ['AND', 'OR'])) {
-                    $where[] = $this->buildCondition($value);
+                    $where[] = $this->buildCondition($value, $paramsContainer);
                 }else {
-                    $where[] = $this->buildOperator($value);
+                    $where[] = $this->buildOperator($value, $paramsContainer);
                 }
             }else {
                 if ($value === null) {
                     $where[] = "$key IS NULL";
                 }else {
                     $where[] = "$key = ?";
-                    $this->addParam($value);
+                    $this->addParams($value, $paramsContainer);
                 }
             }
         }
@@ -291,27 +327,27 @@ class QueryBuilder
      * @param array $condition
      * @return string
      */
-    private function buildOperator(&$condition)
+    private function buildOperator(&$condition, &$paramsContainer)
     {
         list($operation, $field, $val) = $condition;
         switch (strtoupper($operation)) {
             case 'IN':
-                $this->addParams($val);
+                $this->addParams($val, $paramsContainer);
                 return "$field IN (" . implode(', ', array_fill(0, count($val), '?')) . ")";
             case 'NOT IN':
-                $this->addParams($val);
+                $this->addParams($val, $paramsContainer);
                 return "$field NOT IN (" . implode(', ', array_fill(0, count($val), '?')) . ")";
             case 'BETWEEN':
-                $this->addParams($val);
+                $this->addParams($val, $paramsContainer);
                 return "$field BETWEEN ? AND ?";
             case 'NOT BETWEEN':
-                $this->addParams($val);
+                $this->addParams($val, $paramsContainer);
                 return "$field NOT BETWEEN ? AND ?";
             case 'LIKE':
-                $this->addParam($val);
+                $this->addParams($val, $paramsContainer);
                 return "$field LIKE ?";
             case 'NOT LIKE':
-                $this->addParam($val);
+                $this->addParams($val, $paramsContainer);
                 return "$field NOT LIKE ?";
             case 'NULL':
                 if ($val === true) {
@@ -320,28 +356,23 @@ class QueryBuilder
                     return "$field IS NOT NULL";
                 }
             default:
-                $this->addParam($val);
+                $this->addParams($val, $paramsContainer);
                 return "$field $operation ?";
         }
     }
     
-    
-    /**
-     * 添加一个绑定的参数
-     * @param string|int|null $param
-     */
-    public function addParam($param) {
-        $this->params[] = $param;
-    }
-    
     /**
      * 批量添加绑定的参数
-     * @param array $params
+     * @param mixed $params
      */
-    public function addParams($params)
+    public function addParams($params, &$paramsContainer)
     {
-        foreach ($params as $p) {
-            $this->params[] = $p;
+        if (is_array($params)) {
+            foreach ($params as $p) {
+                $paramsContainer[] = $p;
+            }
+        }else {
+            $paramsContainer[] = $params;
         }
     }
     
