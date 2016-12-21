@@ -45,12 +45,20 @@ class QueryBuilder
     
     /**
      * 设置要操作的表
-     * @param string $table
+     * @param string|array $table
      * @return $this
      */
     public function from($table)
     {
-        $this->from = "$table";
+        if (is_array($table)) {
+            $tb = [];
+            foreach ($table as $k=>$t) {
+                $tb[] = is_string($k) ? "$t as $k" : $t;
+            }
+            $this->from = implode(', ', $tb);
+        }else {
+            $this->from = $table;
+        }
         return $this;
     }
     
@@ -58,29 +66,46 @@ class QueryBuilder
      * 设置要查询的字段
      * `
      * select("id, username, password as pass");
-     * select(['id', 'username', 'password'=>'pass']);
+     * select(['id', 'username', 'pass'=>'password']);
      * 
      * `
-     * @param string|array $fields 如果为$key=>$value对的话,会被解析为$key as $val
+     * @param string|array $fields 如果为$key=>$value对的话,会被解析为$value as $key
      * @return $this
      */
     public function select($fields)
     {
+        $this->select = $this->combineSelect($fields);
+        return $this;
+    }
+    
+    /**
+     * 增加要查询的字段
+     * @param string|array $fields
+     * @return $this
+     */
+    public function addSelect($fields)
+    {
+        $select = $this->combineSelect($fields);
+        $this->select .= ($this->select ? ", $select" : $select);
+        return $this;
+    }
+    
+    /**
+     * 组合要查询的字段
+     * @param string|array $fields
+     * @return string
+     */
+    private function combineSelect($fields)
+    {
         if (is_string($fields)) {
-            $this->select = $fields;
+            return $fields;
         }else {
             $select = [];
-            foreach ($fields as $key=>$field) {
-                if (is_string($key)) {
-                    $select[] = "$key as $field";
-                }else {
-                    $select[] = $field;
-                }
+            foreach ($fields as $k=>$field) {
+                $select[] = is_string($k) ? "$field as $k" : $field;
             }
-            $select = implode(', ', $select);
-            $this->select = $select ? $select : '*';
+            return implode(', ', $select);
         }
-        return $this;
     }
     
     /**
@@ -95,11 +120,7 @@ class QueryBuilder
      */
     public function limit($limit)
     {
-        if (is_array($limit)) {
-            $this->limit = "LIMIT $limit[0], $limit[1]";
-        }else {
-            $this->limit = "LIMIT $limit";
-        }
+        $this->limit = is_array($limit) ? "LIMIT $limit[0], $limit[1]" : "LIMIT $limit";
         return $this;
     }
     
@@ -120,11 +141,7 @@ class QueryBuilder
             $sorts = [];
             $sort_arr = [SORT_ASC=>'ASC', SORT_DESC=>'DESC'];
             foreach ($sort as $k=>$v) {
-                if (is_string($k)) {
-                    $sorts[] = "$k $sort_arr[$v]";
-                }else {
-                    $sorts[] = "$v ASC";
-                }
+                $sorts[] = is_string($k) ? "$k $sort_arr[$v]" : "$v ASC";
             }
             $this->orderBy = 'ORDER BY ' . implode(', ', $sorts);
         }
