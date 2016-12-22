@@ -11,7 +11,7 @@ class QueryBuilder
     
     private $from;
     
-    private $select = "";
+    private $select = '*';
     
     private $distinct;
     
@@ -33,6 +33,8 @@ class QueryBuilder
     
     private $joinParams = [];
     
+    private $limitParams = [];
+    
     
     
     /**
@@ -43,162 +45,36 @@ class QueryBuilder
         $this->connection = $connection;
     }
     
-    /**
-     * 把"lying.user"转换成"`lying`.`user`"
-     * @param string $value
-     * @return string
-     */
-    private function quoteColumn(&$value)
+    public function getWhere()
     {
-        if (is_string($value)) {
-            if (strpos($value, '.') === false) {
-                $value = "`$value`";
-            }else {
-                list($db, $tb) = explode('.', $value);
-                $value = "`$db`.`$tb`";
-            }
-        }else {
-            foreach ($value as $k=>&$v) {
-                $this->quoteColumn($v);
-            }
-        }
-        
+        var_dump($this->join, $this->joinParams);
     }
     
-    /**
-     * 设置要操作的表
-     * @param string|array $table
-     * @return $this
-     */
-    public function from($table)
-    {
-        if (is_array($table)) {
-            $tb = [];
-            foreach ($table as $k=>$t) {
-                $this->quoteColumn($t);
-                $tb[] = is_string($k) ? "$t as $k" : $t;
-            }
-            $this->from = implode(', ', $tb);
-        }else {
-            $this->quoteColumn($table);
-            $this->from = $table;
-        }
-        return $this;
-    }
+    
     
     /**
      * 设置要查询的字段
+     * select("id, admin.username, password as pass");
+     * select(['id', 'admin.username', 'pass'=>'password']);
      * `
-     * select("id, username, password as pass");
-     * select(['id', 'username', 'pass'=>'password']);
-     * 
-     * `
-     * @param string|array $fields 如果为$key=>$value对的话,会被解析为$value as $key
+     * @param array|string $fields 接收一个数组,指定键值为别名
      * @return $this
      */
     public function select($fields)
     {
-        $this->select = $this->combineSelect($fields);
-        return $this;
-    }
-    
-    /**
-     * 增加要查询的字段
-     * @param string|array $fields
-     * @return $this
-     */
-    public function addSelect($fields)
-    {
-        $select = $this->combineSelect($fields);
-        $this->select .= ($this->select ? ", $select" : $select);
-        return $this;
-    }
-    
-    /**
-     * 组合要查询的字段
-     * @param string|array $fields
-     * @return string
-     */
-    private function combineSelect($fields)
-    {
-        if (is_string($fields)) {
-            $this->quoteColumn($fields);
-            return $fields;
-        }else {
-            $select = [];
-            foreach ($fields as $k=>$field) {
-                $this->quoteColumn($field);
-                $select[] = is_string($k) ? "$field as $k" : $field;
+        if (is_array($fields)) {
+            foreach ($fields as $k=>$f) {
+                $fields[$k] = is_string($k) ? "$f AS $k" : $f;
             }
-            return implode(', ', $select);
-        }
-    }
-    
-    /**
-     * 设置查询条数限制
-     * `
-     * limit(1);
-     * limit('1, 2');
-     * limit([1, 2]);
-     * `
-     * @param int|string|array $limit
-     * @return $this
-     */
-    public function limit($limit)
-    {
-        $this->limit = is_array($limit) ? "LIMIT $limit[0], $limit[1]" : "LIMIT $limit";
-        return $this;
-    }
-    
-    /**
-     * 排序
-     * `
-     * orderBy('id ASC');
-     * orderBy(['id'=>SORT_DESC, 'name'=>SORT_ASC, 'sex']); //ORDER BY id DESC, name ASC, sex ASC
-     * `
-     * @param string|array $sort
-     * @return $this
-     */
-    public function orderBy($sort)
-    {
-        if (is_string($sort)) {
-            $this->quoteColumn($sort);
-            $this->orderBy = "ORDER BY $sort";
+            $this->select = implode(', ', $fields);
         }else {
-            $sorts = [];
-            $sort_arr = [SORT_ASC=>'ASC', SORT_DESC=>'DESC'];
-            foreach ($sort as $k=>$v) {
-                $this->quoteColumn($v);
-                $sorts[] = is_string($k) ? "$k $sort_arr[$v]" : "$v ASC";
-            }
-            $this->orderBy = 'ORDER BY ' . implode(', ', $sorts);
+            $this->select = $fields;
         }
         return $this;
     }
     
     /**
-     * 分组
-     * `
-     * groupBy('id, name');
-     * groupBy(['id', 'name']);
-     * `
-     * @param string|array $columns
-     * @return $this
-     */
-    public function groupBy($columns)
-    {
-        $this->groupBy = 'GROUP BY ' . (is_string($columns) ? $columns : implode(', ', $columns));
-        return $this;
-    }
-    
-    
-    public function join($table, $type, $condition, $params = [])
-    {
-        
-    }
-    
-    /**
-     * 去重
+     * 设置去重
      * @return $this
      */
     public function distinct()
@@ -207,49 +83,47 @@ class QueryBuilder
         return $this;
     }
     
-    public function getWhere()
-    {
-        var_dump($this->where, $this->whereParams);
-    }
-    
     /**
-     * 设置having条件
-     * @see \lying\db\QueryBuilder::where
-     * @param string|array $condition
-     * @param array $params
+     * 设置要操作的表
+     * `
+     * from("user, lying.admin, file as f");
+     * from(['user', 'lying.admin', 'f'=>'file']);
+     * `
+     * @param array|string $table 接收一个数组,指定键值为别名
      * @return $this
      */
-    public function having($condition, $params = [])
+    public function from($table)
     {
-        $this->having = $this->buildCondition($condition, $params, $this->havingParams);
+        if (is_array($table)) {
+            foreach ($table as $k=>$t) {
+                $table[$k] = is_string($k) ? "$t AS $k" : $t;
+            }
+            $this->from = implode(', ', $table);
+        }else {
+            $this->from = $table;
+        }
         return $this;
     }
     
     /**
-     * 添加AND条件
-     * @see \lying\db\QueryBuilder::Having
-     * @param string|array $condition
-     * @param array $params
+     * 设置关联
+     * `
+     * join('LEFT JOIN', 'user', "admin.id = user.id")
+     * join('LEFT JOIN', 'user', "admin.id = user.id AND user = :user", [':user'=>'susu'])
+     * `
+     * @param string $type 关联类型'INNER JOIN', 'LEFT JOIN', 'RIGHT JOIN'
+     * @param string $table 要关联的表
+     * @param string $on 关联条件,只能为字符串
+     * @param array $params 如果on条件有参数,写在这里.参考where的字符串形式
      * @return $this
      */
-    public function andHaving($condition, $params = [])
+    public function join($type, $table, $on, $params = [])
     {
-        $having = $this->buildCondition($condition, $params, $this->whereParams);
-        $this->having .= ($this->having ? " AND $having" : $having);
-        return $this;
-    }
-    
-    /**
-     * 添加OR条件
-     * @see \lying\db\QueryBuilder::having
-     * @param string|array $condition
-     * @param array $params
-     * @return $this
-     */
-    public function orHaving($condition, $params = [])
-    {
-        $having = $this->buildCondition($condition, $params, $this->whereParams);
-        $this->having .= ($this->having ? " OR $having" : $having);
+        $type = strtoupper($type);
+        if (in_array($type, ['INNER JOIN', 'LEFT JOIN', 'RIGHT JOIN'])) {
+            $condition = $this->buildCondition($on, $params,$this->joinParams);
+            $this->join .= ($this->join ? ' ' : '') . "$type $table ON $condition";
+        }
         return $this;
     }
     
@@ -279,51 +153,149 @@ class QueryBuilder
      *         ['<=', 'num', $num]
      *     ],
      * ]);
-     * @param string|array $condition
-     * @param array $params
+     * @param array|string $condition
+     * @param array $params 绑定的参数
      * @return $this
      */
     public function where($condition, $params = [])
     {
-        $this->where = $this->buildCondition($condition, $params, $this->whereParams);
+        $this->whereParams = [];
+        $this->where = 'WHERE ' . $this->buildCondition($condition, $params, $this->whereParams);
         return $this;
     }
     
     /**
-     * 添加AND条件
-     * @see \lying\db\QueryBuilder::where
-     * @param string|array $condition
-     * @param array $params
+     * where添加AND条件
+     * @param array|string $condition
+     * @param array $params 绑定的参数
      * @return $this
      */
     public function andWhere($condition, $params = [])
     {
         $where = $this->buildCondition($condition, $params, $this->whereParams);
-        $this->where .= ($this->where ? " AND $where" : $where);
+        $this->where .= ($this->where ? " AND $where" : "WHERE $where");
         return $this;
     }
     
     /**
-     * 添加OR条件
-     * @see \lying\db\QueryBuilder::where
-     * @param string|array $condition
-     * @param array $params
+     * where添加OR条件
+     * @param array|string $condition
+     * @param array $params 绑定的参数
      * @return $this
      */
     public function orWhere($condition, $params = [])
     {
         $where = $this->buildCondition($condition, $params, $this->whereParams);
-        $this->where .= ($this->where ? " OR $where" : $where);
+        $this->where .= ($this->where ? " OR $where" : "WHERE $where");
+        return $this;
+    }
+    
+    /**
+     * 设置分组
+     * `
+     * groupBy("id, name");
+     * groupBy(['id', 'name']);
+     * `
+     * @param array|string $columns
+     * @return $this
+     */
+    public function groupBy($columns)
+    {
+        $this->groupBy = 'GROUP BY ' . (is_string($columns) ? $columns : implode(', ', $columns));
+        return $this;
+    }
+    
+    /**
+     * 设置having条件
+     * @param array|string $condition 和where用法一样
+     * @param array $params 绑定的参数
+     * @return $this
+     */
+    public function having($condition, $params = [])
+    {
+        $this->havingParams = [];
+        $this->having = 'HAVING ' . $this->buildCondition($condition, $params, $this->havingParams);
+        return $this;
+    }
+    
+    /**
+     * having添加AND条件
+     * @param array|string $condition
+     * @param array $params 绑定的参数
+     * @return $this
+     */
+    public function andHaving($condition, $params = [])
+    {
+        $having = $this->buildCondition($condition, $params, $this->whereParams);
+        $this->having .= ($this->having ? " AND $having" : "HAVING $having");
+        return $this;
+    }
+    
+    /**
+     * having添加OR条件
+     * @param array|string $condition
+     * @param array $params 绑定的参数
+     * @return $this
+     */
+    public function orHaving($condition, $params = [])
+    {
+        $having = $this->buildCondition($condition, $params, $this->whereParams);
+        $this->having .= ($this->having ? " OR $having" : "HAVING $having");
+        return $this;
+    }
+    
+    /**
+     * 设置排序
+     * `
+     * orderBy("id desc, name asc, sex asc");
+     * orderBy(['id'=>SORT_DESC, 'name'=>SORT_ASC, 'sex']);
+     * `
+     * @param array|string $sort
+     * @return $this
+     */
+    public function orderBy($sort)
+    {
+        if (is_array($sort)) {
+            $sort_arr = [SORT_ASC=>'ASC', SORT_DESC=>'DESC'];
+            foreach ($sort as $k=>$v) {
+                $sort[$k] = is_string($k) ? "$k $sort_arr[$v]" : "$v ASC";
+            }
+            $this->orderBy = 'ORDER BY ' . implode(', ', $sort);
+        }else {
+            $this->orderBy = $sort;
+        }
+        return $this;
+    }
+    
+    /**
+     * 设置查询条数限制
+     * `
+     * limit(1);
+     * limit(1, 2);
+     * `
+     * @param int $offset
+     * @param int $limit
+     * @return $this
+     */
+    public function limit($offset, $limit = null)
+    {
+        $this->limit = 'LIMIT ?';
+        $this->limitParams[] = $offset;
+        if ($limit) {
+            $this->limit .= ', ?';
+            $this->limitParams[] = $limit;
+        }
         return $this;
     }
     
     /**
      * 组建where、having等条件
-     * @param string|array $condition
-     * @param array $params
+     * @param array|string $condition
+     * @param array $params 绑定的参数
+     * @param array $paramsContainer 装载绑定参数的容器
      * @return string
      */
-    private function buildCondition(&$condition, &$params = [], &$paramsContainer)
+    private function buildCondition(&$condition, &$params, &$paramsContainer)
     {
         if (is_array($condition)) {
             return $this->buildArrayCondition($condition, $paramsContainer);
@@ -341,6 +313,7 @@ class QueryBuilder
     /**
      * 组建数组形式的条件
      * @param array $condition
+     * @param array $paramsContainer 装载绑定参数的容器
      * @return string
      */
     private function buildArrayCondition(&$condition, &$paramsContainer)
@@ -375,7 +348,8 @@ class QueryBuilder
     
     /**
      * 组件条件运算符
-     * @param array $condition
+     * @param array $condition 类似['>=', 'id', 3]
+     * @param array $paramsContainer 装载绑定参数的容器
      * @return string
      */
     private function buildOperator(&$condition, &$paramsContainer)
@@ -413,10 +387,10 @@ class QueryBuilder
     }
     
     /**
-     * 批量添加绑定的参数
-     * @param mixed $params
+     * 添加绑定的参数
+     * @param string|array $params
      */
-    public function addParams($params, &$paramsContainer)
+    private function addParams($params, &$paramsContainer)
     {
         if (is_array($params)) {
             foreach ($params as $p) {
@@ -425,6 +399,26 @@ class QueryBuilder
         }else {
             $paramsContainer[] = $params;
         }
+    }
+    
+    public function buildQuery()
+    {
+        $statement = [
+            'SELECT',
+            $this->distinct,
+            $this->select,
+            'FROM',
+            $this->from,
+            $this->join,
+            $this->where,
+            $this->groupBy,
+            $this->having,
+            $this->orderBy,
+            $this->limit,
+        ];
+        $params = array_merge($this->joinParams, $this->whereParams, $this->havingParams, $this->limitParams);
+        $statement = array_filter($statement);
+        //var_dump(implode(' ', $statement), $params);
     }
     
     /**
@@ -445,7 +439,6 @@ class QueryBuilder
     
     /**
      * 批量插入数据
-     * 
      * batchInsert(['username', 'password'], [
      *     ['q', 'qqq'],
      *     ['w', 'www'],
@@ -459,8 +452,7 @@ class QueryBuilder
     public function batchInsert($fields, $data)
     {
         $statement = "INSERT INTO $this->from (" . implode(', ', $fields) . ") VALUES ";
-        $fieldNum = count($fields);
-        $placeholder = "(" . implode(', ', array_fill(0, $fieldNum, '?')) . ")";
+        $placeholder = "(" . implode(', ', array_fill(0, count($fields), '?')) . ")";
         $params = $placeholders = [];
         foreach ($data as $d) {
             $placeholders[] = $placeholder;

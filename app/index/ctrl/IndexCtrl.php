@@ -14,13 +14,28 @@ class IndexCtrl extends Ctrl
     
     public function index()
     {
+        
         $db = $this->make()->getDb();
-        $db->createQuery()->select([])
-        ->where(['or', 'id'=>1, ['in', 'id', [7, 8, 9]]])
-        ->andWhere("username = :username", [':username'=>'susu'])
-        ->orWhere(['>=', 'val - sex', 10])
-        ->orderBy(['id'=>SORT_DESC, 'name'])
-        ->getWhere();
+        var_dump(microtime(true));
+        
+        for ($i=0;$i<100;$i++) {
+            $db->createQuery()
+            ->distinct()
+            ->select(['id','name'])
+            ->from(['user'])
+            ->where(['or', 'id'=>1, ['in', 'id', [7, 8, 9]]])
+            //->andWhere("username = :username", [':username'=>'susu'])
+            //->orWhere(['>=', 'val - sex', 10])
+            //->orderBy(['id'=>SORT_DESC, 'name'])
+            //->groupBy('id')
+            //->having(['count(name)'=>10])
+            //->join('LEFT JOIN', 'file', "admin.id = user.id")
+            //->limit(1)
+            ->buildQuery();
+        }
+        
+  
+        var_dump(microtime(true));
         
     }
     
