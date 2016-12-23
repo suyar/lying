@@ -17,7 +17,7 @@ class IndexCtrl extends Ctrl
         
         $db = $this->make()->getDb();
         
-        $db->createQuery()
+        $res = $db->createQuery()
             ->distinct()
             ->select(['id','name'])
             ->from(['user'])
@@ -30,7 +30,7 @@ class IndexCtrl extends Ctrl
             ->join('LEFT JOIN', 'file', "admin.id = user.id")
             ->limit(1)
             ->buildQuery();
-        
+        var_dump($res);
     }
     
     

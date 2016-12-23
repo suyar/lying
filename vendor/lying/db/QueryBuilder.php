@@ -421,7 +421,7 @@ class QueryBuilder
             $this->limit,
         ];
         $params = array_merge($this->joinParams, $this->whereParams, $this->havingParams, $this->limitParams);
-        $statement = array_filter($statement);
+        $statement = implode(' ', array_filter($statement));
         return [$statement, $params];
     }
     
