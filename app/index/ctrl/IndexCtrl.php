@@ -17,10 +17,13 @@ class IndexCtrl extends Ctrl
         
         $db = $this->make()->getDb();
         
+        
+        $query = $db->createQuery()->from('admin')->select('max(id)')->where(['admin.id'=>100]);
+        
         $res = $db->createQuery()
             ->distinct()
             ->select(['id','name'])
-            ->from(['user'])
+            ->from(['user', 'a'=>$query])
             ->where(['or', 'id'=>1, ['in', 'id', [7, 8, 9]]])
             ->andWhere("username = :username", [':username'=>'susu'])
             ->orWhere(['>=', 'val - sex', 10])

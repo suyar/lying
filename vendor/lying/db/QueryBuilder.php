@@ -11,11 +11,17 @@ class QueryBuilder
     
     private $from;
     
+    private $fromParams = [];
+    
     private $select = '*';
+    
+    private $selectParams = [];
     
     private $distinct;
     
     private $where = '';
+    
+    private $whereParams = [];
     
     private $orderBy = '';
     
@@ -23,18 +29,15 @@ class QueryBuilder
     
     private $limit = '';
     
+    private $limitParams = [];
+    
     private $having = '';
-    
-    private $join = '';
-    
-    private $whereParams = [];
     
     private $havingParams = [];
     
+    private $join = '';
+    
     private $joinParams = [];
-    
-    private $limitParams = [];
-    
     
     
     /**
@@ -54,8 +57,11 @@ class QueryBuilder
     
     /**
      * 设置要查询的字段
+     * `
      * select("id, admin.username, password as pass");
      * select(['id', 'admin.username', 'pass'=>'password']);
+     * 子查询,$query为QueryBuilder实例,pass为子查询别名,最好指定别名
+     * select(['id', 'admin.username', 'pass'=>$query]);
      * `
      * @param array|string $fields 接收一个数组,指定键值为别名
      * @return $this
@@ -64,6 +70,9 @@ class QueryBuilder
     {
         if (is_array($fields)) {
             foreach ($fields as $k=>$f) {
+                if ($f instanceof self) {
+                    $f = $this->addInstanceParams($f, $this->selectParams);
+                }
                 $fields[$k] = is_string($k) ? "$f AS $k" : $f;
             }
             $this->select = implode(', ', $fields);
@@ -88,6 +97,8 @@ class QueryBuilder
      * `
      * from("user, lying.admin, file as f");
      * from(['user', 'lying.admin', 'f'=>'file']);
+     * 子查询,$query为QueryBuilder实例,pass为子查询别名,必须指定别名
+     * from(['user', 'lying.admin', 'f'=>$query]);
      * `
      * @param array|string $table 接收一个数组,指定键值为别名
      * @return $this
@@ -96,6 +107,9 @@ class QueryBuilder
     {
         if (is_array($table)) {
             foreach ($table as $k=>$t) {
+                if ($t instanceof self) {
+                    $t = $this->addInstanceParams($t, $this->fromParams);
+                }
                 $table[$k] = is_string($k) ? "$t AS $k" : $t;
             }
             $this->from = implode(', ', $table);
@@ -110,6 +124,8 @@ class QueryBuilder
      * `
      * join('LEFT JOIN', 'user', "admin.id = user.id")
      * join('LEFT JOIN', 'user', "admin.id = user.id AND user = :user", [':user'=>'susu'])
+     * 子查询,$query为QueryBuilder实例
+     * join('LEFT JOIN', 'user', "admin.id = user.id AND user = :user", [':user'=>$query])
      * `
      * @param string $type 关联类型'INNER JOIN', 'LEFT JOIN', 'RIGHT JOIN'
      * @param string $table 要关联的表
@@ -133,12 +149,12 @@ class QueryBuilder
      * where("id = :id AND name = :name", [':id'=>1, ':name'=>'suyaqi']);
      * where(['id'=>1, 'name'=>null]); 注：'name'=>null的形式将被解析为name IS NULL
      * where(['null', 'name', true]); //name IS NULL
-     * eg.//id = ? AND num <= ?
+     * eg. id = ? AND num <= (select count(*) from xx where xx.id = ?)
      * where([
      *     ['=', 'id', 1],
-     *     ['<=', 'num', $num]
+     *     ['<=', 'num', $query] //子查询,$query为QueryBuilder实例
      * ]);
-     * eg.//username = ? OR id = ? AND num <= ? OR (id = ? OR num <= ?)
+     * eg. username = ? OR id = ? AND num <= ? OR (id = ? OR num <= ?)
      * where([
      *     'or',
      *     'username'=>'lying',
@@ -207,6 +223,7 @@ class QueryBuilder
     
     /**
      * 设置having条件
+     * @see QueryBuilder::where
      * @param array|string $condition 和where用法一样
      * @param array $params 绑定的参数
      * @return $this
@@ -272,18 +289,18 @@ class QueryBuilder
      * `
      * limit(1);
      * limit(1, 2);
+     * limit(1, $query);
+     * 子查询,$query为QueryBuilder实例
      * `
-     * @param int $offset
-     * @param int $limit
+     * @param int|QueryBuilder $offset
+     * @param int|QueryBuilder $limit
      * @return $this
      */
     public function limit($offset, $limit = null)
     {
-        $this->limit = 'LIMIT ?';
-        $this->limitParams[] = $offset;
+        $this->limit = 'LIMIT ' . $this->addParams($offset, $this->limitParams);
         if ($limit) {
-            $this->limit .= ', ?';
-            $this->limitParams[] = $limit;
+            $this->limit .= ', ' . $this->addParams($limit, $this->limitParams);
         }
         return $this;
     }
@@ -301,8 +318,8 @@ class QueryBuilder
             return $this->buildArrayCondition($condition, $paramsContainer);
         }elseif (is_string($condition)) {
             if ($params) {
-                $condition = str_replace(array_keys($params), '?', $condition);
-                $this->addParams($params, $paramsContainer);
+                $place = $this->addParams($params, $paramsContainer);
+                $condition = str_replace(array_keys($params), $place, $condition);
             }
             return $condition;
         }else {
@@ -338,8 +355,8 @@ class QueryBuilder
                 if ($value === null) {
                     $where[] = "$key IS NULL";
                 }else {
-                    $where[] = "$key = ?";
-                    $this->addParams($value, $paramsContainer);
+                    $place = $this->addParams($value, $paramsContainer);
+                    $where[] = "$key = $place";
                 }
             }
         }
@@ -355,50 +372,63 @@ class QueryBuilder
     private function buildOperator(&$condition, &$paramsContainer)
     {
         list($operation, $field, $val) = $condition;
+        $place = is_bool($val) ? $val :$this->addParams($val, $paramsContainer);
         switch (strtoupper($operation)) {
             case 'IN':
-                $this->addParams($val, $paramsContainer);
-                return "$field IN (" . implode(', ', array_fill(0, count($val), '?')) . ")";
+                return "$field IN (" . implode(', ', $place) . ")";
             case 'NOT IN':
-                $this->addParams($val, $paramsContainer);
-                return "$field NOT IN (" . implode(', ', array_fill(0, count($val), '?')) . ")";
+                return "$field NOT IN (" . implode(', ', $place) . ")";
             case 'BETWEEN':
-                $this->addParams($val, $paramsContainer);
-                return "$field BETWEEN ? AND ?";
+                list($p1, $p2) = $place;
+                return "$field BETWEEN $p1 AND $p2";
             case 'NOT BETWEEN':
-                $this->addParams($val, $paramsContainer);
-                return "$field NOT BETWEEN ? AND ?";
+                list($p1, $p2) = $place;
+                return "$field NOT BETWEEN $p1 AND $p2";
             case 'LIKE':
-                $this->addParams($val, $paramsContainer);
-                return "$field LIKE ?";
+                return "$field LIKE $place";
             case 'NOT LIKE':
-                $this->addParams($val, $paramsContainer);
-                return "$field NOT LIKE ?";
+                return "$field NOT LIKE $place";
             case 'NULL':
-                if ($val === true) {
-                    return "$field IS NULL";
-                }else {
-                    return "$field IS NOT NULL";
-                }
+                return $val === true ? "$field IS NULL" : "$field IS NOT NULL";
             default:
-                $this->addParams($val, $paramsContainer);
-                return "$field $operation ?";
+                return "$field $operation $place";
         }
     }
     
     /**
      * 添加绑定的参数
-     * @param string|array $params
+     * @param string|array|QueryBuilder $params
+     * @return string|array
      */
     private function addParams($params, &$paramsContainer)
     {
         if (is_array($params)) {
+            $place = [];
             foreach ($params as $p) {
-                $paramsContainer[] = $p;
+                $place[] = $this->addParams($p, $paramsContainer);
             }
+            return $place;
+        }elseif ($params instanceof self) {
+            return $this->addInstanceParams($params, $paramsContainer);
         }else {
             $paramsContainer[] = $params;
+            return '?';
         }
+    }
+    
+    /**
+     * 返回子查询的sql并绑定参数
+     * @param QueryBuilder $query
+     * @param array $paramsContainer
+     * @return string 返回子查询的sql
+     */
+    private function addInstanceParams(QueryBuilder $query, &$paramsContainer)
+    {
+        list($sql, $param) = $query->buildQuery();
+        foreach ($param as $p) {
+            $paramsContainer[] = $p;
+        }
+        return "($sql)";
     }
     
     /**
@@ -420,7 +450,8 @@ class QueryBuilder
             $this->orderBy,
             $this->limit,
         ];
-        $params = array_merge($this->joinParams, $this->whereParams, $this->havingParams, $this->limitParams);
+        $params = array_merge($this->selectParams, $this->fromParams, 
+            $this->joinParams, $this->whereParams, $this->havingParams, $this->limitParams);
         $statement = implode(' ', array_filter($statement));
         return [$statement, $params];
     }
