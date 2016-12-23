@@ -17,10 +17,12 @@ class IndexCtrl extends Ctrl
         
         $db = $this->make()->getDb();
         
+        var_dump(microtime(true), memory_get_peak_usage() / 1024);
         
-        $query = $db->createQuery()->from('admin')->select('max(id)')->where(['admin.id'=>100]);
-        
-        $res = $db->createQuery()
+        for ($i=0; $i<1000; $i++) {
+            $query = $db->createQuery()->from('admin')->select('max(id)')->where(['admin.id'=>100]);
+            
+            $res = $db->createQuery()
             ->distinct()
             ->select(['id','name'])
             ->from(['user', 'a'=>$query])
@@ -33,7 +35,10 @@ class IndexCtrl extends Ctrl
             ->join('LEFT JOIN', 'file', "admin.id = user.id")
             ->limit(1)
             ->buildQuery();
-        var_dump($res);
+            //var_dump($res);
+        }
+        
+        var_dump(microtime(true), memory_get_peak_usage() / 1024);
     }
     
     
