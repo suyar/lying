@@ -16,26 +16,20 @@ class IndexCtrl extends Ctrl
     {
         
         $db = $this->make()->getDb();
-        var_dump(microtime(true));
         
-        for ($i=0;$i<100;$i++) {
-            $db->createQuery()
+        $db->createQuery()
             ->distinct()
             ->select(['id','name'])
             ->from(['user'])
             ->where(['or', 'id'=>1, ['in', 'id', [7, 8, 9]]])
-            //->andWhere("username = :username", [':username'=>'susu'])
-            //->orWhere(['>=', 'val - sex', 10])
-            //->orderBy(['id'=>SORT_DESC, 'name'])
-            //->groupBy('id')
-            //->having(['count(name)'=>10])
-            //->join('LEFT JOIN', 'file', "admin.id = user.id")
-            //->limit(1)
+            ->andWhere("username = :username", [':username'=>'susu'])
+            ->orWhere(['>=', 'val - sex', 10])
+            ->orderBy(['id'=>SORT_DESC, 'name'])
+            ->groupBy('id')
+            ->having(['count(name)'=>10])
+            ->join('LEFT JOIN', 'file', "admin.id = user.id")
+            ->limit(1)
             ->buildQuery();
-        }
-        
-  
-        var_dump(microtime(true));
         
     }
     

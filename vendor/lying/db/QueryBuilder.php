@@ -401,6 +401,10 @@ class QueryBuilder
         }
     }
     
+    /**
+     * 组建查询语句
+     * @return array 返回数组[$statement, $params]
+     */
     public function buildQuery()
     {
         $statement = [
@@ -418,8 +422,10 @@ class QueryBuilder
         ];
         $params = array_merge($this->joinParams, $this->whereParams, $this->havingParams, $this->limitParams);
         $statement = array_filter($statement);
-        //var_dump(implode(' ', $statement), $params);
+        return [$statement, $params];
     }
+    
+    
     
     /**
      * 插入一条数据
@@ -439,12 +445,13 @@ class QueryBuilder
     
     /**
      * 批量插入数据
+     * `
      * batchInsert(['username', 'password'], [
      *     ['q', 'qqq'],
      *     ['w', 'www'],
      *     ['e', 'eee'],
      * ]);
-     * 
+     * `
      * @param array $fields 要插入的字段
      * @param array $data 要插入的数据,一个二维数组.数组的键值是什么并没有关系,但是第二维的数组的数量应该和字段的数量一致.
      * @return boolean
