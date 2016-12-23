@@ -457,6 +457,26 @@ class QueryBuilder
     }
     
     
+    public function union()
+    {
+        
+    }
+    
+    public function exits()
+    {
+        
+    }
+    
+    public function update($table, $data, $condition, $params = [])
+    {
+        
+    }
+    
+    public function delete($table, $condition, $params)
+    {
+        
+    }
+    
     
     /**
      * 插入一条数据
