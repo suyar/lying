@@ -39,6 +39,10 @@ class QueryBuilder
     
     private $joinParams = [];
     
+    private $union = '';
+    
+    private $unionParams = [];
+    
     
     /**
      * @param Connection $connection
@@ -124,11 +128,13 @@ class QueryBuilder
      * `
      * join('LEFT JOIN', 'user', "admin.id = user.id")
      * join('LEFT JOIN', 'user', "admin.id = user.id AND user = :user", [':user'=>'susu'])
+     * join('LEFT JOIN', ['u'=>'user'], "admin.id = u.id")
      * 子查询,$query为QueryBuilder实例
      * join('LEFT JOIN', 'user', "admin.id = user.id AND user = :user", [':user'=>$query])
+     * join('LEFT JOIN', ['u'=>$query], "admin.id = u.id")
      * `
      * @param string $type 关联类型'INNER JOIN', 'LEFT JOIN', 'RIGHT JOIN'
-     * @param string $table 要关联的表
+     * @param string|array $table 要关联的表
      * @param string $on 关联条件,只能为字符串
      * @param array $params 如果on条件有参数,写在这里.参考where的字符串形式
      * @return $this
@@ -137,6 +143,17 @@ class QueryBuilder
     {
         $type = strtoupper($type);
         if (in_array($type, ['INNER JOIN', 'LEFT JOIN', 'RIGHT JOIN'])) {
+            if (is_array($table)) {
+                list($key, $t) = [key($table), current($table)];
+                if ($t instanceof self) {
+                    $sql = $this->addInstanceParams($t, $this->joinParams);
+                    $table = "$sql AS $key";
+                }elseif (is_string($key)) {
+                    $table = "$t AS $key";
+                }else {
+                    $table = $t;
+                }
+            }
             $condition = $this->buildCondition($on, $params,$this->joinParams);
             $this->join .= ($this->join ? ' ' : '') . "$type $table ON $condition";
         }
@@ -306,6 +323,17 @@ class QueryBuilder
     }
     
     /**
+     * 联合查询
+     * @param QueryBuilder $query
+     * @return $this
+     */
+    public function union(QueryBuilder $query)
+    {
+        $this->union .= (($this->union ? ' UNION ' : 'UNION ') . $this->addInstanceParams($query, $this->unionParams));
+        return $this;
+    }
+    
+    /**
      * 组建where、having等条件
      * @param array|string $condition
      * @param array $params 绑定的参数
@@ -372,7 +400,7 @@ class QueryBuilder
     private function buildOperator(&$condition, &$paramsContainer)
     {
         list($operation, $field, $val) = $condition;
-        $place = is_bool($val) ? $val :$this->addParams($val, $paramsContainer);
+        $place = is_bool($val) ? $val : $this->addParams($val, $paramsContainer);
         switch (strtoupper($operation)) {
             case 'IN':
                 return "$field IN (" . implode(', ', $place) . ")";
@@ -390,6 +418,10 @@ class QueryBuilder
                 return "$field NOT LIKE $place";
             case 'NULL':
                 return $val === true ? "$field IS NULL" : "$field IS NOT NULL";
+            case 'EXISTS':
+                return "EXISTS $place";
+            case 'NOT EXISTS':
+                return "NOT EXISTS $place";
             default:
                 return "$field $operation $place";
         }
@@ -449,55 +481,96 @@ class QueryBuilder
             $this->having,
             $this->orderBy,
             $this->limit,
+            $this->union,
         ];
-        $params = array_merge($this->selectParams, $this->fromParams, 
-            $this->joinParams, $this->whereParams, $this->havingParams, $this->limitParams);
+        $params = array_merge(
+            $this->selectParams,
+            $this->fromParams,
+            $this->joinParams,
+            $this->whereParams,
+            $this->havingParams,
+            $this->limitParams,
+            $this->unionParams
+        );
         $statement = implode(' ', array_filter($statement));
         return [$statement, $params];
     }
     
-    
-    public function union()
+    /**
+     * 返回查询结果
+     * @param int $mode
+     * @param unknown $arg
+     * @param unknown $ctor_args
+     */
+    public function fecthAll($mode = \PDO::FETCH_ASSOC)
     {
-        
+        list($statement, $params) = $this->buildQuery();
+        $sth = $this->connection->PDO()->prepare($statement);
+        $sth->execute($params);
+        return $sth->fetchAll($mode);
     }
     
-    public function exits()
+    /**
+     * 更新数据
+     * @param string $table 表名
+     * @param string|array $data 数据
+     * @param string|array $condition 条件
+     * @param array $params 条件参数
+     * @return boolean
+     */
+    public function update($table, $data, $condition = [], $params = [])
     {
-        
+        if (is_array($data)) {
+            $keys = implode(', ', array_map(function($v) { return "$v = ?"; }, array_keys($data)));
+            $vals = array_values($data);
+        }else {
+            $keys = $data;
+            $vals = [];
+        }
+        $paramsContainer = [];
+        $condition = $this->buildCondition($condition, $params, $paramsContainer);
+        $condition = $condition ? " WHERE $condition" : '';
+        $statement = "UPDATE $table SET " . $keys . $condition;
+        return $this->connection->PDO()->prepare($statement)->execute(array_merge($vals, $paramsContainer));
     }
     
-    public function update($table, $data, $condition, $params = [])
+    /**
+     * 删除数据
+     * @param string $table 表
+     * @param string|array $condition 条件
+     * @param array $params 条件参数
+     * @return boolean
+     */
+    public function delete($table, $condition = [], $params = [])
     {
-        
+        $paramsContainer = [];
+        $condition = $this->buildCondition($condition, $params, $paramsContainer);
+        $condition = $condition ? " WHERE $condition" : '';
+        $statement = "DELETE from $table" . $condition;
+        return $this->connection->PDO()->prepare($statement)->execute($paramsContainer);
     }
-    
-    public function delete($table, $condition, $params)
-    {
-        
-    }
-    
     
     /**
      * 插入一条数据
      * `
-     * insert(['id'=>1, 'name'=>'su']);
+     * insert('user', ['id'=>1, 'name'=>'su']);
      * `
+     * @param string $table 表
      * @param array $data 接收一个关联数组,其中键为字段名,值为字段值.
      * @return boolean 成功返回true,失败返回false
      */
-    public function insert($data)
+    public function insert($table, $data)
     {
         $keys = array_keys($data);
         $placeholder = array_fill(0, count($data), '?');
-        $statement = "INSERT INTO $this->from (" . implode(', ', $keys) . ") VALUES (" . implode(', ', $placeholder) . ")";
+        $statement = "INSERT INTO $table (" . implode(', ', $keys) . ") VALUES (" . implode(', ', $placeholder) . ")";
         return $this->connection->PDO()->prepare($statement)->execute(array_values($data));
     }
     
     /**
      * 批量插入数据
      * `
-     * batchInsert(['username', 'password'], [
+     * batchInsert('user', ['username', 'password'], [
      *     ['q', 'qqq'],
      *     ['w', 'www'],
      *     ['e', 'eee'],
@@ -507,9 +580,9 @@ class QueryBuilder
      * @param array $data 要插入的数据,一个二维数组.数组的键值是什么并没有关系,但是第二维的数组的数量应该和字段的数量一致.
      * @return boolean
      */
-    public function batchInsert($fields, $data)
+    public function batchInsert($table ,$fields, $data)
     {
-        $statement = "INSERT INTO $this->from (" . implode(', ', $fields) . ") VALUES ";
+        $statement = "INSERT INTO $table (" . implode(', ', $fields) . ") VALUES ";
         $placeholder = "(" . implode(', ', array_fill(0, count($fields), '?')) . ")";
         $params = $placeholders = [];
         foreach ($data as $d) {

@@ -17,28 +17,28 @@ class IndexCtrl extends Ctrl
         
         $db = $this->make()->getDb();
         
-        var_dump(microtime(true), memory_get_peak_usage() / 1024);
+        $query = $db->createQuery()->from('admin')->select('max(id)')->where(['admin.id'=>100]);
         
-        for ($i=0; $i<1000; $i++) {
-            $query = $db->createQuery()->from('admin')->select('max(id)')->where(['admin.id'=>100]);
-            
-            $res = $db->createQuery()
-            ->distinct()
-            ->select(['id','name'])
-            ->from(['user', 'a'=>$query])
-            ->where(['or', 'id'=>1, ['in', 'id', [7, 8, 9]]])
-            ->andWhere("username = :username", [':username'=>'susu'])
-            ->orWhere(['>=', 'val - sex', 10])
-            ->orderBy(['id'=>SORT_DESC, 'name'])
-            ->groupBy('id')
-            ->having(['count(name)'=>10])
-            ->join('LEFT JOIN', 'file', "admin.id = user.id")
-            ->limit(1)
-            ->buildQuery();
-            //var_dump($res);
-        }
+        $res = $db->createQuery()
+        //->distinct()
+        //->select(['id','name'])
+        ->from(['user'])
+        //->where(['or', 'id'=>1, ['in', 'id', [7, 8, 9]], ['not exists', null, $query]])
+        //->andWhere("username = :username", [':username'=>'susu'])
+        //->orWhere(['>=', 'val - sex', 10])
+        //->orderBy(['id'=>SORT_DESC, 'name'])
+        //->groupBy('id')
+        //->having(['count(name)'=>10])
+        //->join('LEFT JOIN', ['f'=>$query], "admin.id = user.id")
+        //->limit(1)
+        //->union($query)
+        //->buildQuery();
+        ->fecthAll();
+        var_dump($res);
         
-        var_dump(microtime(true), memory_get_peak_usage() / 1024);
+        //$db->createQuery()->update('user', 'val = val * 2', ['id'=>1]);
+        //$res = $db->createQuery()->delete('user');
+        //var_dump($res);
     }
     
     
