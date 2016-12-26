@@ -1,7 +1,9 @@
 <?php
 namespace lying\cache;
 
-class Cache
+use lying\service\Service;
+
+class Cache extends Service
 {
     
 }

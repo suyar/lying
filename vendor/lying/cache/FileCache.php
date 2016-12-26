@@ -1,7 +1,7 @@
 <?php
 namespace lying\cache;
 
-class FileCache
+class FileCache extends Cache
 {
     
 }
