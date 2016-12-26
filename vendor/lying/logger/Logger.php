@@ -6,31 +6,64 @@ use lying\service\Service;
 abstract class Logger extends Service
 {
     /**
-     * 存储日志的盒子
+     * 存储日志的容器
      * @var array
      */
-    protected $box = [];
+    protected $logContainer = [];
+    
+    /**
+     * 日志等级
+     * @var array
+     */
+    protected static $levels = [
+        LOG_DEBUG=>'debug',
+        LOG_INFO=>'info',
+        LOG_NOTICE=>'notice',
+        LOG_WARNING=>'warning',
+        LOG_ERR=>'error'
+    ];
+    
+    /**
+     * 要记录的日志等级
+     * @var int
+     */
+    protected $level = LOG_NOTICE;
     
     /**
      * 最大存储条数,默认500
-     * @var integer
+     * @var int
      */
-    protected $maxLength = 500;
+    protected $maxItem = 500;
     
     /**
-     * 日志分类,可以在配置文件自定义
-     * @var array
+     * 格式化数据
+     * @param mixed $data
+     * @param number $level
+     * @return string
      */
-    protected $level = ['debug', 'info', 'warning', 'error'];
-    
-    /**
-     * 初始化日志分类
-     * @throws \Exception
-     */
-    protected function init()
+    protected static function formatData($data, $level = 1)
     {
-        if (!is_array($this->level)) {
-            throw new \Exception('Configuration item [level] must be an array.', 500);
+        if (is_string($data)) {
+            return "'$data'";
+        }elseif (is_int($data) || is_float($data)) {
+            return $data;
+        }elseif (is_array($data)) {
+            $tmp = '[' . PHP_EOL;
+            foreach ($data as $key=>$value) {
+                $key = self::formatData($key, $level + 1);
+                $value = self::formatData($value, $level + 1);
+                $tmp .= str_repeat(' ', $level * 4) . "$key => $value," . PHP_EOL;
+            }
+            $tmp .= str_repeat(' ', ($level - 1) * 4) . ']';
+            return $tmp;
+        }elseif (is_null($data)) {
+            return 'null';
+        }elseif (is_bool($data)) {
+            return $data ? 'true' : 'false';
+        }elseif (is_object($data)) {
+            return '(' . get_class($data) . ')';
+        }else {
+            return '(' . gettype($data) . ')';
         }
     }
     
@@ -39,50 +72,35 @@ abstract class Logger extends Service
      * @param mixed $msg 日志内容
      * @param string $level 日志分类
      */
-    public function log($msg, $level = 'debug')
+    public function log($data, $level = LOG_DEBUG)
     {
-        try {
-            if (in_array($level, $this->level)) {
-                if (!is_string($msg)) {
-                    ob_start();
-                    ob_implicit_flush(false);
-                    var_dump($msg);
-                    $msg = ob_get_clean();
-                }
-                $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1);
-                $request = $this->make()->getRequest();
-                $file = $trace[0]['file'];
-                $line = $trace[0]['line'];
-                $time = date('Y-m-d H:i:s');
-                $ip = $request->remoteIp();
-                $url = $request->uri();
-                $msg = $this->buildMsg($time, $ip, $level, $url, $file, $line, $msg);
-                $this->box[] = $msg;
-                if (count($this->box) >= $this->maxLength) {
-                    $this->flush();
-                }
+        if ($level <= $this->level) {
+            $trace = current(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1));
+            $trace = [
+                'time' => date('Y-m-d H:i:s'),
+                'ip' => $_SERVER['REMOTE_ADDR'],
+                'level' => self::$levels[$level],
+                'request' => $_SERVER['REQUEST_URI'],
+                'file' => $trace['file'],
+                'line' => $trace['line'],
+                'data' => self::formatData($data),
+            ];
+            $this->logContainer[] = $this->buildTrace($trace);
+            if (count($this->logContainer) >= $this->maxItem) {
+                $this->flush();
             }
-        }catch (\Exception $e) {
-            if (DEV) throw $e;
         }
     }
     
     /**
-     * 生成日志内容
-     * @param int $time 日志生成时间
-     * @param string $ip 远程访问ip地址
-     * @param string $level 日志类型
-     * @param string $url 远程访问url
-     * @param string $file 打印日志的文件
-     * @param string $line 打印日志文件的行数
-     * @param string $content 日志内容
-     * @return mixed
+     * 生成日志信息
+     * @param array $data
+     * @return string|array
      */
-    abstract protected function buildMsg($time, $ip, $level, $url, $file, $line, $content);
+    abstract protected function buildTrace($data);
     
     /**
      * 刷新输出日志
      */
     abstract public function flush();
-    
 }

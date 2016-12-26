@@ -24,10 +24,17 @@ return [
     'logger'=>[
         'class'=>'lying\logger\FileLog',
         'file'=>'default',
-        'maxLength'=>500,
-        'maxSize'=>10240,
+        'maxItem'=>500,
+        'maxSize'=>1,
         'maxFile'=>5,
-        'level'=>['debug', 'info', 'warning', 'error'],
+        'level'=>LOG_DEBUG,
+    ],
+    'dblog'=>[
+        'class'=>'lying\logger\DbLog',
+        'maxItem'=>500,
+        'level'=>LOG_DEBUG,
+        'connection'=>'db',
+        'table'=>'log',
     ],
     
     

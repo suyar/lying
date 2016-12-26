@@ -4,85 +4,88 @@ namespace lying\logger;
 class FileLog extends Logger
 {
     /**
-     * 日志文件名/日志路径
+     * 日志存储的路径
+     * @var string
+     */
+    protected $path;
+    
+    /**
+     * 日志文件名
      * @var string
      */
     protected $file = 'default';
     
     /**
      * 单个日志文件的最大值(kb)
-     * @var integer
+     * @var int
      */
     protected $maxSize = 10240;
     
     /**
      * 最大的日志文件个数
-     * @var integer
+     * @var int
      */
     protected $maxFile = 5;
     
     /**
      * 初始化文件路径
-     * {@inheritDoc}
-     * @see \lying\logger\Logger::init()
      */
     protected function init()
     {
-        try {
-            parent::init();
-            $path = DIR_RUNTIME . '/log';
-            if (!is_dir($path)) {
-                if (!mkdir($path, 0777, true)) {
-                    throw new \Exception("Failed to create directory $path, please check the runtime directory permissions.", 500);
-                }
+        $this->path = $this->path ? $this->path : DIR_RUNTIME . '/log';
+        if (!is_dir($this->path)) {
+            if (!mkdir($this->path, 0777, true) && DEV) {
+                throw new \Exception("Failed to create directory $this->path, please check the runtime directory permissions.", 500);
             }
-            $this->file = $path . "/$this->file.log";
-            register_shutdown_function([$this, 'flush']);
-        }catch (\Exception $e) {
-            if (DEV) throw $e;
         }
+        $this->file = $this->path . '/' . $this->file . '.log';
+        register_shutdown_function([$this, 'flush']);
     }
     
     /**
-     * {@inheritDoc}
-     * @see \lying\logger\Logger::buildMsg()
+     * 生成日志信息
+     * @param array $trace
+     * @return string
      */
-    protected function buildMsg($time, $ip, $level, $url, $file, $line, $content)
+    protected function buildTrace($trace)
     {
-        return "[$time][$ip][$level][$url] In file $file line $line" . PHP_EOL . $content . PHP_EOL;
+        return implode('', [
+            "[{$trace['time']}][{$trace['ip']}][{$trace['level']}][{$trace['request']}][{$trace['file']}][{$trace['line']}]",
+            PHP_EOL,
+            $trace['data'],
+            PHP_EOL,
+            PHP_EOL,
+        ]);
     }
     
     /**
-     * {@inheritDoc}
-     * @see \lying\logger\Logger::flush()
+     * 刷新输出日志
      */
     public function flush()
     {
-        if ($this->box) {
+        if ($this->logContainer) {
             if (is_file($this->file) && filesize($this->file) >= $this->maxSize * 1024) {
-                $this->replaceFile();
-                clearstatcache();
+                $this->cycleFile();
             }
-            file_put_contents($this->file, $this->box, FILE_APPEND|LOCK_EX);
-            $this->box = [];
+            clearstatcache();
+            file_put_contents($this->file, $this->logContainer, FILE_APPEND|LOCK_EX);
+            $this->logContainer = [];
         }
     }
     
     /**
-     * 删除/备份日志文件
+     * 删除备份日志文件
      */
-    protected function replaceFile()
+    protected function cycleFile()
     {
-        $file = $this->file;
-        for ($i = $this->maxFile; $i >= 0; $i--) {
-            $backfile = $file . ($i === 0 ? '' : ('.bak' . $i));
-            var_dump($backfile);
+        for ($i = $this->maxFile - 1; $i >= 0; $i--) {
+            $backfile = $this->file . ($i === 0 ? '' : ('.bak' . $i));
             if (is_file($backfile)) {
-                if ($i === $this->maxFile) {
+                if ($i === $this->maxFile - 1) {
                     unlink($backfile);
                     continue;
                 }
-                rename($backfile, $file . '.bak' . ($i + 1));
+                rename($backfile, $this->file . '.bak' . ($i + 1));
             }
         }
     }

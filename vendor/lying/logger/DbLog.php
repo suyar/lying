@@ -2,6 +2,7 @@
 namespace lying\logger;
 
 
+use lying\db\QueryBuilder;
 class DbLog extends Logger
 {
     /**
@@ -14,40 +15,56 @@ class DbLog extends Logger
      * 日志表名
      * @var string
      */
-    protected $table;
+    protected $table = 'log';
     
     /**
-     * {@inheritDoc}
-     * @see \lying\logger\Logger::init()
+     * 查询构造器
+     * @var QueryBuilder
+     */
+    protected $qb;
+    
+    /**
+     * 初始化数据库链接
      */
     protected function init()
     {
-        parent::init();
+        $this->connection = $this->make()->getDb($this->connection);
+        $this->qb = new QueryBuilder($this->connection);
+        $sql = "CREATE TABLE IF NOT EXISTS `$this->table` (
+                	`id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+                	`time` DATETIME NOT NULL,
+                	`ip` VARCHAR(20) NOT NULL,
+                	`level` VARCHAR(10) NOT NULL,
+                	`request` VARCHAR(1024) NOT NULL,
+                	`file` VARCHAR(256) NOT NULL,
+                	`line` INT(10) UNSIGNED NOT NULL,
+                	`data` VARCHAR(1024) NOT NULL,
+                	PRIMARY KEY (`id`)
+                )
+                COLLATE='utf8_general_ci'
+                ENGINE=InnoDB";
+        $this->connection->PDO()->exec($sql);
+        register_shutdown_function([$this, 'flush']);
     }
     
     /**
-     * {@inheritDoc}
-     * @see \lying\logger\Logger::buildMsg()
+     * 生成日志信息
+     * @param array $data
+     * @return array
      */
-    protected function buildMsg($time, $ip, $level, $url, $file, $line, $content)
+    protected function buildTrace($data)
     {
-        return [
-            'time'=>$time,
-            'ip'=>$ip,
-            'level'=>$level,
-            'url'=>$url,
-            'file'=>$file,
-            'line'=>$line,
-            'content'=>$content
-        ];
+        return $data;
     }
     
     /**
-     * {@inheritDoc}
-     * @see \lying\logger\Logger::flush()
+     * 刷新输出日志
      */
     public function flush()
     {
-        
+        if ($this->logContainer) {
+            $this->qb->batchInsert($this->table, ['time', 'ip', 'level', 'request', 'file', 'line', 'data'], $this->logContainer);
+            $this->logContainer = [];
+        }
     }
 }
