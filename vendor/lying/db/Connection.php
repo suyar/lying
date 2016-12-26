@@ -21,12 +21,6 @@ class Connection extends Service
      */
     private $tableSchema = [];
     
-    
-    protected function init()
-    {
-        
-    }
-    
     /**
      * 获取数据库实例
      * @return \PDO
@@ -61,19 +55,16 @@ class Connection extends Service
     }
     
     /**
-     * 
-     * @return \lying\db\QueryBuilder
+     * 创建查询构造
+     * @return QueryBuilder
      */
     public function createQuery()
     {
         return new QueryBuilder($this);
     }
     
-    
-    
-    
     /**
-     * 转义字符串
+     * 给字符串加引号
      * @param string $value
      * @return boolean|string
      */

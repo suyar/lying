@@ -28,23 +28,29 @@ class DbLog extends Logger
      */
     protected function init()
     {
-        $this->connection = $this->make()->getDb($this->connection);
-        $this->qb = new QueryBuilder($this->connection);
-        $sql = "CREATE TABLE IF NOT EXISTS `$this->table` (
-                	`id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-                	`time` DATETIME NOT NULL,
-                	`ip` VARCHAR(20) NOT NULL,
-                	`level` VARCHAR(10) NOT NULL,
-                	`request` VARCHAR(1024) NOT NULL,
-                	`file` VARCHAR(256) NOT NULL,
-                	`line` INT(10) UNSIGNED NOT NULL,
-                	`data` VARCHAR(1024) NOT NULL,
-                	PRIMARY KEY (`id`)
-                )
-                COLLATE='utf8_general_ci'
-                ENGINE=InnoDB";
-        $this->connection->PDO()->exec($sql);
-        register_shutdown_function([$this, 'flush']);
+        try {
+            $this->connection = $this->make()->getDb($this->connection);
+            $this->qb = $this->connection->createQuery();
+            $sql = "CREATE TABLE IF NOT EXISTS `$this->table` (
+            `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `time` DATETIME NOT NULL,
+            `ip` VARCHAR(20) NOT NULL,
+            `level` VARCHAR(10) NOT NULL,
+            `request` VARCHAR(1024) NOT NULL,
+            `file` VARCHAR(256) NOT NULL,
+            `line` INT(10) UNSIGNED NOT NULL,
+            `data` VARCHAR(1024) NOT NULL,
+            PRIMARY KEY (`id`)
+            )
+            COLLATE='utf8_general_ci'
+            ENGINE=InnoDB";
+            $this->connection->PDO()->exec($sql);
+            register_shutdown_function([$this, 'flush']);
+        }catch (\Exception $e) {
+            if (DEV) {
+                throw $e;
+            }
+        }
     }
     
     /**
@@ -63,7 +69,13 @@ class DbLog extends Logger
     public function flush()
     {
         if ($this->logContainer) {
-            $this->qb->batchInsert($this->table, ['time', 'ip', 'level', 'request', 'file', 'line', 'data'], $this->logContainer);
+            try {
+                $this->qb->batchInsert($this->table, ['time', 'ip', 'level', 'request', 'file', 'line', 'data'], $this->logContainer);
+            }catch (\Exception $e) {
+                if (DEV) {
+                    throw $e;
+                }
+            }
             $this->logContainer = [];
         }
     }
