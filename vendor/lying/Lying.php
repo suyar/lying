@@ -1,32 +1,17 @@
 <?php
-
 class Lying
 {
     /**
-     * 自身实例
-     * @var \Lying
-     */
-    private static $instance;
-    
-    /**
-     * 所有的核心类文件映射
+     * 类文件映射
      * @var array
      */
-    public static $classes = [];
+    public static $classMap = [];
     
     /**
-     * 框架单例容器
-     * @var lying\service\Container
+     * 工厂实例
+     * @var \lying\service\Maker
      */
-    public static $container;
-    
-    /**
-     * 初始化自身实例
-     */
-    public function __construct()
-    {
-        self::$instance = $this;
-    }
+    public static $maker;
     
     /**
      * 自动加载
@@ -34,8 +19,8 @@ class Lying
      */
     public static function autoload($className)
     {
-        if (isset(self::$classes[$className])) {
-            $file = self::$classes[$className];
+        if (isset(self::$classMap[$className])) {
+            $file = self::$classMap[$className];
         }else {
             $file = ROOT . '/' . str_replace('\\', '/', $className) . '.php';
         }
@@ -50,7 +35,7 @@ class Lying
      */
     public function run()
     {
-        $router = self::getRouter();
+        $router = maker()->router();
         list($m, $c, $a) = $router->parse();
         $class = "app\\$m\\ctrl\\$c";
         if (class_exists($class) && method_exists($class, $a) && (new \ReflectionMethod($class, $a))->isPublic()) {
@@ -59,91 +44,4 @@ class Lying
             throw new \Exception('Page not found.', 404);
         }
     }
-    
-    /**
-     * 返回自身实例
-     * @return \Lying
-     */
-    public static function instance()
-    {
-        return self::$instance;
-    }
-    
-    /**
-     * 获取配置类实例
-     * @return lying\service\Config
-     */
-    public function getConfig()
-    {
-        return self::$container->make('config');
-    }
-    
-    /**
-     * 获取路由类实例
-     * @return lying\service\Router
-     */
-    public function getRouter()
-    {
-        return self::$container->make('router');
-    }
-    
-    /**
-     * 获取请求类实例
-     * @return lying\service\Request
-     */
-    public function getRequest()
-    {
-        return self::$container->make('request');
-    }
-    
-    /**
-     * 获取加密类实例
-     * @return lying\service\Secure
-     */
-    public function getSecure()
-    {
-        return self::$container->make('secure');
-    }
-    
-    /**
-     * 获取cookie类实例
-     * @return lying\service\Cookie
-     */
-    public function getCookie()
-    {
-        return self::$container->make('cookie');
-    }
-    
-    /**
-     * 获取session类实例
-     * @return lying\service\Session
-     */
-    public function getSession()
-    {
-        return self::$container->make('session');
-    }
-    
-    /**
-     * 返回log类实例
-     * @param string $id log的id
-     * @return lying\logger\Logger
-     */
-    public function getLogger($id = 'logger')
-    {
-        return self::$container->make($id);
-    }
-    
-    /**
-     * 获取数据库连接实例
-     * @param string $id
-     * @return lying\db\Connection
-     */
-    public function getDb($id = 'db')
-    {
-        return self::$container->make($id);
-    }
-    
-    
 }
-
-

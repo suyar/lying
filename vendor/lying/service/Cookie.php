@@ -17,7 +17,7 @@ class Cookie extends Service
      * @return boolean
      */
     public function set($name, $value, $expire = 0, $path = '/', $domain = '', $secure = false, $httponly = false) {
-        $value = $this->make()->getSecure()->encrypt($value, $this->key);
+        $value = maker()->secure()->encrypt($value, $this->key);
         return setcookie($name, $value, $expire, $path, $domain, $secure, $httponly);
     }
     
@@ -28,7 +28,7 @@ class Cookie extends Service
      * @return string
      */
     public function get($name, $defaultValue = null) {
-        return isset($_COOKIE[$name]) ? $this->make()->getSecure()->decrypt($_COOKIE[$name], $this->key) : $defaultValue;
+        return isset($_COOKIE[$name]) ? maker()->secure()->decrypt($_COOKIE[$name], $this->key) : $defaultValue;
     }
     
     /**

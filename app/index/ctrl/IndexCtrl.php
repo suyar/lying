@@ -14,7 +14,7 @@ class IndexCtrl extends Ctrl
     
     public function index()
     {
-        $this->make()->getLogger('dblog')->log(666);
+        maker()->logger()->log(['尤里', '苏', 'name'=>['666', 'sex'=>false]]);
     }
     
     

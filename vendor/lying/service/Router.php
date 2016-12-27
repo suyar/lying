@@ -9,7 +9,7 @@ class Router extends Service
      */
     public function parse()
     {
-        $request = $this->make()->getRequest();
+        $request = maker()->request();
         $uri = $request->uri();
         $parse = parse_url($uri);
         
@@ -18,7 +18,7 @@ class Router extends Service
         
         //查找域名配置
         $host = $request->host();
-        $config = $this->make()->getConfig();
+        $config = maker()->config();
         $conf = $config->get('router');
         $conf = isset($conf[$host]) ? $conf[$host] : $conf['default'];
         //设置路由配置为当前配置

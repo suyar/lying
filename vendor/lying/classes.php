@@ -1,5 +1,4 @@
 <?php
-
 return [
     'lying\base\Ctrl' => DIR_LYING . '/base/Ctrl.php',
     'lying\base\Exception' => DIR_LYING . '/base/Exception.php',
@@ -20,7 +19,7 @@ return [
     'lying\logger\Logger' => DIR_LYING . '/logger/Logger.php',
     
     'lying\service\Config' => DIR_LYING . '/service/Config.php',
-    'lying\service\Container' => DIR_LYING . '/service/Container.php',
+    'lying\service\Maker' => DIR_LYING . '/service/Maker.php',
     'lying\service\Cookie' => DIR_LYING . '/service/Cookie.php',
     'lying\service\Request' => DIR_LYING . '/service/Request.php',
     'lying\service\Router' => DIR_LYING . '/service/Router.php',

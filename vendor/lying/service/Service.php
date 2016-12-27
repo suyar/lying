@@ -4,27 +4,19 @@ namespace lying\service;
 class Service
 {
     /**
-     * 初始化成员变量
-     * @param array $params 参数,key/value形式的数组
+     * 初始化子类的成员变量
+     * @param array $params 参数,key=>value形式的数组
      */
     public function __construct($params = [])
     {
-        if ($params) {
-            foreach ($params as $key=>$param) {
-                $this->$key = $param;
-            }
+        foreach ($params as $key=>$param) {
+            $this->$key = $param;
         }
-        if (method_exists($this, 'init')) {
-            $this->init($params);
-        }
+        $this->init($params);
     }
     
     /**
-     * 返回Lying实例
-     * @return \Lying
+     * 子类可继承并接收一个参数,参数为构造函数接受的参数
      */
-    final public function make()
-    {
-        return \Lying::instance();
-    }
+    protected function init() {}
 }

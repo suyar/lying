@@ -1,7 +1,7 @@
 <?php
 namespace lying\service;
 
-class Config
+class Config extends Service
 {
     /**
      * 缓存全局配置
@@ -27,7 +27,7 @@ class Config
     /**
      * 重置某个配置
      * @param string $key 配置文件名
-     * @param string $params 参数数组，默认为空
+     * @param string $params 参数数组,默认为空
      */
     public function set($key, $params = [])
     {
