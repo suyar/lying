@@ -5,14 +5,27 @@ use lying\service\Service;
 
 class Connection extends Service
 {
+    /**
+     * 数据源
+     * @var string
+     */
     protected $dsn;
     
+    /**
+     * 数据库账号
+     * @var string
+     */
     protected $user;
     
+    /**
+     * 数据库密码
+     * @var string
+     */
     protected $pass;
     
     /**
-     * @var \PDO PDO实例
+     * PDO实例
+     * @var \PDO
      */
     private $dbh;
     
@@ -25,33 +38,41 @@ class Connection extends Service
      * 获取数据库实例
      * @return \PDO
      */
-    public function PDO()
+    public function pdo()
     {
-        if ($this->dbh instanceof \PDO) {
-            return $this->dbh;
-        } else {
+        if (!($this->dbh instanceof \PDO)) {
             $this->dbh = new \PDO($this->dsn, $this->user, $this->pass, [
                 \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
                 \PDO::ATTR_EMULATE_PREPARES => false,
                 \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
             ]);
-            return $this->dbh;
         }
+        return $this->dbh;
     }
     
     /**
      * 获取表的结构
      * @param string $table
-     * @return multitype:\lying\db\Schema
+     * @return Schema
      */
-    public function getSchema($table)
+    public function tableSchema($table)
     {
         if (isset($this->tableSchema[$table])) {
             return $this->tableSchema[$table];
         }
-        $fieldSchema = $this->PDO()->query("DESC $table")->fetchAll();
+        $fieldSchema = $this->pdo()->query("DESC `$table`")->fetchAll();
         $this->tableSchema[$table] = new Schema($fieldSchema);
         return $this->tableSchema[$table];
+    }
+    
+    /**
+     * 预处理sql语句
+     * @param string $statement
+     * @return PDOStatement
+     */
+    public function prepare($statement)
+    {
+        return $this->pdo()->prepare($statement);
     }
     
     /**
@@ -73,7 +94,7 @@ class Connection extends Service
         if (!is_string($value)) {
             return $value;
         }
-        return $this->PDO()->quote($value);
+        return $this->pdo()->quote($value);
     }
     
     /**
@@ -82,7 +103,7 @@ class Connection extends Service
      */
     public function beginTransaction()
     {
-        return $this->PDO()->beginTransaction();
+        return $this->pdo()->beginTransaction();
     }
     
     /**
@@ -91,7 +112,7 @@ class Connection extends Service
      */
     public function commit()
     {
-        return $this->PDO()->commit();
+        return $this->pdo()->commit();
     }
     
     /**
@@ -100,8 +121,6 @@ class Connection extends Service
      */
     public function rollBack()
     {
-        return $this->PDO()->rollBack();
+        return $this->pdo()->rollBack();
     }
-    
-    
 }

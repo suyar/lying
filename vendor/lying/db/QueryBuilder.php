@@ -505,7 +505,7 @@ class QueryBuilder
     public function fecthAll($mode = \PDO::FETCH_ASSOC)
     {
         list($statement, $params) = $this->buildQuery();
-        $sth = $this->connection->PDO()->prepare($statement);
+        $sth = $this->connection->prepare($statement);
         $sth->execute($params);
         return $sth->fetchAll($mode);
     }
@@ -531,7 +531,7 @@ class QueryBuilder
         $condition = $this->buildCondition($condition, $params, $paramsContainer);
         $condition = $condition ? " WHERE $condition" : '';
         $statement = "UPDATE $table SET " . $keys . $condition;
-        return $this->connection->PDO()->prepare($statement)->execute(array_merge($vals, $paramsContainer));
+        return $this->connection->prepare($statement)->execute(array_merge($vals, $paramsContainer));
     }
     
     /**
@@ -547,7 +547,7 @@ class QueryBuilder
         $condition = $this->buildCondition($condition, $params, $paramsContainer);
         $condition = $condition ? " WHERE $condition" : '';
         $statement = "DELETE from $table" . $condition;
-        return $this->connection->PDO()->prepare($statement)->execute($paramsContainer);
+        return $this->connection->prepare($statement)->execute($paramsContainer);
     }
     
     /**
@@ -564,7 +564,7 @@ class QueryBuilder
         $keys = array_keys($data);
         $placeholder = array_fill(0, count($data), '?');
         $statement = "INSERT INTO $table (" . implode(', ', $keys) . ") VALUES (" . implode(', ', $placeholder) . ")";
-        return $this->connection->PDO()->prepare($statement)->execute(array_values($data));
+        return $this->connection->prepare($statement)->execute(array_values($data));
     }
     
     /**
@@ -591,6 +591,6 @@ class QueryBuilder
                 $params[] = $v;
             }
         }
-        return $this->connection->PDO()->prepare($statement . implode(', ', $placeholders))->execute($params);
+        return $this->connection->prepare($statement . implode(', ', $placeholders))->execute($params);
     }
 }

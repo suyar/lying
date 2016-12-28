@@ -32,20 +32,10 @@ class FileLog extends Logger
      */
     protected function init()
     {
-        try {
-            $this->path = $this->path ? $this->path : DIR_RUNTIME . '/log';
-            if (!is_dir($this->path)) {
-                if (!mkdir($this->path, 0777, true)) {
-                    throw new \Exception("Failed to create directory $this->path, please check the runtime directory permissions.", 500);
-                }
-            }
-            $this->file = $this->path . '/' . $this->file . '.log';
-            register_shutdown_function([$this, 'flush']);
-        }catch (\Exception $e) {
-            if (DEV) {
-                throw $e;
-            }
-        }
+        $this->path = $this->path ? $this->path : DIR_RUNTIME . '/log';
+        !is_dir($this->path) && mkdir($this->path, 0777, true);
+        $this->file = $this->path . '/' . $this->file . '.log';
+        register_shutdown_function([$this, 'flush']);
     }
     
     /**
