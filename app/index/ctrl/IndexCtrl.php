@@ -14,25 +14,58 @@ class IndexCtrl extends Ctrl
     
     public function index()
     {
-        $str = 'sdfdsf你的 是的呢是你的 是的呢是你';
+        $str = '1';
         $key = '123456';
-        $this->encrype($str, $key);
+        $res = $this->encrype($str, $key, 2);
+        var_dump(base64_encode($res));
+        var_dump($this->decrypt($res, $key));
     }
     
-    public function encrype($str, $key)
+    public function encrype($str, $key, $exp = 0)
     {
-        $key = md5($key);
-        $publicKey = microtime(true);
-        //var_dump($publicKey);
+        $keyHash = md5($key, true);
+        $strHash = md5($str, true);
+        $rendomKey = substr(md5(microtime(true)), -4);
         
-        $keystore = bin2hex($str);
-        var_dump($keystore);
+        $str = sprintf('%010d', $exp === 0 ? 0 : time() + $exp) . $strHash . $str;
+        
+        
         
         $strLen = strlen($str);
+        $keyMap = bin2hex(md5($rendomKey.$keyHash));
+        $keyLen = strlen($keyMap);
+        
+        
+        $result = '';
         for ($i = 0; $i < $strLen; $i++) {
-            
-            //echo ord($str[$i]) . "<br>";
+            $result .= chr(ord($str[$i]) ^ ord($keyMap[$i % $keyLen]));
         }
+        return $rendomKey.$result;
+    }
+    
+    public function decrypt($str, $key)
+    {
+        $keyHash = md5($key, true);
+        $rendomKey = substr($str, 0, 4);
+        
+        $str = substr($str, 4);
+        $keyMap = bin2hex(md5($rendomKey.$keyHash));
+        $strLen = strlen($str);
+        $keyLen = strlen($keyMap);
+        
+        $result = '';
+        for ($i = 0; $i < $strLen; $i++) {
+            $result .= chr(ord($str[$i]) ^ ord($keyMap[$i % $keyLen]));
+        }
+        $time = substr($result, 0, 10);
+        $strHash = substr($result, 10, 16);
+        $str = substr($result, 26);
+        
+        var_dump($time > time());
+        
+        var_dump($strHash === md5($str, true));
+        
+        return $str;
     }
     
     
