@@ -5,22 +5,21 @@ class Router extends Service
 {
     /**
      * 解析路由
-     * @return array
+     * @return array 返回[$m, $c, $a]
      */
     public function parse()
     {
         $uri = maker()->request()->requestUri();
         $parse = parse_url($uri);
-        
+        //解析原生GET
+        parse_str(isset($parse['query']) ? $parse['query'] : '', $_GET);
         //查找域名配置
         $host = maker()->request()->host();
         $config = maker()->config()->get('router');
         $config = isset($config[$host]) ? $config[$host] : $config['default'];
-        
         //分割
         return $this->split($parse['path'], $config);
     }
-    
     
     /**
      * 分割path参数
@@ -29,83 +28,56 @@ class Router extends Service
      * @throws \Exception
      * @return array
      */
-    public function split($path, $conf)
+    private function split($path, $conf)
     {
-        if ($path !== '/' && isset($conf['suffix'])) {
-            
-        }
-        
-        
-        
-        var_dump($path);exit;
-        
-        
-        
-        
-        $path = '/' . trim($path, '/');
-        
-        //判断后缀名
-        if ($path !== '/' && isset($conf['suffix']) && $conf['suffix']) {
-            if (preg_match('/\\'. $conf['suffix'] .'$/', $path)) {
-                $path = preg_replace('/\\'. $conf['suffix'] .'$/', '', $path);
-            }else {
-                throw new \Exception('Unknown path ' . $path, 404);
+        //去掉index.php
+        $path = trim(preg_replace('/^\/index\.php/i', '', $path, 1), '/');
+        //检查后缀名
+        if ($path !== '' && isset($conf['suffix'])) {
+            $validate = 0;
+            $path = trim(preg_replace('/' . $conf['suffix'] . '$/i', '', $path, 1, $validate), '/');
+            if ($validate === 0) {
+                throw new \Exception('Page not found.', 404);
             }
         }
-        
-        //匹配路由规则
-        $match = [];
-        foreach ($conf['rule'] as $key=>$value) {
-            if (preg_match($key, $path, $match)) {
-                $path = $value;
-                unset($match[0]);
-                break;
-            }
-        }
-        
         //分割
-        $t = array_filter(explode('/', $path));
-        
-        //替换参数
-        $t = array_map(function($val) use (&$match) {
-            return strpos($val, ':') === 0 ? array_shift($match) : $val;
-        }, $t);
-        
-        //查找mudule
-        $m = isset($conf['module']) && $conf['module'] ? $conf['module'] : array_shift($t);
-        $m = is_null($m) ? $conf['default_module'] : $m;
-        
-        //确定controller和action
-        switch (count($t)) {
-            case 0:
-                $c = $conf['default_ctrl'];
-                $a = $conf['default_action'];
-                break;
-            case 1:
-                $c = array_shift($t);
-                $a = $conf['default_action'];
-                break;
-            default:
-                $c = array_shift($t);
-                $a = array_shift($t);
-                $this->resolveGet($t);
-        }
-        define('__MODULE__', $m);
-        define('__CTRL__', $c);
-        define('__ACTION__', $a);
-        return [$m, ucfirst($c).'Ctrl', $a];
+        $tmpArr = array_filter(explode('/', $path));
+        //设置module,ctrl,action
+        $m = isset($conf['module']) && $conf['module'] ? $conf['module'] : (($m = array_shift($tmpArr)) ? $m : 'index');
+        $c = ($c = array_shift($tmpArr)) ? $c : (isset($conf['ctrl']) && $conf['ctrl'] ? $conf['ctrl'] : 'index');
+        $a = ($a = array_shift($tmpArr)) ? $a : (isset($conf['action']) && $conf['action'] ? $conf['action'] : 'index');
+        //转换为驼峰
+        $m = $this->convert($m);
+        $c = $this->convert($c);
+        $a = $this->convert($a);
+        //解析多余的参数到GET
+        $this->parseGet($tmpArr);
+        //返回当前请求的m,c,a
+        return [$m, $c.'Ctrl', $a];
+    }
+    
+    /**
+     * 把m,c,a的'-'转换为驼峰
+     * @param string $val 要转换的字符串
+     * @param boolean $ucfirst 首字母大写
+     * @return string
+     */
+    private function convert($val, $ucfirst = false)
+    {
+        $val = str_replace(' ', '', ucwords(str_replace('-', ' ', strtolower($val))));
+        return $ucfirst ? $val : lcfirst($val);
     }
     
     /**
      * 多余的path参数用来解析成get变量
      * @param array $params
      */
-    public function resolveGet($params)
+    private function parseGet($params)
     {
         while ($params) {
             $key = array_shift($params);
             $value = array_shift($params);
-            $_GET[$key] = $value;
+            $_GET[$key] = $value ? $value : '';
         }
     }
     

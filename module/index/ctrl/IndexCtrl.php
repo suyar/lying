@@ -1,5 +1,5 @@
 <?php
-namespace app\index\ctrl;
+namespace module\index\ctrl;
 
 use lying\base\Ctrl;
 
@@ -14,8 +14,11 @@ class IndexCtrl extends Ctrl
     
     public function index()
     {
-        var_dump(gethostbyaddr($_SERVER['REMOTE_ADDR']));
-        var_dump($_SERVER);
+        var_dump($_GET);
     }
     
+    public function del()
+    {
+        echo '777';
+    }
 }

@@ -1,5 +1,5 @@
 <?php
-namespace app\admin\ctrl;
+namespace module\admin\ctrl;
 
 class IndexCtrl
 {

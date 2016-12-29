@@ -1,5 +1,5 @@
 <?php
-namespace app\index\model;
+namespace module\index\model;
 
 use lying\base\Model;
 
