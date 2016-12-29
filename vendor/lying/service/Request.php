@@ -1,62 +1,108 @@
 <?php
 namespace lying\service;
 
-class Request
+class Request extends Service
 {
     /**
-     * 返回请求的url，不包含host和#后面的参数
-     * @return null|string 形如:/index.html?r=11
+     * 服务器使用的CGI规范的版本;例如,"CGI/1.1"
+     * @return string|null
      */
-    public function uri()
+    public function cgiVersion()
     {
-        return isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : null;
+        return isset($_SERVER['GATEWAY_INTERFACE']) ? $_SERVER['GATEWAY_INTERFACE'] : null;
     }
     
     /**
-     * 返回当前请求的绝对路径(不包括#后面的内容)
-     * @return string
+     * 当前运行脚本所在的服务器的IP地址
+     * @return string|null
      */
-    public function absoluteUrl()
+    public function serverAddr()
     {
-        return $this->scheme() . '://' . $this->host() . $this->uri();
+        return isset($_SERVER['SERVER_ADDR']) ? $_SERVER['SERVER_ADDR'] : null;
     }
     
     /**
-     * 返回host
-     * @return null|string 形如：lying.com，不带端口和协议类型
+     * 当前运行脚本所在的服务器的主机名
+     * 如果脚本运行于虚拟主机中,该名称是由那个虚拟主机所设置的值决定
+     * @return string|null
      */
-    public function host()
+    public function serverName()
+    {
+        return isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : null;
+    }
+    
+    /**
+     * 服务器标识字符串,在响应请求时的头信息中给出
+     * @return string|null
+     */
+    public function serverSoftware()
+    {
+        return isset($_SERVER['SERVER_SOFTWARE']) ? $_SERVER['SERVER_SOFTWARE'] : null;
+    }
+    
+    /**
+     * 请求页面时通信协议的名称和版本;例如,"HTTP/1.0"
+     * @return string|null
+     */
+    public function serverProtocol()
+    {
+        return isset($_SERVER['SERVER_PROTOCOL']) ? $_SERVER['SERVER_PROTOCOL'] : null;
+    }
+    
+    /**
+     * 访问页面使用的请求方法;例如,GET, POST, HEAD, PUT, PATCH, DELETE
+     * 如果请求方法为HEAD,PHP脚本将在发送 Header头信息之后终止(这意味着在产生任何输出后,不再有输出缓冲)
+     * @return string|null
+     */
+    public function requestMethod()
+    {
+        return isset($_SERVER['REQUEST_METHOD']) ? strtoupper($_SERVER['REQUEST_METHOD']) : null;
+    }
+    
+    /**
+     * 请求开始时的时间戳
+     * @param boolean $msec 是否返回13位时间戳
+     * @return string|null
+     */
+    public function requestTime($msec = false)
+    {
+        if ($msec) {
+            return isset($_SERVER['REQUEST_TIME_FLOAT']) ? $_SERVER['REQUEST_TIME_FLOAT'] * 1000 : null;
+        }else {
+            return isset($_SERVER['REQUEST_TIME']) ? $_SERVER['REQUEST_TIME'] : null;
+        }
+    }
+    
+    /**
+     * 查询字符串
+     * @return string|null
+     */
+    public function queryString()
+    {
+        return isset($_SERVER['QUERY_STRING']) ? $_SERVER['QUERY_STRING'] : null;
+    }
+    
+    /**
+     * 当前运行脚本所在的文档根目录,在服务器配置文件中定义
+     * @return string|null
+     */
+    public function docRoot()
+    {
+        return isset($_SERVER['DOCUMENT_ROOT']) ? $_SERVER['DOCUMENT_ROOT'] : null;
+    }
+    
+    /**
+     * 当前请求头中 Host:项的内容,如果存在的话
+     * @return string|null
+     */
+    public function httpHost()
     {
         return isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : null;
     }
     
     /**
-     * 返回当前请求的协议类型，
-     * @return string 返回'http'或者'https'
-     */
-    public function scheme()
-    {
-        return isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ? 'https' : 'http';
-    }
-    
-    /**
-     * 获取服务器的IP地址
-     * @return string|null
-     */
-    public function serverIp() {
-        return isset($_SERVER['SERVER_ADDR']) ? $_SERVER['SERVER_ADDR'] : null;
-    }
-    
-    /**
-     * 获取客户端IP地址,失败返回null
-     * @return string|null
-     */
-    public function remoteIp() {
-        return isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : null;
-    }
-    
-    /**
-     * 返回浏览器UA
+     * 当前请求头中 User-Agent:项的内容,如果存在的话
+     * 该字符串表明了访问该页面的用户代理的信息
      * @return string|null
      */
     public function UA()
@@ -65,13 +111,92 @@ class Request
     }
     
     /**
-     * 返回请求的方法
-     * @return string|null "GET", "HEAD", "POST", "PUT"
+     * 返回当前请求的协议"HTTPS"或"HTTP"
+     * @return string
      */
-    public function method()
+    public function scheme()
     {
-        return isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : null;
+        return isset($_SERVER['HTTPS']) && (strcasecmp($_SERVER['HTTPS'], 'on') === 0) ? 'HTTPS' : 'HTTP';
     }
+    
+    /**
+     * 浏览当前页面的用户的IP地址
+     * @return string|null
+     */
+    public function remoteAddr()
+    {
+        return isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : null;
+    }
+    
+    /**
+     * 用户机器上连接到Web服务器所使用的端口号
+     * @return string|null
+     */
+    public function remotePort()
+    {
+        return isset($_SERVER['REMOTE_PORT']) ? $_SERVER['REMOTE_PORT'] : null;
+    }
+    
+    /**
+     * 当前执行脚本的绝对路径
+     * 如果在CLI模式下使用相对路径执行脚本,那么 将包含用户指定的相对路径
+     * @return string|null
+     */
+    public function scriptFile()
+    {
+        return isset($_SERVER['SCRIPT_FILENAME']) ? $_SERVER['SCRIPT_FILENAME'] : null;
+    }
+    
+    /**
+     * Web服务器使用的端口
+     * 如果使用SSL安全连接,则这个值为用户设置的HTTP端口
+     * @return string|null
+     */
+    public function serverPort()
+    {
+        return isset($_SERVER['SERVER_PORT']) ? $_SERVER['SERVER_PORT'] : null;
+    }
+    
+    /**
+     * 包含当前脚本的路径
+     * @return string|null
+     */
+    public function scriptName()
+    {
+        return isset($_SERVER['SCRIPT_NAME']) ? $_SERVER['SCRIPT_NAME'] : null;
+    }
+    
+    /**
+     * URI用来指定要访问的页面;例如"/index.html"
+     * @return string|null
+     */
+    public function requestUri()
+    {
+        return isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : null;
+    }
+    
+    /**
+     * 包含由客户端提供的,跟在真实脚本名称之后并且在查询语句之前的路径信息,如果存在的话
+     * @return string|null
+     */
+    public function pathInfo()
+    {
+        return isset($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO'] : null;
+    }
+    
+    /**
+     * 返回不为空的主机名;例如,abc.com,127.0.0.1
+     * @return string
+     */
+    public function host()
+    {
+        $host = $this->httpHost();
+        return $host ? $host : $this->serverName();
+    }
+    
+    
+    
+    
     
     /**
      * 是否为POST请求
@@ -79,7 +204,7 @@ class Request
      */
     public function isPost()
     {
-        return $this->method() === 'POST';
+        return $this->requestMethod() === 'POST';
     }
     
     /**
@@ -88,7 +213,7 @@ class Request
      */
     public function isGet()
     {
-        return $this->method() === 'GET';
+        return $this->requestMethod() === 'GET';
     }
     
     /**
@@ -97,7 +222,7 @@ class Request
      */
     public function isHead()
     {
-        return $this->method() === 'HEAD';
+        return $this->requestMethod() === 'HEAD';
     }
     
     /**
@@ -106,11 +231,38 @@ class Request
      */
     public function isPut()
     {
-        return $this->method() === 'PUT';
+        return $this->requestMethod() === 'PUT';
     }
     
     /**
-     * 是否为Ajax请求
+     * 是否为OPTIONS请求
+     * @return boolean
+     */
+    public function isOptions()
+    {
+        return $this->requestMethod() === 'OPTIONS';
+    }
+    
+    /**
+     * 是否为DELETE请求
+     * @return boolean
+     */
+    public function isDelete()
+    {
+        return $this->requestMethod() === 'DELETE';
+    }
+    
+    /**
+     * 是否为PATCH请求
+     * @return boolean
+     */
+    public function isPatch()
+    {
+        return $this->requestMethod() === 'PATCH';
+    }
+    
+    /**
+     * 是否为AJAX请求
      * @return boolean
      */
     public function isAjax()
@@ -119,7 +271,7 @@ class Request
     }
     
     /**
-     * 是否为Pjax请求
+     * 是否为PJAX请求
      * @return boolean
      */
     public function isPjax()
@@ -128,10 +280,10 @@ class Request
     }
     
     /**
-     * 返回POST原生数据
+     * 返回原生请求数据
      * @return string
      */
-    public function rawData()
+    public function rawBody()
     {
         return file_get_contents('php://input');
     }

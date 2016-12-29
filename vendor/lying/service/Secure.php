@@ -1,30 +1,44 @@
 <?php
 namespace lying\service;
 
-class Secure
+class Secure extends Service
 {
     /**
-     * AES加密
-     * @param string $data
-     * @param string $key
-     * @return string
+     * 异或加密
+     * @param string $str 要加密的字符串
+     * @param string $key 密钥
+     * @return string 加密后的字符串
      */
-    public function encrypt($data, $key)
+    public function xorEncrypt($str, $key)
     {
-        $key = $iv = md5($key, true);
-        $res = openssl_encrypt($data, 'AES-256-CBC', $key, OPENSSL_RAW_DATA, $iv);
-        return base64_encode($res);
+        $key = strtoupper(sha1($key));
+        $str .= hash_hmac('sha256', $str, $key, true);
+        
+        $strLen = strlen($str);
+        $result = '';
+        for ($i = 0; $i < $strLen; $i++) {
+            $result .= chr(ord($str[$i]) ^ ord($key[$i % 40]));
+        }
+        return str_replace(['+', '/', '='], ["_$key[0]", "_$key[19]", "_$key[39]"], base64_encode($result));
     }
     
     /**
-     * AES解密
-     * @param string $data
-     * @param string $key
-     * @return string
+     * 异或解密;注意,这里可能返回空的字符串,请用false === $result判断返回值
+     * @param string $str 要解密的字符串
+     * @param string $key 密钥
+     * @return string|boolean 成功返回解密后的字符串,失败返回false
      */
-    public function decrypt($data, $key)
+    public function xorDecrypt($str, $key)
     {
-        $key = $iv = md5($key, true);
-        return openssl_decrypt(base64_decode($data), 'AES-256-CBC', $key, OPENSSL_RAW_DATA, $iv);
+        $key = strtoupper(sha1($key));
+        $str = base64_decode(str_replace(["_$key[0]", "_$key[19]", "_$key[39]"], ['+', '/', '='], $str));
+        
+        $strLen = strlen($str);
+        $result = '';
+        for ($i = 0; $i < $strLen; $i++) {
+            $result .= chr(ord($str[$i]) ^ ord($key[$i % 40]));
+        }
+        $str = substr($result, 0, -32);
+        return substr($result, -32) === hash_hmac('sha256', $str, $key, true) ? $str : false;
     }
 }

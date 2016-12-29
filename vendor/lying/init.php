@@ -6,7 +6,9 @@ date_default_timezone_set('Asia/Shanghai');
 
 define('DIR_LYING', __DIR__);
 
-define('DIR_APP', ROOT . '/app');
+define('ROOT', realpath(DIR_LYING . '/../../'));
+
+define('DIR_MODULE', ROOT . '/module');
 
 define('DIR_CONF', ROOT . '/config');
 
@@ -20,6 +22,6 @@ spl_autoload_register([Lying::class, 'autoload']);
 
 Exception::register();
 
-Lying::$maker = new Maker(require(DIR_CONF . '/service.php'));
+Lying::$maker = new Maker(require DIR_CONF . '/service.php');
 
-require DIR_LYING . '/functions.php';
+require DIR_LYING . '/function.php';

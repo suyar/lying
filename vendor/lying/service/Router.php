@@ -9,24 +9,18 @@ class Router extends Service
      */
     public function parse()
     {
-        $request = maker()->request();
-        $uri = $request->uri();
+        $uri = maker()->request()->requestUri();
         $parse = parse_url($uri);
         
-        //解析普通get参数
-        parse_str(isset($parse['query']) ? $parse['query'] : '', $_GET);
-        
         //查找域名配置
-        $host = $request->host();
-        $config = maker()->config();
-        $conf = $config->get('router');
-        $conf = isset($conf[$host]) ? $conf[$host] : $conf['default'];
-        //设置路由配置为当前配置
-        $config->set('router', $conf);
+        $host = maker()->request()->host();
+        $config = maker()->config()->get('router');
+        $config = isset($config[$host]) ? $config[$host] : $config['default'];
         
         //分割
-        return $this->split(strtolower($parse['path']), $conf);
+        return $this->split($parse['path'], $config);
     }
+    
     
     /**
      * 分割path参数
@@ -37,6 +31,17 @@ class Router extends Service
      */
     public function split($path, $conf)
     {
+        if ($path !== '/' && isset($conf['suffix'])) {
+            
+        }
+        
+        
+        
+        var_dump($path);exit;
+        
+        
+        
+        
         $path = '/' . trim($path, '/');
         
         //判断后缀名

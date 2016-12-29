@@ -27,8 +27,7 @@ class Cookie extends Service
      * @return boolean 成功返回true,失败返回false
      */
     public function set($name, $value, $expire = 0, $path = '/', $domain = '', $secure = false, $httponly = false) {
-        $value = serialize($value);
-        $value = hash_hmac('sha256', $value, $this->key) . $value;
+        $value = maker()->secure()->xorEncrypt($value, $this->key);
         return setcookie($name, $value, $expire, $path, $domain, $secure, $httponly);
     }
     
@@ -40,25 +39,12 @@ class Cookie extends Service
      */
     public function get($name, $default = null) {
         if (isset($_COOKIE[$name])) {
-            $data = $this->validate($_COOKIE[$name]);
-            if ($data !== false) {
-                return $data;
+            $res = maker()->secure()->xorDecrypt($_COOKIE[$name], $this->key);
+            if (false !== $res) {
+                return $res;
             }
         }
         return $default;
-    }
-    
-    /**
-     * 校验cookie值
-     * @param string $cookie
-     * @return string|boolean 成功返回反序列化后的字符串,失败返回false
-     */
-    private function validate($cookie)
-    {
-        $hash = substr($cookie, 0, 64);
-        $data = substr($cookie, 64);
-        $validate = hash_hmac('sha256', $data, $this->key);
-        return substr_compare($validate, $hash, 0) === 0 ? unserialize($data) : false;
     }
     
     /**

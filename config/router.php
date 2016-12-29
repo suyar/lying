@@ -1,20 +1,31 @@
 <?php
 return [
-    'default'=>[//必须
-        'module'=>'index',//可选，如果不设置必须把module写进path里
-        'default_module'=>'index',//必须，当没有path的时候默认的module
-        'default_ctrl'=>'index',//必须
-        'default_action'=>'index',//必须
-        'suffix'=>'.html',//可选
+    //默认域名配置;必须
+    'default'=>[
+        //绑定的module;可选,如果定义了此参数,就没有办法通过path访问其他模块了
+        'module'=>'index',
+        //默认控制器;可选,默认为index
+        'default_ctrl'=>'index',
+        //默认方法;可选,默认为index
+        'default_action'=>'index',
+        //默认后缀;可选
+        'suffix'=>'.html',
+        //路由规则;必须
         'rule'=>[
             '/^\/post\/(\d+)$/'=>'/post/detail/id/:id',
         ],
     ],
-    'admin.lying.com'=>[//可选
-        'module'=>'admin',//必须
-        'default_ctrl'=>'index',//必须
-        'default_action'=>'index',//必须
-        'suffix'=>'.html',//可选
+    //指定域名配置;可选
+    'admin.lying.com'=>[
+        //绑定的module;必须
+        'module'=>'admin',
+        //默认控制器;可选,默认为index
+        'default_ctrl'=>'index',
+        //默认方法;可选,默认为index
+        'default_action'=>'index',
+        //默认后缀;可选
+        'suffix'=>'.html',
+        //路由规则;必须
         'rule'=>[
             
         ],
