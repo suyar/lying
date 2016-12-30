@@ -4,6 +4,12 @@ namespace lying\service;
 class Router extends Service
 {
     /**
+     * 当前路由
+     * @var array
+     */
+    private $router;
+    
+    /**
      * 解析路由
      * @return array 返回[$m, $c, $a]
      */
@@ -11,49 +17,96 @@ class Router extends Service
     {
         $uri = maker()->request()->requestUri();
         $parse = parse_url($uri);
-        //解析原生GET
+        
+        //解析原生GET;这里是为了去除转发规则中$_GET本身中无用的参数,可以注释掉
         parse_str(isset($parse['query']) ? $parse['query'] : '', $_GET);
+        
         //查找域名配置
         $host = maker()->request()->host();
         $config = maker()->config()->get('router');
         $config = isset($config[$host]) ? $config[$host] : $config['default'];
-        //分割
-        return $this->split($parse['path'], $config);
+        
+        //解析路由
+        return $this->resolve($parse['path'], $config);
     }
     
     /**
-     * 分割path参数
-     * @param string $path
-     * @param array $conf
+     * 分割PATH,路由匹配
+     * @param string $path 请求的路径,不包括queryString
+     * @param array $conf 配置参数
      * @throws \Exception
      * @return array
      */
-    private function split($path, $conf)
+    private function resolve($path, $conf)
     {
         //去掉index.php
         $path = trim(preg_replace('/^\/index\.php/i', '', $path, 1), '/');
+        
         //检查后缀名
         if ($path !== '' && isset($conf['suffix'])) {
-            $validate = 0;
-            $path = trim(preg_replace('/' . $conf['suffix'] . '$/i', '', $path, 1, $validate), '/');
+            $path = trim(preg_replace('/\\' . $conf['suffix'] . '$/i', '', $path, 1, $validate), '/');
             if ($validate === 0) {
                 throw new \Exception('Page not found.', 404);
             }
         }
-        //分割
-        $tmpArr = array_filter(explode('/', $path));
+        
+        //分割,过滤,重新索引
+        $tmpArr = array_values(array_filter(explode('/', $path)));
+        
+        //对每个元素进行url解码,包括键值
+        $tmpArr = array_map(function($val) {
+            return urldecode($val);
+        }, $tmpArr);
+        
+        //路由匹配
+        foreach ($conf['rule'] as $pattern => $rule) {
+            $patternArr = explode('/', $pattern);
+            //path个数不匹配,匹配下一个
+            if (count($tmpArr) < count($patternArr)) {
+                continue;
+            }
+            //映射参数
+            $route = array_shift($rule);
+            $params = [];
+            $match = true;
+            foreach ($patternArr as $i => $r) {
+                if (strncmp($r, ':', 1) === 0) {
+                    $key = ltrim($r, ':');
+                    //正则匹配
+                    if (isset($rule[$key]) && preg_match($rule[$key], $tmpArr[$i]) === 0) {
+                        $match = false;
+                        break;
+                    }
+                    array_push($params, $key, $tmpArr[$i]);
+                }elseif ($tmpArr[$i] !== $r) {
+                    $match = false;
+                    break;
+                }
+            }
+            //匹配到就不进行下一条匹配
+            if ($match) {
+                $tmpArr = array_merge(explode('/', $route), $params);
+                break;
+            }
+        }
+        
         //设置module,ctrl,action
         $m = isset($conf['module']) && $conf['module'] ? $conf['module'] : (($m = array_shift($tmpArr)) ? $m : 'index');
         $c = ($c = array_shift($tmpArr)) ? $c : (isset($conf['ctrl']) && $conf['ctrl'] ? $conf['ctrl'] : 'index');
         $a = ($a = array_shift($tmpArr)) ? $a : (isset($conf['action']) && $conf['action'] ? $conf['action'] : 'index');
-        //转换为驼峰
-        $m = $this->convert($m);
-        $c = $this->convert($c);
-        $a = $this->convert($a);
+        
+        //存下当前的路由,全部小写,没有转换成驼峰
+        $this->router = [strtolower($m), strtolower($c), strtolower($a)];
+        
         //解析多余的参数到GET
         $this->parseGet($tmpArr);
-        //返回当前请求的m,c,a
-        return [$m, $c.'Ctrl', $a];
+        
+        //转换为驼峰,返回当前请求的m,c,a
+        return [
+            $this->convert($this->router[0]),
+            $this->convert($this->router[1], true).'Ctrl',
+            $this->convert($this->router[2])
+        ];
     }
     
     /**
@@ -64,7 +117,7 @@ class Router extends Service
      */
     private function convert($val, $ucfirst = false)
     {
-        $val = str_replace(' ', '', ucwords(str_replace('-', ' ', strtolower($val))));
+        $val = str_replace(' ', '', ucwords(str_replace('-', ' ', $val)));
         return $ucfirst ? $val : lcfirst($val);
     }
     
@@ -79,6 +132,37 @@ class Router extends Service
             $value = array_shift($params);
             $_GET[$key] = $value ? $value : '';
         }
+    }
+    
+    /**
+     * 返回此次请求的路由
+     * @param boolean $string 是否以字符串的形式返回
+     * @return array|string user-name/index/index
+     */
+    public function router($string = false)
+    {
+        return $string ? implode('/', $this->router) : $this->router;
+    }
+    
+    
+    public function url($path, $params = [])
+    {
+        $routeArr = explode($path, '/');
+        $scheme = maker()->request()->scheme();
+        $host = maker()->request()->host();
+        
+        $conf = maker()->config()->get('router');
+        $suffix = isset($conf['suffix']) && $conf['suffix'] ? $conf['suffix'] : '';
+        
+        
+        switch (count($routeArr)) {
+            case 1:
+                
+        }
+        
+        
+        var_dump($this->router());
+        
     }
     
     /**

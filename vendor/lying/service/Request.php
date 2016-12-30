@@ -111,12 +111,12 @@ class Request extends Service
     }
     
     /**
-     * 返回当前请求的协议"HTTPS"或"HTTP"
+     * 返回当前请求的协议"https"或"http"
      * @return string
      */
     public function scheme()
     {
-        return isset($_SERVER['HTTPS']) && (strcasecmp($_SERVER['HTTPS'], 'on') === 0) ? 'HTTPS' : 'HTTP';
+        return isset($_SERVER['HTTPS']) && (strcasecmp($_SERVER['HTTPS'], 'on') === 0) ? 'https' : 'http';
     }
     
     /**
@@ -183,6 +183,10 @@ class Request extends Service
     {
         return isset($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO'] : null;
     }
+    
+    
+    
+    
     
     /**
      * 返回不为空的主机名;例如,abc.com,127.0.0.1

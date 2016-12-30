@@ -19,6 +19,12 @@ class IndexCtrl extends Ctrl
     
     public function del()
     {
-        echo '777';
+        var_dump($_GET);
+    }
+    
+    public function userName()
+    {
+        //var_dump($_GET);
+        maker()->router()->url('index/index/user', ['time'=>'2016-12-22', 'id'=>7]);
     }
 }
