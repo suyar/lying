@@ -24,8 +24,9 @@ class IndexCtrl extends Ctrl
     
     public function userName()
     {
+        echo "1000次反解析(秒):<br>";
         $s = microtime(true);
-        for ($i = 0; $i < 10000; $i++) {
+        for ($i = 0; $i < 1000; $i++) {
             $url = maker()->router()->url('user-name', [
                 'time'=>'2016-12-22',
                 'id'=>7,
