@@ -14,17 +14,25 @@ class IndexCtrl extends Ctrl
     
     public function index()
     {
-        var_dump($_GET);
+        var_dump(__METHOD__);
     }
     
     public function del()
     {
-        var_dump($_GET);
+        var_dump(__METHOD__);
     }
     
     public function userName()
     {
-        //var_dump($_GET);
-        maker()->router()->url('index/index/user', ['time'=>'2016-12-22', 'id'=>7]);
+        $s = microtime(true);
+        for ($i = 0; $i < 10000; $i++) {
+            $url = maker()->router()->url('user-name', [
+                'time'=>'2016-12-22',
+                'id'=>7,
+                'game'=>'lol+',
+                'type'=>'苏亚琦'
+            ]);
+        }
+        var_dump(microtime(true) - $s);
     }
 }

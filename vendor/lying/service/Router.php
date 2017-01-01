@@ -25,6 +25,8 @@ class Router extends Service
         $host = maker()->request()->host();
         $config = maker()->config()->get('router');
         $config = isset($config[$host]) ? $config[$host] : $config['default'];
+        //重新设置已经载入的router配置
+        maker()->config()->set('router', $config);
         
         //解析路由
         return $this->resolve($parse['path'], $config);
@@ -50,13 +52,16 @@ class Router extends Service
             }
         }
         
-        //分割,过滤,重新索引
-        $tmpArr = array_values(array_filter(explode('/', $path)));
+        //分割
+        $tmpArr = explode('/', $path);
         
         //对每个元素进行url解码,包括键值
         $tmpArr = array_map(function($val) {
             return urldecode($val);
         }, $tmpArr);
+        
+        //设置module
+        $m = isset($conf['module']) && $conf['module'] ? $conf['module'] : (($m = array_shift($tmpArr)) ? $m : 'index');
         
         //路由匹配
         foreach ($conf['rule'] as $pattern => $rule) {
@@ -85,13 +90,13 @@ class Router extends Service
             }
             //匹配到就不进行下一条匹配
             if ($match) {
-                $tmpArr = array_merge(explode('/', $route), $params);
+                $tmpArr = array_merge(explode('/', $route), $params, array_splice($tmpArr, count($patternArr)));
+                $m = array_shift($tmpArr);
                 break;
             }
         }
         
-        //设置module,ctrl,action
-        $m = isset($conf['module']) && $conf['module'] ? $conf['module'] : (($m = array_shift($tmpArr)) ? $m : 'index');
+        //设置ctrl,action
         $c = ($c = array_shift($tmpArr)) ? $c : (isset($conf['ctrl']) && $conf['ctrl'] ? $conf['ctrl'] : 'index');
         $a = ($a = array_shift($tmpArr)) ? $a : (isset($conf['action']) && $conf['action'] ? $conf['action'] : 'index');
         
@@ -130,7 +135,7 @@ class Router extends Service
         while ($params) {
             $key = array_shift($params);
             $value = array_shift($params);
-            $_GET[$key] = $value ? $value : '';
+            $_GET[$key] = $value === null ? '' : $value;
         }
     }
     
@@ -144,77 +149,59 @@ class Router extends Service
         return $string ? implode('/', $this->router) : $this->router;
     }
     
-    
-    public function url($path, $params = [])
-    {
-        $routeArr = explode($path, '/');
-        $scheme = maker()->request()->scheme();
-        $host = maker()->request()->host();
-        
-        $conf = maker()->config()->get('router');
-        $suffix = isset($conf['suffix']) && $conf['suffix'] ? $conf['suffix'] : '';
-        
-        
-        switch (count($routeArr)) {
-            case 1:
-                
-        }
-        
-        
-        var_dump($this->router());
-        
-    }
-    
     /**
-     * 生成url
-     * @param string $path 形如"post"、"post/index"、"admin/post/index"或者完整网址,否则报错
-     * @param array $params 要带的参数，使用path模式/id/1/name/carol.
-     * 此参数只接受数组+字母组成的键/值,包含非数字、字母的参数会被忽略.
-     * 注意：如果此参数的键值为纯数字，则键值将会被忽略，如createUrl('post', [1])将会变成/path/1而不是/path/0/1.
-     * @param string $query 接受一个数组，此数组的参数会被编码成get参数的形式放在"?"之后.
-     * 所有带有特殊字符(+、空格、|、/、?、%、#、&、<、>等)的键/值对，都应该放在此参数.
-     * @throws \Exception
+     * url生成,支持反解析
+     * @param string $path 要生成的相对路径
+     * 如果路径post,则生成当前module,当前ctrl下的post方法;
+     * 如果路径post/index,则生成当前module,ctrl为PostCtrl下的index方法;
+     * 如果路径admin/post/index,则生成当前module为admin,ctrl为PostCtrl下的index方法;
+     * @param array $params 要生成的参数,如果有路由规则,参数中必须包含rule中的参数才能反解析
      * @return string
      */
-    public function createUrl($path, $params = [], $query = [])
+    public function url($path, $params = [])
     {
-        //如果是常规连接就带参数返回
-        if (strncmp($path, 'http://', 7) === 0 || strncmp($path, 'https://', 8) === 0) {
-            $query = $params ? http_build_query($params, '', '&', PHP_QUERY_RFC3986) : false;
-            return $path .= ($query ? "?$query" : '');
-        }
-        
-        $tmp = explode('/', $path);
-        //查询当前对应的配置
-        $host = $this->make()->getRequest()->host();
-        $conf = $this->make()->getConfig()->get('router');
-        $suffix = isset($conf['suffix']) && $conf['suffix'] ? $conf['suffix'] : '';
-        $module = isset($conf['module']) && $conf['module'];
-        
-        switch (count($tmp)) {
+        $route = explode('/', $path);
+        switch (count($route)) {
             case 1:
-                $url = $module ? ('/' . __CTRL__ . "/$tmp[0]") : ('/' . __MODULE__ . '/' . __CTRL__ . "/$tmp[0]");
+                $route = [$this->router[0], $this->router[1], $route[0]];
                 break;
             case 2:
-                $url = $module ? ("/$tmp[0]/$tmp[1]") : ('/' . __MODULE__ . "/$tmp[0]/$tmp[1]");
+                $route = [$this->router[0], $route[0], $route[1]];
                 break;
             case 3:
-                $url = "/$tmp[0]/$tmp[1]/$tmp[2]";
                 break;
             default:
-                throw new \Exception('The URL format is not correct', 500);
+                $route = $this->router;
         }
-        
-        //设置path形式的参数
-        foreach ($params as $key=>$param) {
-            if (ctype_alnum($key) && ctype_alnum($param)) {
-                $url .= is_numeric($key) ? "/$param" : "/$key/$param";
+        $route = implode('/', $route);
+        //匹配路由,反解析
+        $conf = maker()->config()->get('router');
+        foreach ($conf['rule'] as $r => $v) {
+            if ($route === $v[0]) {
+                preg_match_all('/:([^\/]+)/', $r, $matchs);
+                foreach ($matchs[1] as $m) {
+                    //寻找参数并且匹配参数正则,不匹配就继续寻找下一条规则
+                    if (!isset($params[$m]) || isset($v[$m]) && !preg_match($v[$m], $params[$m])) {
+                        continue 2;
+                    }
+                    $r = str_replace(":$m", urlencode($params[$m]), $r);
+                }
+                //反解析的参数都存在
+                $params = array_diff_key($params, array_flip($matchs[1]));
+                $route = $r;
+                break;
             }
         }
-        //设置格式化的query参数
-        $query = $query ? http_build_query($query, '', '&', PHP_QUERY_RFC3986) : false;
-        
-        $url .= $suffix . ($query ? "?$query" : '');
-        return $url;
+        //拼接参数        
+        $query = str_replace(['=', '&'], '/', http_build_query($params, '', '&', PHP_QUERY_RFC3986));
+        //协议类型
+        $scheme = maker()->request()->scheme();
+        //主机名
+        $host = maker()->request()->host();
+        //是否启用pathinfo
+        $webconf = maker()->config()->get('web');
+        //后缀
+        $suffix = isset($conf['suffix']) && $conf['suffix'] ? $conf['suffix'] : '';
+        return $scheme . '://' . $host . ($webconf['pathinfo'] ? '/index.php/' : '/') . $route . '/' . $query . $suffix;
     }
 }
