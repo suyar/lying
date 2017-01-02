@@ -189,9 +189,11 @@ class Router extends Service
                 //反解析的参数都存在
                 $params = array_diff_key($params, array_flip($matchs[1]));
                 $route = $r;
+                $match = true;
                 break;
             }
         }
+        
         //拼接参数        
         $query = str_replace(['=', '&'], '/', http_build_query($params, '', '&', PHP_QUERY_RFC3986));
         //协议类型
@@ -199,9 +201,13 @@ class Router extends Service
         //主机名
         $host = maker()->request()->host();
         //是否启用pathinfo
-        $webconf = maker()->config()->get('web');
+        $webconf = maker()->config()->get('web')['pathinfo'];
         //后缀
         $suffix = isset($conf['suffix']) && $conf['suffix'] ? $conf['suffix'] : '';
-        return $scheme . '://' . $host . ($webconf['pathinfo'] ? '/index.php/' : '/') . $route . '/' . $query . $suffix;
+        //没有匹配到并且设置了默认module,就去掉route的module
+        if (!isset($match) && isset($conf['module']) && $conf['module']) {
+            $route = preg_replace('/^'.$conf['module'].'\//', '', $route);
+        }
+        return $scheme . '://' . $host . ($webconf ? '/index.php/' : '/') . $route . '/' . $query . $suffix;
     }
 }
