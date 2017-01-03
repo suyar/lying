@@ -7,7 +7,7 @@ class Service
      * 初始化子类的成员变量
      * @param array $params 参数,key=>value形式的数组
      */
-    public function __construct($params = [])
+    final public function __construct($params = [])
     {
         foreach ($params as $key=>$param) {
             $this->$key = $param;

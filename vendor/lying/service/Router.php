@@ -158,7 +158,7 @@ class Router extends Service
      * @param array $params 要生成的参数,如果有路由规则,参数中必须包含rule中的参数才能反解析
      * @return string
      */
-    public function url($path, $params = [])
+    public function createUrl($path, $params = [])
     {
         $route = explode('/', $path);
         switch (count($route)) {

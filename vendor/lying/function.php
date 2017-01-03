@@ -29,3 +29,17 @@ function post($key = null, $default = null)
 {
     return $key === null ? (isset($_POST[$key]) ? $_POST[$key] : $default) : $_POST;
 }
+
+/**
+ * url生成,支持反解析
+ * @param string $path 要生成的相对路径
+ * 如果路径post,则生成当前module,当前ctrl下的post方法;
+ * 如果路径post/index,则生成当前module,ctrl为PostCtrl下的index方法;
+ * 如果路径admin/post/index,则生成当前module为admin,ctrl为PostCtrl下的index方法;
+ * @param array $params
+ * @return string
+ */
+function url($path, $params = [])
+{
+    return maker()->router()->createUrl($path, $params);
+}

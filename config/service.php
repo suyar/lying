@@ -1,17 +1,15 @@
 <?php
 return [
-    //以下不要更改
-    'config'=>'lying\service\Config',
-    'request'=>'lying\service\Request',
-    'router'=>'lying\service\Router',
-    'secure'=>'lying\service\Secure',
-    'session'=>'lying\service\Session',
-    
-    //以下可以更改
+    'session'=>[
+        'class'=>'lying\session\Session',
+        'cache'=>'db',
+    ],
     'cookie'=>[
         'class'=>'lying\service\Cookie',
         'key'=>'123456',
     ],
+    //以上session和cookie的id都不可变更
+    
     'cache'=>[
         'class'=>'lying\cache\FileCache',
     ],
@@ -36,6 +34,7 @@ return [
         'connection'=>'db',
         'table'=>'log',
     ],
+    
     
     
 ];

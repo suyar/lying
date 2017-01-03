@@ -18,7 +18,7 @@ class Maker
         'request'=>'lying\service\Request',
         'router'=>'lying\service\Router',
         'secure'=>'lying\service\Secure',
-        'session'=>'lying\service\Session',
+        'session'=>'lying\session\Session',
         'cookie'=>'lying\service\Cookie',
     ];
     

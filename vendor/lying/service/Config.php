@@ -25,7 +25,7 @@ class Config extends Service
     }
     
     /**
-     * 重置某个配置
+     * 重置某个配置,配置的改变并不会改变配置文件,只会改变运行时的配置
      * @param string $key 配置文件名
      * @param string $params 参数数组,默认为空
      */

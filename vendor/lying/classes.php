@@ -18,6 +18,9 @@ return [
     'lying\logger\FileLog' => DIR_LYING . '/logger/FileLog.php',
     'lying\logger\Logger' => DIR_LYING . '/logger/Logger.php',
     
+    'lying\session\Session' => DIR_LYING . '/session/Session.php',
+    'lying\session\CacheSession' => DIR_LYING . '/session/CacheSession.php',
+    
     'lying\service\Config' => DIR_LYING . '/service/Config.php',
     'lying\service\Maker' => DIR_LYING . '/service/Maker.php',
     'lying\service\Cookie' => DIR_LYING . '/service/Cookie.php',
@@ -25,5 +28,4 @@ return [
     'lying\service\Router' => DIR_LYING . '/service/Router.php',
     'lying\service\Secure' => DIR_LYING . '/service/Secure.php',
     'lying\service\Service' => DIR_LYING . '/service/Service.php',
-    'lying\service\Session' => DIR_LYING . '/service/Session.php',
 ];
