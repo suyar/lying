@@ -14,18 +14,13 @@ class IndexCtrl extends Ctrl
     
     public function index()
     {
-        $m = new \Memcached();
-        var_dump($m->addServer('localhost', 11211));
-        var_dump($m->getResultMessage());
-        var_dump($m->set('ip', false));
-        var_dump($m->getResultMessage());
+        var_dump(apcu_store(['66', '88'], null, 10));
     }
     
     public function get()
     {
-        $m = new \Memcached();
-        $m->addServer('localhost', 11211);
-        var_dump($m->get('ip'));
+        $res = maker()->cache()->get('key', 'suyaqi');
+        var_dump($res);
     }
     
     

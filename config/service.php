@@ -1,5 +1,13 @@
 <?php
 return [
+    //FileCache完美
+    'cache'=>[
+        'class'=>'lying\cache\FileCache',
+        'dir'=> DIR_RUNTIME . '/cache',
+        'gc'=>0.5,
+    ],
+    
+    
     'session'=>[
         'class'=>'lying\session\Session',
         'cache'=>'db',
@@ -10,9 +18,9 @@ return [
     ],
     //以上session和cookie的id都不可变更
     
-    'cache'=>[
-        'class'=>'lying\cache\FileCache',
-    ],
+    
+    
+    
     'db'=>[
         'class'=>'lying\db\Connection',
         'dsn'=>'mysql:host=127.0.0.1;dbname=lying',

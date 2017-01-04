@@ -10,7 +10,7 @@ class FileCache extends Cache
     protected $dir;
     
     /**
-     * 缓存清除的频率
+     * 垃圾清除的频率,数值为0到1之间,越小回收的越频繁
      * @var float
      */
     protected $gc = 0.5;
@@ -41,7 +41,7 @@ class FileCache extends Cache
      */
     public function gc()
     {
-        if (mt_rand(0, 10000) < ($this->gc % 10) * 10000) {
+        if (mt_rand(0, 10000) > $this->gc * 10000) {
             return $this->flush();
         }
         return false;

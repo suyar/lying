@@ -5,10 +5,11 @@ return [
     'lying\base\Model' => DIR_LYING . '/base/Model.php',
     'lying\base\View' => DIR_LYING . '/base/View.php',
     
+    'lying\cache\ApcCache' => DIR_LYING . '/cache/ApcCache.php',
     'lying\cache\Cache' => DIR_LYING . '/cache/Cache.php',
     'lying\cache\DbCache' => DIR_LYING . '/cache/DbCache.php',
     'lying\cache\FileCache' => DIR_LYING . '/cache/FileCache.php',
-    'lying\cache\Memcached' => DIR_LYING . '/cache/Memcached.php',
+    'lying\cache\MemCached' => DIR_LYING . '/cache/MemCached.php',
     
     'lying\db\Connection' => DIR_LYING . '/db/Connection.php',
     'lying\db\QueryBuilder' => DIR_LYING . '/db/QueryBuilder.php',
@@ -19,7 +20,6 @@ return [
     'lying\logger\Logger' => DIR_LYING . '/logger/Logger.php',
     
     'lying\session\Session' => DIR_LYING . '/session/Session.php',
-    'lying\session\CacheSession' => DIR_LYING . '/session/CacheSession.php',
     
     'lying\service\Config' => DIR_LYING . '/service/Config.php',
     'lying\service\Maker' => DIR_LYING . '/service/Maker.php',
