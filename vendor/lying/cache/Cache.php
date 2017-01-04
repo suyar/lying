@@ -6,31 +6,62 @@ use lying\service\Service;
 abstract class Cache extends Service
 {
     /**
-     * 读取缓存
-     * @param string $key 缓存的键
-     * @return boolean|string 缓存的数据
+     * 存储一个元素
+     * @param string $key 键名
+     * @param mixed $data 数据
+     * @param integer $expiration 有效时间,默认为0
+     * @return boolean 成功返回tuue,失败返回false
+     */
+    abstract public function set($key, $data, $expiration = 0);
+    
+    /**
+     * 检索一个元素
+     * @param string $key 键名
+     * @return mixed 返回存储的值,失败返回false
      */
     abstract public function get($key);
     
     /**
-     * 设置缓存
-     * @param string $key 缓存的键
-     * @param string $data 缓存的数据
-     * @param int $exp 缓存时间,如果小等于0则默认为一年
-     * @return boolean 设置是否成功
+     * 批量设置缓存
+     * @param array $data 一个key=>value形式的数组
+     * @param integer $expiration 有效时间,默认为0
+     * @return boolean 成功返回true,失败返回false
      */
-    abstract public function set($key, $data, $exp);
+    abstract public function mset($data, $expiration = 0);
     
     /**
-     * 删除一个缓存数据
-     * @param string $key 缓存的键
-     * @return boolean 删除是否成功
+     * 批量读取缓存
+     * @param array $keys 检索key的数组
+     * @return array|boolean 成功返回元素的数组,失败返回false
      */
-    abstract public function remove($key);
+    abstract public function mget($keys);
     
     /**
-     * 删除过期的缓存
+     * 检索一个键名是否存在
+     * @param string $key 键名
+     * @return boolean 存在返回true,不存在或者失败返回false
      */
-    abstract public function gc();
+    abstract public function exist($key);
+    
+    /**
+     * 删除一个缓存
+     * @param string $key 键名
+     * @return boolean 成功返回true,失败或者不存在返回false
+     */
+    abstract public function del($key);
+    
+    /**
+     * 重新设置有效时间
+     * @param string $key 键名
+     * @param integer $expiration 有效时间,默认为0
+     * @return boolean 成功返回true,失败返回false
+     */
+    abstract public function touch($key, $expiration = 0);
+    
+    /**
+     * 删除所有缓存
+     * @return boolean 成功返回true,失败返回false
+     */
+    abstract public function flush();
 }
 

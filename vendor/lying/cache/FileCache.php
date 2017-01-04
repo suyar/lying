@@ -10,15 +10,54 @@ class FileCache extends Cache
     protected $dir;
     
     /**
-     * 缓存清除的几率
+     * 缓存清除的频率
      * @var float
      */
     protected $gc = 0.5;
     
+    /**
+     * 初始化缓存文件夹
+     * 默认为runtime/cache
+     */
     protected function init()
     {
         $this->dir = $this->dir ? $this->dir : DIR_RUNTIME . '/cache';
         !is_dir($this->dir) && mkdir($this->dir, 0777, true);
+    }
+    
+    /**
+     * 生成缓存文件名
+     * @param string $key 键值
+     * @return string 生成的文件名
+     */
+    private function cacheFile($key)
+    {
+        return $this->dir . '/' . md5($key) . '.bin';
+    }
+    
+    /**
+     * 概率回收垃圾
+     * @return boolean 回收成功返回true,失败或者未回收返回false
+     */
+    public function gc()
+    {
+        if (mt_rand(0, 10000) < ($this->gc % 10) * 10000) {
+            return $this->flush();
+        }
+        return false;
+    }
+    
+    /**
+     * @see \lying\cache\Cache::set()
+     */
+    public function set($key, $data, $expiration = 0)
+    {
+        $this->gc();
+        $cacheFile = $this->cacheFile($key);
+        if (file_put_contents($cacheFile, serialize($data), LOCK_EX) !== false) {
+            return touch($cacheFile, time() + ($expiration > 0 ? $expiration : 31536000));
+        }
+        return false;
     }
     
     /**
@@ -34,45 +73,74 @@ class FileCache extends Cache
                 $cacheValue = stream_get_contents($fp);
                 flock($fp, LOCK_UN);
                 fclose($fp);
-                return $cacheValue;
+                return unserialize($cacheValue);
             }
         }
         return false;
     }
     
     /**
-     * @see \lying\cache\Cache::set()
+     * @see \lying\cache\Cache::mset()
+     * @return boolean 如果有一个失败就返回false,这不能作为是否全部失败的标志
      */
-    public function set($key, $data, $exp)
+    public function mset($data, $expiration = 0)
     {
-        $this->gc();
-        $cacheFile = $this->dir . '/' . md5($key) . '.bin';
-        if (file_put_contents($cacheFile, $data, LOCK_EX) !== false) {
-            return touch($cacheFile, time() + ($exp > 0 ? $exp : time()) );
+        $stat = true;
+        foreach ($data as $k => $d) {
+            $stat = $stat && $this->set($k, $d);
         }
-        return false;
+        return $stat;
     }
     
     /**
-     * @see \lying\cache\Cache::remove()
+     * @see \lying\cache\Cache::mget()
      */
-    public function remove($key)
+    public function mget($keys)
     {
-        $cacheFile = $this->dir . '/' . md5($key) . '.bin';
+        $values = [];
+        foreach ($keys as $k) {
+            $values[] = $this->get($k);
+        }
+        return $values ? $values : false;
+    }
+    
+    /**
+     * @see \lying\cache\Cache::exist()
+     */
+    public function exist($key)
+    {
+        $cacheFile = $this->cacheFile($key);
+        return file_exists($cacheFile) && filemtime($cacheFile) > time();
+    }
+    
+    /**
+     * @see \lying\cache\Cache::del()
+     */
+    public function del($key)
+    {
+        $cacheFile = $this->cacheFile($key);
         return file_exists($cacheFile) && unlink($cacheFile);
     }
     
     /**
-     * @see \lying\cache\Cache::gc()
+     * @see \lying\cache\Cache::touch()
      */
-    public function gc()
+    public function touch($key, $expiration = 0)
     {
-        if (mt_rand(0, 10000) < $this->gc * 10000 && $arr = glob($this->dir . '/*.bin')) {
-            foreach ($arr as $f) {
-                if (filemtime($f) < time()) {
-                    unlink($f);
-                }
+        $cacheFile = $this->cacheFile($key);
+        return file_exists($cacheFile) && touch($cacheFile, time() + ($expiration > 0 ? $expiration : 31536000));
+    }
+    
+    /**
+     * @see \lying\cache\Cache::flush()
+     */
+    public function flush()
+    {
+        foreach (glob($this->dir . '/*.bin') as $file) {
+            if (filemtime($file) < time()) {
+                unlink($file);
             }
         }
+        return true;
     }
 }
