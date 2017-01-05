@@ -1,11 +1,29 @@
 <?php
 return [
-    //FileCache完美
-    'cache'=>[
+    //缓存类
+    'FileCache'=>[
         'class'=>'lying\cache\FileCache',
         'dir'=> DIR_RUNTIME . '/cache',
         'gc'=>0.5,
     ],
+    'ApcCache'=>[
+        'class'=>'lying\cache\ApcCache',
+        'apcu'=>true,
+    ],
+    'Memcached'=>[
+        'class'=>'lying\cache\MemCached',
+        'servers'=>[
+            ['127.0.0.1', 11211, 50],
+        ],
+        /*'options'=>[
+            \Memcached::OPT_BINARY_PROTOCOL=>true,
+        ],
+        'username'=>'user',
+        'password'=>'pass',*/
+    ],
+    
+    
+    
     
     
     'session'=>[

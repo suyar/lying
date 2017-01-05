@@ -25,7 +25,7 @@ abstract class Cache extends Service
      * 批量设置缓存
      * @param array $data 一个key=>value形式的数组
      * @param integer $expiration 有效时间,默认为0
-     * @return boolean 成功返回true,失败返回false
+     * @return boolean 成功返回true,失败返回false或者未成功的键的数组,具体请参考各个缓存类的注释
      */
     abstract public function mset($data, $expiration = 0);
     
@@ -37,7 +37,8 @@ abstract class Cache extends Service
     abstract public function mget($keys);
     
     /**
-     * 检索一个键名是否存在
+     * 检索一个键名是否存在(过期为不存在),与值无关;
+     * 此函数可以区分值为false和取值失败,值为false也可能返回true
      * @param string $key 键名
      * @return boolean 存在返回true,不存在或者失败返回false
      */

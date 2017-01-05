@@ -14,13 +14,14 @@ class IndexCtrl extends Ctrl
     
     public function index()
     {
-        var_dump(apcu_store(['66', '88'], null, 10));
+        
+        
     }
     
     public function get()
     {
-        $res = maker()->cache()->get('key', 'suyaqi');
-        var_dump($res);
+        
+        
     }
     
     

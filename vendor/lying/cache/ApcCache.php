@@ -27,11 +27,12 @@ class ApcCache extends Cache
     
     /**
      * @see \lying\cache\Cache::mset()
+     * @return array 返回设置失败的键值数组
      */
     public function mset($data, $expiration = 0)
     {
         $res = $this->apcu ? apcu_store($data, null, $expiration) : apc_store($data, null, $expiration);
-        
+        return is_array($res) ? array_keys($res) : [];
     }
     
     /**
@@ -39,11 +40,7 @@ class ApcCache extends Cache
      */
     public function mget($keys)
     {
-        $values = [];
-        foreach ($keys as $k) {
-            $values[] = $this->get($k);
-        }
-        return $values ? $values : false;
+        return $this->apcu ? apcu_fetch($keys) : apc_fetch($keys);
     }
     
     /**
@@ -51,8 +48,7 @@ class ApcCache extends Cache
      */
     public function exist($key)
     {
-        $cacheFile = $this->cacheFile($key);
-        return file_exists($cacheFile) && filemtime($cacheFile) > time();
+        return $this->apcu ? apcu_exists($key) : apc_exists($key);
     }
     
     /**
@@ -60,8 +56,7 @@ class ApcCache extends Cache
      */
     public function del($key)
     {
-        $cacheFile = $this->cacheFile($key);
-        return file_exists($cacheFile) && unlink($cacheFile);
+        return $this->apcu ? apcu_delete($key) : apc_delete($key);
     }
     
     /**
@@ -69,8 +64,7 @@ class ApcCache extends Cache
      */
     public function touch($key, $expiration = 0)
     {
-        $cacheFile = $this->cacheFile($key);
-        return file_exists($cacheFile) && touch($cacheFile, time() + ($expiration > 0 ? $expiration : 31536000));
+        return $this->exist($key) !== false ? $this->set($key, $this->get($key), $expiration) : false;
     }
     
     /**
@@ -78,11 +72,6 @@ class ApcCache extends Cache
      */
     public function flush()
     {
-        foreach (glob($this->dir . '/*.bin') as $file) {
-            if (filemtime($file) < time()) {
-                unlink($file);
-            }
-        }
-        return true;
+        return $this->apcu ? apcu_clear_cache() : apc_clear_cache('user');
     }
 }

@@ -81,15 +81,15 @@ class FileCache extends Cache
     
     /**
      * @see \lying\cache\Cache::mset()
-     * @return boolean 如果有一个失败就返回false,这不能作为是否全部失败的标志
+     * @return array 返回设置失败的键值数组
      */
     public function mset($data, $expiration = 0)
     {
-        $stat = true;
+        $failed = [];
         foreach ($data as $k => $d) {
-            $stat = $stat && $this->set($k, $d);
+            $this->set($k, $d) ? $failed[] = $k : '';
         }
-        return $stat;
+        return $failed;
     }
     
     /**
