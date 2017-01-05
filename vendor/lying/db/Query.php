@@ -6,9 +6,9 @@ class Query
     
     protected $select;
     
-    protected $from;
-    
     protected $distinct;
+    
+    protected $from;
     
     protected $join;
     
