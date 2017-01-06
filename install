@@ -1,0 +1,54 @@
+[Apache2.4.25]
+gcc,
+apr, apr-devel,
+apr-util, apr-util-devel,
+pcre, pcre-devel,
+perl 5,
+openssl, openssl-devel
+
+./configure --prefix=/usr/local/apache2 --with-ssl
+make
+make install
+
+./apachectl -k start|stop|restart
+
+[PHP7.1.0]
+gcc,
+libxml2, libxml2-devel,
+bzip2, bzip2-devel,
+zlib, zlib-devel,
+libmcrypt, libmcrypt-devel,
+openssl, openssl-devel,
+libjpeg-turbo, libjpeg-turbo-devel,
+libpng, libpng-devel,
+libcurl, libcurl-devel,
+
+./configure
+--prefix=/usr/local/php7
+--with-apxs2=/usr/local/apache2/bin/apxs
+--with-bz2
+--with-zlib
+--with-mcrypt
+--with-openssl
+--enable-mbstring
+--with-mysqli=mysqlnd
+--with-pdo-mysql=mysqlnd
+--enable-calendar
+--enable-exif
+
+--with-gd
+--with-jpeg-dir
+--with-png-dir
+--with-ttf
+--with-t1lib
+--enable-gd-native-ttf
+
+--enable-bcmath
+--with-curl
+--enable-ftp
+--enable-libxml
+
+
+./configure --with-apxs2=/usr/local/apache2/bin/apxs --with-bz2 --with-zlib --with-mcrypt --with-openssl --enable-mbstring --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --enable-calendar --enable-exif --with-gd --with-jpeg-dir --with-png-dir --with-ttf --with-t1lib --enable-gd-native-ttf --enable-bcmath --with-curl --enable-ftp --enable-libxml
+
+
