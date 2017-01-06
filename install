@@ -39,8 +39,6 @@ libcurl, libcurl-devel,
 --with-gd
 --with-jpeg-dir
 --with-png-dir
---with-ttf
---with-t1lib
 --enable-gd-native-ttf
 
 --enable-bcmath
@@ -49,6 +47,6 @@ libcurl, libcurl-devel,
 --enable-libxml
 
 
-./configure --with-apxs2=/usr/local/apache2/bin/apxs --with-bz2 --with-zlib --with-mcrypt --with-openssl --enable-mbstring --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --enable-calendar --enable-exif --with-gd --with-jpeg-dir --with-png-dir --with-ttf --with-t1lib --enable-gd-native-ttf --enable-bcmath --with-curl --enable-ftp --enable-libxml
+./configure --prefix=/usr/local/php7 --with-apxs2=/usr/local/apache2/bin/apxs --with-bz2 --with-zlib --with-mcrypt --with-openssl --enable-mbstring --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --enable-calendar --enable-exif --with-gd --with-jpeg-dir --with-png-dir --enable-gd-native-ttf --enable-bcmath --with-curl --enable-ftp --enable-libxml
 
 
