@@ -14,7 +14,11 @@ class IndexCtrl extends Ctrl
     
     public function index()
     {
-        $query = (new \lying\db\Query())->build();
+        $query = (new \lying\db\Query())
+        ->select(['u'=>'lying.user'])
+        ->from('user')
+        ->build();
+        var_dump($query);
     }
     
     public function get()
