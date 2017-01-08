@@ -14,7 +14,7 @@ class IndexCtrl extends Ctrl
     
     public function index()
     {
-        var_dump(preg_split('/\s*,\s*/', 'id, username, 666', -1, PREG_SPLIT_NO_EMPTY));
+        $query = (new \lying\db\Query())->build();
     }
     
     public function get()

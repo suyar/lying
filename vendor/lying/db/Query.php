@@ -4,9 +4,9 @@ namespace lying\db;
 class Query
 {
     
-    protected $select;
+    protected $select = [];
     
-    protected $distinct;
+    protected $distinct = false;
     
     protected $from;
     
@@ -79,6 +79,34 @@ class Query
     public function where($condition, $params = [])
     {
         $this->where = $condition;
+        
+    }
+    
+    //======================================================================================//
+    
+    
+    private function quoteColumns($name)
+    {
+        
+    }
+    
+    private function buildSelect(&$params, $distinct)
+    {
+        $columns = [];
+        foreach ($this->select as $key => $val) {
+            if ($val instanceof self) {
+                list($statememt, $p) = $val->build();
+                $params = array_merge($params, $p);
+                $columns[] = is_string($key) ? $statememt : "($statememt)";
+            }
+        }
+    }
+    
+    public function build()
+    {
+        $params = [];
+        $this->buildSelect($params, $this->distinct);
+        var_dump($params);
         
     }
     
