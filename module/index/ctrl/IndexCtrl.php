@@ -23,7 +23,9 @@ class IndexCtrl extends Ctrl
     
     public function get()
     {
-        
+        $a = [2=>'pp',3=>'oo'];
+        $b = [2=>'dd', 3=>'cc'];
+        var_dump(array_merge($a, $b));
         
     }
     

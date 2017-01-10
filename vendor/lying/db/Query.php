@@ -73,7 +73,7 @@ class Query
      * @param string $type 连接类型,left join,right join,inner join
      * @param string|array $table 要连接的表,子查询用数组形式表示,键值为别名
      * @param string|array $on 条件,如果要使用'字段1 = 字段2'的形式,请用字符串带入,用数组的话字段2将被解析为绑定参数
-     * @param array $params 绑定的参数
+     * @param array $params 绑定的参数,应为key=>value形式
      * @return \lying\db\Query
      */
     public function join($type, $table, $on = '', $params = [])
@@ -161,17 +161,26 @@ class Query
         return empty($tables) ? '' : 'FROM ' . implode(', ', $tables);
     }
     
-    
+    /**
+     * 组建表关联
+     * @param array $params 绑定的参数
+     * @return string
+     */
     private function buildJoin(&$params)
     {
         $joins = [];
         foreach ($this->join as $key => $join) {
             list($type, $table, $on, $par) = $join;
             $type = strtoupper(trim($type));
-            $tables = $this->quoteColumns((array)$table, $params);
-            $table = reset($tables);
             if (in_array($type, ['LEFT JOIN', 'RIGHT JOIN', 'INNER JOIN'])) {
+                $tables = $this->quoteColumns((array)$table, $params);
+                $table = reset($tables);
                 $joins[$key] = "$type $table";
+                $condition = $this->buildCondition($on, $par);
+                if ($condition) {
+                    $params = array_merge($params, $par);
+                    $joins[$key] .= " ON $condition";
+                }
             }
         }
         return implode(' ', $joins);
@@ -180,16 +189,32 @@ class Query
     
     public function buildCondition($condition, &$params)
     {
-        
+        if (is_string($condition)) {
+            $tmp = [];
+            foreach ($params as $key => $param) {
+                if ($param instanceof self) {
+                    list($statememt, $p) = $param->build();
+                    $tmp = array_merge($tmp, $p);
+                    $condition = str_replace($key, "($statememt)", $condition);
+                }elseif (is_string($key)) {
+                    $tmp[] = $param;
+                    $condition = str_replace($key, '?', $condition);
+                }
+            }
+            $params = $tmp;
+            return trim($condition);
+        }
     }
     
     public function build()
     {
         $params = [];
-        $select = $this->buildSelect($params);
-        $from = $this->buildFrom($params);
-        $join = $this->buildJoin($params);
-        var_dump($select, $from, $join);
+        $sql = implode(' ', [
+            $this->buildSelect($params),
+            $this->buildFrom($params),
+            $this->buildJoin($params),
+        ]);
+        var_dump($sql, $params);
     }
     
 }
