@@ -17,8 +17,8 @@ class IndexCtrl extends Ctrl
         $query = (new \lying\db\Query())
         ->select(['u'=>'lying.user'])
         ->from('user')
+        ->join('left join', ['admin'])
         ->build();
-        var_dump($query);
     }
     
     public function get()
