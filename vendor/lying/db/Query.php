@@ -22,12 +22,14 @@ class Query
     protected $limit;
     
     /**
-     * 设置要查询的字段
+     * 设置要查询的字段,当没有设置要查询的字段的时候,默认为'*'
      * @param string|array $columns 要查询的字段
      * select('id, lying.sex, count(id) as count')
      * select(['id', 'lying.sex', 'count'=>'count(id)', 'q'=>$query])
      * 其中$query为Query实例子查询,子查询返回一个字段名,必须指定子查询的别名
      * 只有$columns为数组的时候才支持子查询
+     * 注意:当你使用到包含逗号的数据库表达式的时候,你必须使用数组的格式,以避免自动的错误的引号添加,例如:
+     * select(["CONCAT(first_name, ' ', last_name) AS full_name", 'email']);
      * @return \lying\db\Query
      */
     public function select($columns)
@@ -40,7 +42,7 @@ class Query
     }
     
     /**
-     * 是否使用DISTINCT选项
+     * 去重
      * @param boolean $use 是否使用,默认为true
      * @return \lying\db\Query
      */
@@ -69,19 +71,36 @@ class Query
     }
     
     /**
-     * 设置表连接
+     * 设置表连接,可多次调用
      * @param string $type 连接类型,left join,right join,inner join
      * @param string|array $table 要连接的表,子查询用数组形式表示,键值为别名
      * @param string|array $on 条件,如果要使用'字段1 = 字段2'的形式,请用字符串带入,用数组的话字段2将被解析为绑定参数
      * @param array $params 绑定的参数,应为key=>value形式
      * @return \lying\db\Query
      */
-    public function join($type, $table, $on = '', $params = [])
+    public function join($type, $table, $on = null, $params = [])
     {
         $this->join[] = [$type, $table, $on, $params];
         return $this;
     }
     
+    
+    /**
+     * 
+     * @param string|array $condition
+     * where("id = 1 and name = :name", [':name'=>'lying']);
+     * where(['id'=>1, 'name'=>'lying']);
+     * where();
+     * @param array $params
+     * @return \lying\db\Query
+     */
+    public function where($condition, $params = [])
+    {
+        $this->where = [$condition, $params];
+        return $this;
+    }
+    
+
     
     
     //======================================================================================//
@@ -121,12 +140,12 @@ class Query
      * @param array $params
      * @return array
      */
-    private function quoteColumns($columns, &$params)
+    private function quoteColumns($columns, &$container)
     {
         foreach ($columns as $key => $val) {
             if ($val instanceof self) {
-                list($statememt, $p) = $val->build();
-                $params = array_merge($params, $p);
+                list($statememt, $params) = $val->build();
+                $container = array_merge($container, $params);
                 $columns[$key] = "($statememt) AS " . $this->quoteColumn($key);
             }elseif (is_string($key)) {
                 $columns[$key] = $this->quoteColumn($val) . ' AS ' . $this->quoteColumn($key);
@@ -144,9 +163,9 @@ class Query
      * @param array $params 绑定的参数
      * @return string
      */
-    private function buildSelect(&$params)
+    private function buildSelect(&$container)
     {
-        $columns = $this->quoteColumns($this->select, $params);
+        $columns = $this->quoteColumns($this->select, $container);
         return ($this->distinct ? 'SELECT DISTINCT ' : 'SELECT ') . (empty($columns) ? '*' : implode(', ', $columns));
     }
     
@@ -155,9 +174,9 @@ class Query
      * @param array $params 绑定的参数
      * @return string
      */
-    private function buildFrom(&$params)
+    private function buildFrom(&$container)
     {
-        $tables = $this->quoteColumns($this->from, $params);
+        $tables = $this->quoteColumns($this->from, $container);
         return empty($tables) ? '' : 'FROM ' . implode(', ', $tables);
     }
     
@@ -166,19 +185,18 @@ class Query
      * @param array $params 绑定的参数
      * @return string
      */
-    private function buildJoin(&$params)
+    private function buildJoin(&$container)
     {
         $joins = [];
         foreach ($this->join as $key => $join) {
-            list($type, $table, $on, $par) = $join;
+            list($type, $table, $on, $params) = $join;
             $type = strtoupper(trim($type));
             if (in_array($type, ['LEFT JOIN', 'RIGHT JOIN', 'INNER JOIN'])) {
-                $tables = $this->quoteColumns((array)$table, $params);
+                $tables = $this->quoteColumns((array)$table, $container);
                 $table = reset($tables);
                 $joins[$key] = "$type $table";
-                $condition = $this->buildCondition($on, $par);
-                if ($condition) {
-                    $params = array_merge($params, $par);
+                if (!empty($on)) {
+                    $condition = $this->buildCondition($on, $params, $container);
                     $joins[$key] .= " ON $condition";
                 }
             }
@@ -187,22 +205,60 @@ class Query
     }
     
     
-    public function buildCondition($condition, &$params)
+    
+    private function buildWhere(&$container)
     {
-        if (is_string($condition)) {
-            $tmp = [];
-            foreach ($params as $key => $param) {
-                if ($param instanceof self) {
-                    list($statememt, $p) = $param->build();
-                    $tmp = array_merge($tmp, $p);
-                    $condition = str_replace($key, "($statememt)", $condition);
-                }elseif (is_string($key)) {
-                    $tmp[] = $param;
-                    $condition = str_replace($key, '?', $condition);
-                }
+        if (empty($this->where)) {
+            return '';
+        }
+        list($condition, $params) = $this->where;
+        $where = $this->buildCondition($condition, $params, $container);
+        return empty($where) ? '' : "WHERE $where";
+    }
+    
+    
+    
+    private function buildPlaceholders($params, &$container)
+    {
+        if (is_array($params)) {
+            foreach ($params as $k => $p) {
+                $params[$k] = $this->buildPlaceholders($p, $container);
             }
-            $params = $tmp;
-            return trim($condition);
+            return $params;
+        }elseif ($params instanceof self) {
+            list($statememt, $p) = $params->build();
+            $container = array_merge($container, $p);
+            return "($statememt)";
+        }else {
+            $container[] = $params;
+            return '?';
+        }
+    }
+    
+    
+    public function buildCondition($condition, $params, &$container)
+    {
+        if (empty($condition)) {
+            return '';
+        }elseif (is_string($condition)) {
+            $keys = array_keys($params);
+            $place = $this->buildPlaceholders($params, $container);
+            return str_replace($keys, $place, $condition);
+        }elseif (is_array($condition)) {
+            return $this->buildArrayCondition($condition, $container);
+        }else {
+            return '';
+        }
+    }
+    
+    
+    public function buildArrayCondition($condition, &$container)
+    {
+        $op = 'AND';
+        if (isset($condition[0]) && is_string($condition[0])) {
+            if (in_array(strtoupper($condition[0]), ['AND', 'OR'])) {
+                $op = strtoupper(array_shift($condition));
+            }
         }
     }
     
@@ -213,6 +269,8 @@ class Query
             $this->buildSelect($params),
             $this->buildFrom($params),
             $this->buildJoin($params),
+            $this->buildWhere($params),
+            
         ]);
         var_dump($sql, $params);
     }

@@ -17,15 +17,20 @@ class IndexCtrl extends Ctrl
         $query = (new \lying\db\Query())
         ->select(['u'=>'lying.user'])
         ->from('user')
-        ->join('left join', ['admin'])
+        ->join('left join', 'admin', 'user.id = admin.id')
+        ->where("id = :id, name= :name", [':id'=>1, ':name'=>'susu'])
         ->build();
     }
     
     public function get()
     {
-        $a = [2=>'pp',3=>'oo'];
-        $b = [2=>'dd', 3=>'cc'];
-        var_dump(array_merge($a, $b));
+        //a = 1 or b = 2 and c = 3 or d = 4
+        
+        $arr = [
+            'and',
+            ['or', 'a'=>1, 'b'=>2],
+            ['or', 'c'=>3, 'd'=>4]
+        ];
         
     }
     
