@@ -18,7 +18,7 @@ class IndexCtrl extends Ctrl
         ->select(['u'=>'lying.user'])
         ->from('user')
         ->join('left join', 'admin', 'user.id = admin.id')
-        ->where("id = :id, name= :name", [':id'=>1, ':name'=>'susu'])
+        ->where(['or', 'id'=>1, 'name'=>'lying'])
         ->build();
     }
     

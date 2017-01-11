@@ -252,13 +252,62 @@ class Query
     }
     
     
-    public function buildArrayCondition($condition, &$container)
+    private function buildArrayCondition($condition, &$container)
     {
-        $op = 'AND';
         if (isset($condition[0]) && is_string($condition[0])) {
             if (in_array(strtoupper($condition[0]), ['AND', 'OR'])) {
                 $op = strtoupper(array_shift($condition));
+            }else {
+                return $this->buildOperator($condition, $container);
             }
+        }
+        $where = [];
+        foreach ($condition as $key => $value) {
+            if (is_array($value)) {
+                if (isset($value[0]) && is_string($value[0]) && in_array(strtoupper($value[0]), ['AND', 'OR'])) {
+                    $where[] = $this->buildArrayCondition($value, $container);
+                }else {
+                    $where[] = $this->buildOperator($value, $container);
+                }
+            }else {
+                if ($value === null) {
+                    $where[] = "$key IS NULL";
+                }else {
+                    $place = $this->buildPlaceholders($value, $container);
+                    $where[] = "$key = $place";
+                }
+            }
+        }
+        return isset($op) && $op === 'OR' ? '(' . implode(' OR ', $where) . ')' : implode(' AND ', $where);
+    }
+    
+    private function buildOperator($condition, &$container)
+    {
+        list($operation, $field, $val) = $condition;
+        $place = is_bool($val) ? $val : $this->buildPlaceholders($val, $container);
+        switch (strtoupper($operation)) {
+            case 'IN':
+                return "$field IN (" . implode(', ', $place) . ")";
+            case 'NOT IN':
+                return "$field NOT IN (" . implode(', ', $place) . ")";
+            case 'BETWEEN':
+                list($p1, $p2) = $place;
+                return "$field BETWEEN $p1 AND $p2";
+            case 'NOT BETWEEN':
+                list($p1, $p2) = $place;
+                return "$field NOT BETWEEN $p1 AND $p2";
+            case 'LIKE':
+                return "$field LIKE $place";
+            case 'NOT LIKE':
+                return "$field NOT LIKE $place";
+            case 'NULL':
+                return $val === true ? "$field IS NULL" : "$field IS NOT NULL";
+            case 'EXISTS':
+                return "EXISTS $place";
+            case 'NOT EXISTS':
+                return "NOT EXISTS $place";
+            default:
+                return "$field $operation $place";
         }
     }
     
