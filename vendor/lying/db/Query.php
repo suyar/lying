@@ -3,24 +3,64 @@ namespace lying\db;
 
 class Query
 {
+    /**
+     * @var array 要查询的字段
+     * @see select()
+     */
     protected $select = [];
     
+    /**
+     * @var boolean 是否去重
+     * @see distinct()
+     */
     protected $distinct = false;
     
+    /**
+     * @var array 要查询的表
+     * @see from()
+     */
     protected $from = [];
     
+    /**
+     * @var array 要关联的表
+     * @see join()
+     */
     protected $join = [];
     
+    /**
+     * @var array 查询的条件
+     * @see where()
+     */
     protected $where = [[], []];
 
+    /**
+     * @var array 分组查询的条件
+     * @see groupBy()
+     */
     protected $groupBy = [];
     
+    /**
+     * @var array 筛选的条件
+     * @see having()
+     */
     protected $having = [[], []];
     
+    /**
+     * @var array 要排序的字段
+     * @see orderBy()
+     */
     protected $orderBy = [];
     
+    /**
+     * @var array 偏移和限制的条数
+     * @see limit()
+     */
     protected $limit = [];
     
+    /**
+     * @var array 联合查询的Query
+     * @see union()
+     */
     protected $union = [];
     
     /**
@@ -141,7 +181,7 @@ class Query
             foreach ($columns as $key => $column) {
                 if (preg_match('/^(.*?)\s+(asc|desc)$/i', $column, $matches)) {
                     $res[$matches[1]] = strcasecmp($matches[2], 'DESC') ? SORT_ASC : SORT_DESC;
-                }else {
+                } else {
                     $res[$column] = SORT_ASC;
                 }
             }
@@ -200,12 +240,12 @@ class Query
     {
         if (strpos($name, '(') !== false) {
             return $name;
-        }elseif (strpos($name, '.') !== false) {
+        } elseif (strpos($name, '.') !== false) {
             $cols = array_map(function($v) {
                 return $this->quoteSimple($v);
             }, preg_split('/\s*\.\s*/', $name, -1, PREG_SPLIT_NO_EMPTY));
             return implode('.', $cols);
-        }else {
+        } else {
             return $this->quoteSimple($name);
         }
     }
@@ -228,11 +268,11 @@ class Query
             if ($val instanceof self) {
                 list($statememt, $container) = $val->build($container);
                 $columns[$key] = "($statememt) AS " . $this->quoteColumn($key);
-            }elseif (is_string($key)) {
+            } elseif (is_string($key)) {
                 $columns[$key] = $this->quoteColumn($val) . ' AS ' . $this->quoteColumn($key);
-            }elseif (preg_match('/^(.*?)(?i:\s+as\s+|\s+)([\w\-_\.]+)$/', $val, $matches)) {
+            } elseif (preg_match('/^(.*?)(?i:\s+as\s+|\s+)([\w\-_\.]+)$/', $val, $matches)) {
                 $columns[$key] = $this->quoteColumn($matches[1]) . ' AS ' . $this->quoteColumn($matches[2]);
-            }else {
+            } else {
                 $columns[$key] = $this->quoteColumn($val);
             }
         }
@@ -250,13 +290,13 @@ class Query
     {
         if (empty($condition)) {
             return '';
-        }elseif (is_string($condition)) {
+        } elseif (is_string($condition)) {
             $keys = array_keys($params);
             $place = $this->buildPlaceholders($params, $container);
             return str_replace($keys, $place, $condition);
-        }elseif (is_array($condition)) {
+        } elseif (is_array($condition)) {
             return $this->buildArrayCondition($condition, $container);
-        }else {
+        } else {
             return '';
         }
     }
@@ -272,7 +312,7 @@ class Query
         if (isset($condition[0]) && is_string($condition[0])) {
             if (in_array(strtoupper($condition[0]), ['AND', 'OR'])) {
                 $op = strtoupper(array_shift($condition));
-            }else {
+            } else {
                 return $this->buildOperator($condition, $container);
             }
         }
@@ -280,12 +320,12 @@ class Query
             if (is_string($key)) {
                 if (is_array($value)) {
                     $where[$key] = $this->buildOperator(['IN', $key, $value], $container);
-                }elseif ($value === null) {
+                } elseif ($value === null) {
                     $where[$key] = $this->buildOperator(['NULL', $key, true], $container);
-                }else {
+                } else {
                     $where[$key] = $this->quoteColumn($key) . " = " . $this->buildPlaceholders($value, $container);
                 }
-            }elseif (is_array($value)) {
+            } elseif (is_array($value)) {
                 $where[$key] = $this->buildArrayCondition($value, $container);
             }
         }
@@ -342,10 +382,10 @@ class Query
                 $params[$k] = $this->buildPlaceholders($p, $container);
             }
             return $params;
-        }elseif ($params instanceof self) {
+        } elseif ($params instanceof self) {
             list($statememt, $container) = $params->build($container);
             return "($statememt)";
-        }else {
+        } else {
             $container[] = $params;
             return '?';
         }
@@ -442,7 +482,7 @@ class Query
         foreach ($this->orderBy as $name => $type) {
             if (is_string($name)) {
                 $sort[] = $this->quoteColumn($name) . ' ' . $sort_type[$type];
-            }else {
+            } else {
                 $sort[] = $this->quoteColumn($type) . ' ASC';
             }
         }
@@ -457,9 +497,9 @@ class Query
     {
         if (isset($this->limit[1]) && $this->limit[1] !== null) {
             return "LIMIT " . $this->limit[0] . ', ' . $this->limit[1];
-        }elseif (isset($this->limit[0])) {
+        } elseif (isset($this->limit[0])) {
             return "LIMIT " . $this->limit[0];
-        }else {
+        } else {
             return '';
         }
     }

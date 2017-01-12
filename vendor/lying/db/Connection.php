@@ -6,33 +6,25 @@ use lying\service\Service;
 class Connection extends Service
 {
     /**
-     * 数据源
-     * @var string
+     * @var string 数据源
+     * @see http://php.net/manual/en/pdo.construct.php
      */
     protected $dsn;
     
     /**
-     * 数据库账号
-     * @var string
+     * @var string 数据库账号
      */
     protected $user;
     
     /**
-     * 数据库密码
-     * @var string
+     * @var string 数据库密码
      */
     protected $pass;
     
     /**
-     * PDO实例
-     * @var \PDO
+     * @var \PDO PDO实例
      */
     private $dbh;
-    
-    /**
-     * @var Schema[] 表结构
-     */
-    private $tableSchema = [];
     
     /**
      * 获取数据库实例
@@ -51,24 +43,9 @@ class Connection extends Service
     }
     
     /**
-     * 获取表的结构
-     * @param string $table
-     * @return Schema
-     */
-    public function tableSchema($table)
-    {
-        if (isset($this->tableSchema[$table])) {
-            return $this->tableSchema[$table];
-        }
-        $fieldSchema = $this->pdo()->query("DESC `$table`")->fetchAll();
-        $this->tableSchema[$table] = new Schema($fieldSchema);
-        return $this->tableSchema[$table];
-    }
-    
-    /**
      * 预处理sql语句
-     * @param string $statement
-     * @return PDOStatement
+     * @param string $statement 准备要执行的语句
+     * @return \PDOStatement
      */
     public function prepare($statement)
     {
@@ -76,30 +53,17 @@ class Connection extends Service
     }
     
     /**
-     * 创建查询构造
-     * @return QueryBuilder
+     * 创建查询构造器
+     * @return Query
      */
     public function createQuery()
     {
-        return new QueryBuilder($this);
+        return new Query();
     }
     
     /**
-     * 给字符串加引号
-     * @param string $value
-     * @return boolean|string
-     */
-    public function quoteValue($value)
-    {
-        if (!is_string($value)) {
-            return $value;
-        }
-        return $this->pdo()->quote($value);
-    }
-    
-    /**
-     * 开始事务
-     * @return boolean
+     * 启动一个事务
+     * @return boolean 成功时返回true,或者在失败时返回false
      */
     public function beginTransaction()
     {
@@ -107,8 +71,8 @@ class Connection extends Service
     }
     
     /**
-     * 提交事务
-     * @return boolean
+     * 提交一个事务
+     * @return boolean 成功时返回true,或者在失败时返回false
      */
     public function commit()
     {
@@ -116,8 +80,8 @@ class Connection extends Service
     }
     
     /**
-     * 回滚事务
-     * @return boolean
+     * 回滚一个事务
+     * @return boolean 成功时返回true,或者在失败时返回false
      */
     public function rollBack()
     {
