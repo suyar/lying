@@ -17,9 +17,11 @@ class Query
     
     protected $having = [[], []];
     
-    protected $orderBy;
+    protected $orderBy = [];
     
-    protected $limit;
+    protected $limit = [];
+    
+    protected $union = [];
     
     /**
      * 设置要查询的字段
@@ -125,15 +127,56 @@ class Query
         return $this;
     }
     
-    
+    /**
+     * 设置排序
+     * @param $columns 要排序的字段和排序方式
+     * e.g. orderBy('id, name desc');
+     * e.g. orderBy(['id'=>SORT_DESC, 'name']);
+     * @return \lying\db\Query
+     */
     public function orderBy($columns)
     {
-        
+        if (is_string($columns)) {
+            $columns = preg_split('/\s*,\s*/', trim($columns), -1, PREG_SPLIT_NO_EMPTY);
+            foreach ($columns as $key => $column) {
+                if (preg_match('/^(.*?)\s+(asc|desc)$/i', $column, $matches)) {
+                    $res[$matches[1]] = strcasecmp($matches[2], 'DESC') ? SORT_ASC : SORT_DESC;
+                }else {
+                    $res[$column] = SORT_ASC;
+                }
+            }
+            $this->orderBy = isset($res) ? $res : [];
+        }else {
+            $this->orderBy = $columns;
+        }
+        return $this;
     }
-
     
+    /**
+     * 设置限制查询的条数
+     * @param int $offset 偏移的条数,如果只提供此参数,则等同于limit(0, $offset)
+     * e.g. limit(10);
+     * e.g. limit(5, 20);
+     * @param int $limit 限制的条数
+     * @return \lying\db\Query
+     */
+    public function limit($offset, $limit = null)
+    {
+        $this->limit = [$offset, $limit];
+        return $this;
+    }
     
-    //======================================================================================//
+    /**
+     * 设置联合查询,可多次使用
+     * @param Query $query 子查询
+     * @param boolean $all 是否使用UNION ALL,默认false
+     * @return \lying\db\Query
+     */
+    public function union(Query $query, $all = false)
+    {
+        $this->union[] = [$query, $all];
+        return $this;
+    }
     
     /**
      * 简单地给表名,字段加上"`"
@@ -183,8 +226,7 @@ class Query
     {
         foreach ($columns as $key => $val) {
             if ($val instanceof self) {
-                list($statememt, $params) = $val->build();
-                $container = array_merge($container, $params);
+                list($statememt, $container) = $val->build($container);
                 $columns[$key] = "($statememt) AS " . $this->quoteColumn($key);
             }elseif (is_string($key)) {
                 $columns[$key] = $this->quoteColumn($val) . ' AS ' . $this->quoteColumn($key);
@@ -301,8 +343,7 @@ class Query
             }
             return $params;
         }elseif ($params instanceof self) {
-            list($statememt, $p) = $params->build();
-            $container = array_merge($container, $p);
+            list($statememt, $container) = $params->build($container);
             return "($statememt)";
         }else {
             $container[] = $params;
@@ -380,7 +421,7 @@ class Query
     }
     
     /**
-     * 筛选条件
+     * 编译筛选条件
      * @param array $container 参数容器
      * @return string 返回编译后的条件语句
      */
@@ -391,19 +432,70 @@ class Query
         return empty($where) ? '' : "HAVING $having";
     }
     
-    
-    
-    public function build()
+    /**
+     * 编译排序方式
+     * @return string 返回排序语句
+     */
+    private function buildOrderBy()
     {
-        $params = [];
-        $sql = implode(' ', [
+        $sort_type = [SORT_ASC => 'ASC', SORT_DESC => 'DESC'];
+        foreach ($this->orderBy as $name => $type) {
+            if (is_string($name)) {
+                $sort[] = $this->quoteColumn($name) . ' ' . $sort_type[$type];
+            }else {
+                $sort[] = $this->quoteColumn($type) . ' ASC';
+            }
+        }
+        return isset($sort) ? 'ORDER BY ' . implode(', ', $sort) : '';
+    }
+    
+    /**
+     * 编译偏移和限制的条数
+     * @return string 返回编译后的LIMIT语句
+     */
+    private function buildLimit()
+    {
+        if (isset($this->limit[1]) && $this->limit[1] !== null) {
+            return "LIMIT " . $this->limit[0] . ', ' . $this->limit[1];
+        }elseif (isset($this->limit[0])) {
+            return "LIMIT " . $this->limit[0];
+        }else {
+            return '';
+        }
+    }
+    
+    /**
+     * 编译联合查询语句
+     * @param array $container 参数容器
+     * @return string 返回联合查询的语句
+     */
+    private function buildUnion(&$container)
+    {
+        foreach ($this->union as $union) {
+            list($statememt, $container) = $union[0]->build($container);
+            $unions[] = ($union[1] ? 'UNION ALL ' : 'UNION ') . "($statememt)";
+        }
+        return isset($unions) ? implode(' ', $unions) : '';
+    }
+    
+    /**
+     * 组件sql语句
+     * @param array $params 引用获取参数
+     * @return array 返回[$statememt, $params]
+     */
+    public function build(&$params = [])
+    {
+        $statememt = implode(' ', array_filter([
             $this->buildSelect($params),
             $this->buildFrom($params),
             $this->buildJoin($params),
             $this->buildWhere($params),
             $this->buildGroupBy(),
-        ]);
-        var_dump($sql, $params);
+            $this->buildHaving($params),
+            $this->buildOrderBy(),
+            $this->buildLimit(),
+            $this->buildUnion($params),
+        ]));
+        return [$statememt, $params];
     }
-    
 }
