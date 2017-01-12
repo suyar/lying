@@ -11,25 +11,24 @@ class Query
     
     protected $join = [];
     
-    protected $where;
+    protected $where = [[], []];
 
-    protected $groupBy;
+    protected $groupBy = [];
     
-    protected $having;
+    protected $having = [[], []];
     
     protected $orderBy;
     
     protected $limit;
     
     /**
-     * 设置要查询的字段,当没有设置要查询的字段的时候,默认为'*'
-     * @param string|array $columns 要查询的字段
-     * select('id, lying.sex, count(id) as count')
-     * select(['id', 'lying.sex', 'count'=>'count(id)', 'q'=>$query])
-     * 其中$query为Query实例子查询,子查询返回一个字段名,必须指定子查询的别名
-     * 只有$columns为数组的时候才支持子查询
-     * 注意:当你使用到包含逗号的数据库表达式的时候,你必须使用数组的格式,以避免自动的错误的引号添加,例如:
-     * select(["CONCAT(first_name, ' ', last_name) AS full_name", 'email']);
+     * 设置要查询的字段
+     * @param string|array $columns 要查询的字段,,当没有设置要查询的字段的时候,默认为'*'
+     * e.g. select('id, lying.sex, count(id) as count')
+     * e.g. select(['id', 'lying.sex', 'count'=>'count(id)', 'q'=>$query])
+     * 其中$query为Query实例,必须指定子查询的别名,只有$columns为数组的时候才支持子查询
+     * 注意:当你使用到包含逗号的数据库表达式的时候,你必须使用数组的格式,以避免自动的错误的引号添加
+     * e.g. select(["CONCAT(first_name, ' ', last_name) AS full_name", 'email']);
      * @return \lying\db\Query
      */
     public function select($columns)
@@ -42,11 +41,10 @@ class Query
     }
     
     /**
-     * 去重
-     * @param boolean $use 是否使用,默认为true
+     * 去除重复行
      * @return \lying\db\Query
      */
-    public function distinct($use = true)
+    public function distinct()
     {
         $this->distinct = true;
         return $this;
@@ -55,10 +53,9 @@ class Query
     /**
      * 设置要查询的表
      * @param string|array $tables 要查询的表
-     * from('user, lying.admin as ad')
-     * from(['user', 'ad'=>'lying.admin', 'q'=>$query])
-     * 其中$query为Query实例子查询,必须指定子查询的别名
-     * 只有$tables为数组的时候才支持子查询
+     * e.g. from('user, lying.admin as ad')
+     * e.g. from(['user', 'ad'=>'lying.admin', 'q'=>$query])
+     * 其中$query为Query实例,必须指定子查询的别名,只有$tables为数组的时候才支持子查询
      * @return \lying\db\Query
      */
     public function from($tables)
@@ -72,9 +69,9 @@ class Query
     
     /**
      * 设置表连接,可多次调用
-     * @param string $type 连接类型,left join,right join,inner join
-     * @param string|array $table 要连接的表,子查询用数组形式表示,键值为别名
-     * @param string|array $on 条件,如果要使用'字段1 = 字段2'的形式,请用字符串带入,用数组的话字段2将被解析为绑定参数
+     * @param string $type 连接类型,可以为'left join', 'right join', 'inner join'
+     * @param string|array $table 要连接的表,子查询用数组形式表示,键为别名,值为Query实例
+     * @param string|array $on 条件,如果要使用'字段1 = 字段2'的形式,请用字符串带入,用数组的话'字段2'将被解析为绑定参数
      * @param array $params 绑定的参数,应为key=>value形式
      * @return \lying\db\Query
      */
@@ -84,14 +81,14 @@ class Query
         return $this;
     }
     
-    
     /**
-     * 
-     * @param string|array $condition
-     * where("id = 1 and name = :name", [':name'=>'lying']);
-     * where(['id'=>1, 'name'=>'lying']);
-     * where();
-     * @param array $params
+     * 设置查询条件
+     * @param string|array $condition 要查询的条件
+     * 如果要使用'字段1 = 字段2'的形式,请用字符串带入,用数组的话'字段2'将被解析为绑定参数
+     * e.g. where("user.id = admin.id and name = :name", [':name'=>'lying']);
+     * e.g. where(['id'=>1, 'name'=>'lying']);
+     * e.g. where(['id'=>[1, 2, 3]], ['or', 'name'=>'lying', 'sex'=>1]);
+     * @param array $params 当$condition为字符串时,绑定参数的数组
      * @return \lying\db\Query
      */
     public function where($condition, $params = [])
@@ -100,15 +97,49 @@ class Query
         return $this;
     }
     
+    /**
+     * 设置分组查询
+     * @param string|array 要分组的字段
+     * e.g. groupBy('id, sex');
+     * e.g. groupBy(['id', 'sex']);
+     * @return \lying\db\Query
+     */
+    public function groupBy($columns)
+    {
+        if (is_string($columns)) {
+            $tables = preg_split('/\s*,\s*/', trim($columns), -1, PREG_SPLIT_NO_EMPTY);
+        }
+        $this->groupBy = $columns;
+        return $this;
+    }
+    
+    /**
+     * 聚合筛选
+     * @param string|array $condition 参见where()
+     * @param array $params 参见where()
+     * @return \lying\db\Query
+     */
+    public function having($condition, $params = [])
+    {
+        $this->having = [$condition, $params];
+        return $this;
+    }
+    
+    
+    public function orderBy($columns)
+    {
+        
+    }
 
     
     
     //======================================================================================//
     
     /**
-     * 给字段加上"`"
-     * @param string $name
-     * @return string
+     * 简单地给表名,字段加上"`"
+     * e.g. 'name' => '`name`'
+     * @param string $name 字段名
+     * @return string 字段名
      */
     private function quoteSimple($name)
     {
@@ -116,9 +147,11 @@ class Query
     }
     
     /**
-     * 给字段加上"`"
-     * @param string $name
-     * @return string
+     * 给复杂的表名,字段加上"`"
+     * e.g. 'lying.name' => '`lying`.`name`'
+     * 注意:'count(id)'并不会转义成'count(`id`)',而还是原来的'count(id)'
+     * @param string $name 字段名
+     * @return string 字段名
      */
     private function quoteColumn($name)
     {
@@ -135,10 +168,16 @@ class Query
     }
     
     /**
-     * 给字段加上"`"
-     * @param array $tables
-     * @param array $params
-     * @return array
+     * 给复杂的表名,字段加上"`",并且编译别名和子查询,请以数组形式传入字段名和表名
+     * 如,
+     * e.g. ['lying.name'] => ['`lying`.`name`']
+     * e.g. ['lying.name n'] => ['`lying`.`name` AS `n`']
+     * e.g. ['lying.name as n'] => ['`lying`.`name` AS `n`']
+     * e.g. ['n'=>'lying.name'] => ['`lying`.`name` AS `n`']
+     * e.g. ['n'=>$query] => ['(select ...) AS `n`'],其中$query为Query实例
+     * @param array $tables 一个存字段名或者表名的数组
+     * @param array $container 参数容器
+     * @return array 返回编译后的表名数组,数组键名和传入时一样
      */
     private function quoteColumns($columns, &$container)
     {
@@ -159,84 +198,13 @@ class Query
     }
     
     /**
-     * 组建查询的字段
-     * @param array $params 绑定的参数
-     * @return string
+     * 编译条件
+     * @param string|array $condition 条件字符串或者数组
+     * @param array $params 当$condition为字符串时,绑定参数的数组
+     * @param array $container 参数容器
+     * @return string 返回编译后的条件字符串
      */
-    private function buildSelect(&$container)
-    {
-        $columns = $this->quoteColumns($this->select, $container);
-        return ($this->distinct ? 'SELECT DISTINCT ' : 'SELECT ') . (empty($columns) ? '*' : implode(', ', $columns));
-    }
-    
-    /**
-     * 组建查询的表
-     * @param array $params 绑定的参数
-     * @return string
-     */
-    private function buildFrom(&$container)
-    {
-        $tables = $this->quoteColumns($this->from, $container);
-        return empty($tables) ? '' : 'FROM ' . implode(', ', $tables);
-    }
-    
-    /**
-     * 组建表关联
-     * @param array $params 绑定的参数
-     * @return string
-     */
-    private function buildJoin(&$container)
-    {
-        $joins = [];
-        foreach ($this->join as $key => $join) {
-            list($type, $table, $on, $params) = $join;
-            $type = strtoupper(trim($type));
-            if (in_array($type, ['LEFT JOIN', 'RIGHT JOIN', 'INNER JOIN'])) {
-                $tables = $this->quoteColumns((array)$table, $container);
-                $table = reset($tables);
-                $joins[$key] = "$type $table";
-                if (!empty($on)) {
-                    $condition = $this->buildCondition($on, $params, $container);
-                    $joins[$key] .= " ON $condition";
-                }
-            }
-        }
-        return implode(' ', $joins);
-    }
-    
-    
-    
-    private function buildWhere(&$container)
-    {
-        if (empty($this->where)) {
-            return '';
-        }
-        list($condition, $params) = $this->where;
-        $where = $this->buildCondition($condition, $params, $container);
-        return empty($where) ? '' : "WHERE $where";
-    }
-    
-    
-    
-    private function buildPlaceholders($params, &$container)
-    {
-        if (is_array($params)) {
-            foreach ($params as $k => $p) {
-                $params[$k] = $this->buildPlaceholders($p, $container);
-            }
-            return $params;
-        }elseif ($params instanceof self) {
-            list($statememt, $p) = $params->build();
-            $container = array_merge($container, $p);
-            return "($statememt)";
-        }else {
-            $container[] = $params;
-            return '?';
-        }
-    }
-    
-    
-    public function buildCondition($condition, $params, &$container)
+    private function buildCondition($condition, $params, &$container)
     {
         if (empty($condition)) {
             return '';
@@ -251,7 +219,12 @@ class Query
         }
     }
     
-    
+    /**
+     * 编译数组形式的条件
+     * @param array $condition 条件数组
+     * @param array $container 参数容器
+     * @return string 返回编译后的条件字符串
+     */
     private function buildArrayCondition($condition, &$container)
     {
         if (isset($condition[0]) && is_string($condition[0])) {
@@ -261,31 +234,34 @@ class Query
                 return $this->buildOperator($condition, $container);
             }
         }
-        $where = [];
         foreach ($condition as $key => $value) {
-            if (is_array($value)) {
-                if (isset($value[0]) && is_string($value[0]) && in_array(strtoupper($value[0]), ['AND', 'OR'])) {
-                    $where[] = $this->buildArrayCondition($value, $container);
+            if (is_string($key)) {
+                if (is_array($value)) {
+                    $where[$key] = $this->buildOperator(['IN', $key, $value], $container);
+                }elseif ($value === null) {
+                    $where[$key] = $this->buildOperator(['NULL', $key, true], $container);
                 }else {
-                    $where[] = $this->buildOperator($value, $container);
+                    $where[$key] = $this->quoteColumn($key) . " = " . $this->buildPlaceholders($value, $container);
                 }
-            }else {
-                if ($value === null) {
-                    $where[] = "$key IS NULL";
-                }else {
-                    $place = $this->buildPlaceholders($value, $container);
-                    $where[] = "$key = $place";
-                }
+            }elseif (is_array($value)) {
+                $where[$key] = $this->buildArrayCondition($value, $container);
             }
         }
         return isset($op) && $op === 'OR' ? '(' . implode(' OR ', $where) . ')' : implode(' AND ', $where);
     }
     
+    /**
+     * 编译['<', 'id', 1]形式的条件
+     * @param array $condition 条件数组
+     * @param array $container 参数容器
+     * @return string 返回编译后的条件字符串
+     */
     private function buildOperator($condition, &$container)
     {
         list($operation, $field, $val) = $condition;
-        $place = is_bool($val) ? $val : $this->buildPlaceholders($val, $container);
-        switch (strtoupper($operation)) {
+        $field = $this->quoteColumn($field);
+        $place = is_bool($val) ? '' : $this->buildPlaceholders($val, $container);
+        switch (trim(strtoupper($operation))) {
             case 'IN':
                 return "$field IN (" . implode(', ', $place) . ")";
             case 'NOT IN':
@@ -311,6 +287,112 @@ class Query
         }
     }
     
+    /**
+     * 绑定参数,编译占位符
+     * @param string|array $params 绑定的参数
+     * @param array $container 参数容器
+     * @return string|array 返回编译后的占位符字符串或者数组
+     */
+    private function buildPlaceholders($params, &$container)
+    {
+        if (is_array($params)) {
+            foreach ($params as $k => $p) {
+                $params[$k] = $this->buildPlaceholders($p, $container);
+            }
+            return $params;
+        }elseif ($params instanceof self) {
+            list($statememt, $p) = $params->build();
+            $container = array_merge($container, $p);
+            return "($statememt)";
+        }else {
+            $container[] = $params;
+            return '?';
+        }
+    }
+    
+    /**
+     * 编译查询的字段
+     * @param array $container 参数容器
+     * @return string 返回编译后的查询字段
+     */
+    private function buildSelect(&$container)
+    {
+        $columns = $this->quoteColumns($this->select, $container);
+        return ($this->distinct ? 'SELECT DISTINCT ' : 'SELECT ') . (empty($columns) ? '*' : implode(', ', $columns));
+    }
+    
+    /**
+     * 编译查询的表
+     * @param array $container 参数容器
+     * @return string 返回编译后的表
+     */
+    private function buildFrom(&$container)
+    {
+        $tables = $this->quoteColumns($this->from, $container);
+        return empty($tables) ? '' : 'FROM ' . implode(', ', $tables);
+    }
+    
+    /**
+     * 编译表关联
+     * @param array $container 参数容器
+     * @return string 返回编译后关联语句
+     */
+    private function buildJoin(&$container)
+    {
+        foreach ($this->join as $key => $join) {
+            list($type, $table, $on, $params) = $join;
+            $type = strtoupper(trim($type));
+            if (in_array($type, ['LEFT JOIN', 'RIGHT JOIN', 'INNER JOIN'])) {
+                $tables = $this->quoteColumns((array)$table, $container);
+                $table = reset($tables);
+                $joins[$key] = "$type $table";
+                if (!empty($on)) {
+                    $condition = $this->buildCondition($on, $params, $container);
+                    $joins[$key] .= " ON $condition";
+                }
+            }
+        }
+        return isset($joins) ? implode(' ', $joins) : '';
+    }
+    
+    /**
+     * 编译查询条件
+     * @param array $container 参数容器
+     * @return string 返回编译后的条件语句
+     */
+    private function buildWhere(&$container)
+    {
+        list($condition, $params) = $this->where;
+        $where = $this->buildCondition($condition, $params, $container);
+        return empty($where) ? '' : "WHERE $where";
+    }
+    
+    /**
+     * 编译分组查询
+     * @return string 返回编译后的GROUP BY语句
+     */
+    private function buildGroupBy()
+    {
+        foreach ($this->groupBy as $key => $col) {
+            $columns[$key] = $this->quoteColumn($col);
+        }
+        return isset($columns) ? 'GROUP BY ' . implode(', ', $columns) : '';
+    }
+    
+    /**
+     * 筛选条件
+     * @param array $container 参数容器
+     * @return string 返回编译后的条件语句
+     */
+    private function buildHaving(&$container)
+    {
+        list($condition, $params) = $this->having;
+        $having = $this->buildCondition($condition, $params, $container);
+        return empty($where) ? '' : "HAVING $having";
+    }
+    
+    
+    
     public function build()
     {
         $params = [];
@@ -319,7 +401,7 @@ class Query
             $this->buildFrom($params),
             $this->buildJoin($params),
             $this->buildWhere($params),
-            
+            $this->buildGroupBy(),
         ]);
         var_dump($sql, $params);
     }

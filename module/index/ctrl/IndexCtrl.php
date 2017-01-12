@@ -14,11 +14,23 @@ class IndexCtrl extends Ctrl
     
     public function index()
     {
+        $arr = [
+            'and',
+            'lying.name'=>'lying',
+            'id'=>[1,2,3],
+            'sex'=>null,
+            [
+                'or', 
+                ['and', 'a'=>1, 'b'=>2],
+                ['in', 'baby', [666,888]],
+            ],
+        ];
+        
         $query = (new \lying\db\Query())
         ->select(['u'=>'lying.user'])
         ->from('user')
         ->join('left join', 'admin', 'user.id = admin.id')
-        ->where(['or', 'id'=>1, 'name'=>'lying'])
+        ->where($arr)
         ->build();
     }
     
@@ -28,6 +40,7 @@ class IndexCtrl extends Ctrl
         
         $arr = [
             'and',
+            'name'=>'lying',
             ['or', 'a'=>1, 'b'=>2],
             ['or', 'c'=>3, 'd'=>4]
         ];
