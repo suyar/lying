@@ -2,6 +2,7 @@
 namespace module\index\ctrl;
 
 use lying\base\Ctrl;
+use lying\db\Query;
 
 class IndexCtrl extends Ctrl
 {
@@ -14,7 +15,11 @@ class IndexCtrl extends Ctrl
     
     public function index()
     {
+        $query = (new Query(maker()->db()))->from(['admin'])->where(['id'=>1])->select('name');
         
+        
+        
+        var_dump($query->column());
         
     }
     

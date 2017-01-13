@@ -4,6 +4,11 @@ namespace lying\db;
 class Query
 {
     /**
+     * @var Connection 数据库连接实例
+     */
+    private $connection;
+    
+    /**
      * @var array 要查询的字段
      * @see select()
      */
@@ -62,6 +67,15 @@ class Query
      * @see union()
      */
     protected $union = [];
+    
+    /**
+     * 初始化Query查询
+     * @param Connection $connection
+     */
+    public function __construct(Connection $connection)
+    {
+        $this->connection = $connection;
+    }
     
     /**
      * 设置要查询的字段
@@ -266,8 +280,8 @@ class Query
     {
         foreach ($columns as $key => $val) {
             if ($val instanceof self) {
-                list($statememt, $container) = $val->build($container);
-                $columns[$key] = "($statememt) AS " . $this->quoteColumn($key);
+                list($statement, $container) = $val->build($container);
+                $columns[$key] = "($statement) AS " . $this->quoteColumn($key);
             } elseif (is_string($key)) {
                 $columns[$key] = $this->quoteColumn($val) . ' AS ' . $this->quoteColumn($key);
             } elseif (preg_match('/^(.*?)(?i:\s+as\s+|\s+)([\w\-_\.]+)$/', $val, $matches)) {
@@ -383,8 +397,8 @@ class Query
             }
             return $params;
         } elseif ($params instanceof self) {
-            list($statememt, $container) = $params->build($container);
-            return "($statememt)";
+            list($statement, $container) = $params->build($container);
+            return "($statement)";
         } else {
             $container[] = $params;
             return '?';
@@ -428,8 +442,7 @@ class Query
                 $table = reset($tables);
                 $joins[$key] = "$type $table";
                 if (!empty($on)) {
-                    $condition = $this->buildCondition($on, $params, $container);
-                    $joins[$key] .= " ON $condition";
+                    $joins[$key] .= ' ON ' . $this->buildCondition($on, $params, $container);
                 }
             }
         }
@@ -512,8 +525,8 @@ class Query
     private function buildUnion(&$container)
     {
         foreach ($this->union as $union) {
-            list($statememt, $container) = $union[0]->build($container);
-            $unions[] = ($union[1] ? 'UNION ALL ' : 'UNION ') . "($statememt)";
+            list($statement, $container) = $union[0]->build($container);
+            $unions[] = ($union[1] ? 'UNION ALL ' : 'UNION ') . "($statement)";
         }
         return isset($unions) ? implode(' ', $unions) : '';
     }
@@ -521,11 +534,11 @@ class Query
     /**
      * 组件sql语句
      * @param array $params 引用获取参数
-     * @return array 返回[$statememt, $params]
+     * @return array 返回[$statement, $params]
      */
     public function build(&$params = [])
     {
-        $statememt = implode(' ', array_filter([
+        $statement = implode(' ', array_filter([
             $this->buildSelect($params),
             $this->buildFrom($params),
             $this->buildJoin($params),
@@ -536,6 +549,146 @@ class Query
             $this->buildLimit(),
             $this->buildUnion($params),
         ]));
-        return [$statememt, $params];
+        return [$statement, $params];
+    }
+    
+    /**
+     * 查询数据
+     * @param string $method 查询的方法
+     * @return mixed 查询的数据
+     */
+    private function fetch($method)
+    {
+        list($statement, $params) = $this->build();
+        $sth = $this->connection->prepare($statement);
+        $sth->execute($params);
+        $res = call_user_func([$sth, $method]);
+        $sth->closeCursor();
+        return $res;
+    }
+    
+    /**
+     * 返回结果集中的一条记录
+     * @return mixed
+     */
+    public function one()
+    {
+        return $this->fetch('fetch');
+    }
+    
+    /**
+     * 返回所有查询结果的数组
+     * @return mixed
+     */
+    public function all()
+    {
+        return $this->fetch('fetchAll');
+    }
+    
+    /**
+     * 从结果集中的下一行返回单独的一列,查询结果为标量
+     * @return mixed
+     */
+    public function column()
+    {
+        return $this->fetch('fetchColumn');
+    }
+    
+    /**
+     * 插入一条数据
+     * @param string $table 要插入的表名
+     * @param array $datas 要插入的数据,(name => value)形式的数组
+     * 当然value可以是子查询,Query的实例,但是查询的表不能和插入的表是同一个
+     * @return int 返回受影响的行数,有可能是0行
+     */
+    public function insert($table, $datas)
+    {
+        foreach ($datas as $col => $data) {
+            $cols[] = $this->quoteColumn($col);
+            if ($data instanceof self) {
+                list($statement, $params) = $data->build($params);
+                $palceholders[] = "($statement)";
+            } else {
+                $palceholders[] = $this->buildPlaceholders($data, $params);
+            }
+        }
+        $table = $this->quoteColumn($table);
+        $statement = "INSERT INTO $table (" . implode(', ', $cols) . ') VALUES (' . implode(', ', $palceholders) . ')';
+        $sth = $this->connection->prepare($statement);
+        $sth->execute($params);
+        return $sth->rowCount();
+    }
+    
+    /**
+     * 批量插入数据
+     * @param string $table 要插入的表名
+     * @param array $columns 要插入的字段名
+     * @param array $datas 要插入的数据,应为一个二维数组
+     * e.g. batchInsert('user', ['name', 'sex'], [
+     *     ['user1', 1],
+     *     ['user2', 0],
+     *     ['user3', 1],
+     * ])
+     * @return int 返回受影响的行数,有可能是0行
+     */
+    public function batchInsert($table, $columns, $datas)
+    {
+        foreach ($datas as $row) {
+            $v[] = '(' . implode(', ', $this->buildPlaceholders($row, $params)) . ')';
+        }
+        $table = $this->quoteColumn($table);
+        $columns = array_map(function($col) {
+            return $this->quoteColumn($col);
+        }, $columns);
+        $statement = "INSERT INTO $table (" . implode(', ', $columns) . ') VALUES ' . implode(', ', $v);
+        $sth = $this->connection->prepare($statement);
+        $sth->execute($params);
+        return $sth->rowCount();
+    }
+    
+    /**
+     * 更新数据
+     * @param string $table 要更新的表
+     * @param array $datas 要更新的数据,(name => value)形式的数组
+     * 当然value可以是子查询,Query的实例,但是查询的表不能和更新的表是同一个
+     * @param string|array $condition 更新的条件,参见where()
+     * @param array $params 条件的参数,参见where()
+     * @return int 返回受影响的行数,有可能是0行
+     */
+    public function update($table, $datas, $condition = '', $params = [])
+    {
+        foreach ($datas as $name => $data) {
+            if ($data instanceof self) {
+                list($statement, $p) = $data->build($p);
+                $palceholders[] = $this->quoteColumn($name) . " = ($statement)";
+            } else {
+                $palceholders[] = $this->quoteColumn($name) . ' = ' . $this->buildPlaceholders($data, $p);
+            }
+        }
+        $table = $this->quoteColumn($table);
+        $statement = "UPDATE $table SET " . implode(', ', $palceholders);
+        $where = $this->buildCondition($condition, $params, $p);
+        $statement = $statement . (empty($where) ? '' : " WHERE $where");
+        $sth = $this->connection->prepare($statement);
+        $sth->execute($p);
+        return $sth->rowCount();
+    }
+    
+    /**
+     * 删除数据
+     * @param string $table 要删除的表
+     * @param string|array $condition 删除的条件,参见where()
+     * @param array $params 条件的参数,参见where()
+     * @return int 返回受影响的行数,有可能是0行
+     */
+    public function delete($table, $condition = '', $params = [])
+    {
+        $table = $this->quoteColumn($table);
+        $statement = "DELETE FROM $table";
+        $where = $this->buildCondition($condition, $params, $p);
+        $statement = $statement . (empty($where) ? '' : " WHERE $where");
+        $sth = $this->connection->prepare($statement);
+        $sth->execute($p);
+        return $sth->rowCount();
     }
 }

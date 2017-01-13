@@ -13,8 +13,6 @@ return [
     
     'lying\db\Connection' => DIR_LYING . '/db/Connection.php',
     'lying\db\Query' => DIR_LYING . '/db/Query.php',
-    'lying\db\QueryBuilder' => DIR_LYING . '/db/QueryBuilder.php',
-    'lying\db\Schema' => DIR_LYING . '/db/Schema.php',
     
     'lying\logger\DbLog' => DIR_LYING . '/logger/DbLog.php',
     'lying\logger\FileLog' => DIR_LYING . '/logger/FileLog.php',
