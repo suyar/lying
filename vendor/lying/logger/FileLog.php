@@ -4,26 +4,22 @@ namespace lying\logger;
 class FileLog extends Logger
 {
     /**
-     * 日志存储的路径
-     * @var string
+     * @var string 日志存储的路径
      */
     protected $path;
     
     /**
-     * 日志文件名
-     * @var string
+     * @var string 日志文件名
      */
     protected $file = 'default';
     
     /**
-     * 单个日志文件的最大值(kb)
-     * @var int
+     * @var int 单个日志文件的最大值(kb)
      */
     protected $maxSize = 10240;
     
     /**
-     * 最大的日志文件个数
-     * @var int
+     * @var int 最大的日志文件个数
      */
     protected $maxFile = 5;
     
@@ -35,13 +31,13 @@ class FileLog extends Logger
         $this->path = $this->path ? $this->path : DIR_RUNTIME . '/log';
         !is_dir($this->path) && mkdir($this->path, 0777, true);
         $this->file = $this->path . '/' . $this->file . '.log';
-        register_shutdown_function([$this, 'flush']);
+        parent::init();
     }
     
     /**
      * 生成日志信息
-     * @param array $trace
-     * @return string
+     * @param array $trace 编译日志格式
+     * @return string 返回字符串形式的数据
      */
     protected function buildTrace($trace)
     {

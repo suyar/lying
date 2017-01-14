@@ -58,7 +58,7 @@ class Connection extends Service
      */
     public function createQuery()
     {
-        return new Query();
+        return new Query($this);
     }
     
     /**

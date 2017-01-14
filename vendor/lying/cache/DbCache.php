@@ -4,14 +4,12 @@ namespace lying\cache;
 class DbCache extends Cache
 {
     /**
-     * 数据库连接
-     * @var \lying\db\Connection
+     * @var \lying\db\Connection 数据库连接实例
      */
-    protected $connection;
+    protected $connection = 'db';
     
     /**
-     * 缓存的表名
-     * @var string
+     * @var string 缓存的表名
      */
     protected $table = 'cache';
     
@@ -28,7 +26,15 @@ class DbCache extends Cache
      */
     public function set($key, $data, $expiration = 0)
     {
-        
+        $query = $this->connection->createQuery();
+        return $this->exist($key) ? $query->update($this->table, [
+            'expire' => $expiration > 0 ? time() + $expiration : 0,
+            'data' => serialize($data),
+        ], ['key' => $key]) : $query->insert($this->table, [
+            'key' => $key,
+            'expire' => $expiration > 0 ? time() + $expiration : 0,
+            'data' => serialize($data),
+        ]);
     }
     
     /**
@@ -36,7 +42,14 @@ class DbCache extends Cache
      */
     public function get($key)
     {
-        
+        return unserialize($this->connection->createQuery()
+        ->select(['data'])
+        ->from([$this->table])
+        ->where([
+            'key' => $key,
+            ['or', 'expire' => 0, ['>', 'expire', time()]],
+        ])
+        ->column());
     }
     
     /**
@@ -61,7 +74,13 @@ class DbCache extends Cache
      */
     public function exist($key)
     {
-        
+        return $this->connection->createQuery()->select(['key'])
+        ->from([$this->table])
+        ->where([
+            'key' => $key,
+            ['or', 'expire' => 0, ['>', 'expire', time()]],
+        ])
+        ->one() ? true : false;
     }
     
     /**

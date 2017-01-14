@@ -12,61 +12,61 @@ class Query
      * @var array 要查询的字段
      * @see select()
      */
-    protected $select = [];
+    private $select = [];
     
     /**
      * @var boolean 是否去重
      * @see distinct()
      */
-    protected $distinct = false;
+    private $distinct = false;
     
     /**
      * @var array 要查询的表
      * @see from()
      */
-    protected $from = [];
+    private $from = [];
     
     /**
      * @var array 要关联的表
      * @see join()
      */
-    protected $join = [];
+    private $join = [];
     
     /**
      * @var array 查询的条件
      * @see where()
      */
-    protected $where = [[], []];
+    private $where = [[], []];
 
     /**
      * @var array 分组查询的条件
      * @see groupBy()
      */
-    protected $groupBy = [];
+    private $groupBy = [];
     
     /**
      * @var array 筛选的条件
      * @see having()
      */
-    protected $having = [[], []];
+    private $having = [[], []];
     
     /**
      * @var array 要排序的字段
      * @see orderBy()
      */
-    protected $orderBy = [];
+    private $orderBy = [];
     
     /**
      * @var array 偏移和限制的条数
      * @see limit()
      */
-    protected $limit = [];
+    private $limit = [];
     
     /**
      * @var array 联合查询的Query
      * @see union()
      */
-    protected $union = [];
+    private $union = [];
     
     /**
      * 初始化Query查询
@@ -555,14 +555,13 @@ class Query
     /**
      * 查询数据
      * @param string $method 查询的方法
-     * @return mixed 查询的数据
+     * @return mixed 查询的数据,失败返回false
      */
     private function fetch($method)
     {
         list($statement, $params) = $this->build();
         $sth = $this->connection->prepare($statement);
-        $sth->execute($params);
-        $res = call_user_func([$sth, $method]);
+        $res = $sth->execute($params) ? call_user_func([$sth, $method]) : false;
         $sth->closeCursor();
         return $res;
     }
@@ -599,7 +598,7 @@ class Query
      * @param string $table 要插入的表名
      * @param array $datas 要插入的数据,(name => value)形式的数组
      * 当然value可以是子查询,Query的实例,但是查询的表不能和插入的表是同一个
-     * @return int 返回受影响的行数,有可能是0行
+     * @return int|boolean 返回受影响的行数,有可能是0行,失败返回false
      */
     public function insert($table, $datas)
     {
@@ -615,8 +614,7 @@ class Query
         $table = $this->quoteColumn($table);
         $statement = "INSERT INTO $table (" . implode(', ', $cols) . ') VALUES (' . implode(', ', $palceholders) . ')';
         $sth = $this->connection->prepare($statement);
-        $sth->execute($params);
-        return $sth->rowCount();
+        return $sth->execute($params) ? $sth->rowCount() : false;
     }
     
     /**
@@ -629,7 +627,7 @@ class Query
      *     ['user2', 0],
      *     ['user3', 1],
      * ])
-     * @return int 返回受影响的行数,有可能是0行
+     * @return int|boolean 返回受影响的行数,有可能是0行,失败返回false
      */
     public function batchInsert($table, $columns, $datas)
     {
@@ -642,8 +640,7 @@ class Query
         }, $columns);
         $statement = "INSERT INTO $table (" . implode(', ', $columns) . ') VALUES ' . implode(', ', $v);
         $sth = $this->connection->prepare($statement);
-        $sth->execute($params);
-        return $sth->rowCount();
+        return $sth->execute($params) ? $sth->rowCount() : false;
     }
     
     /**
@@ -653,7 +650,7 @@ class Query
      * 当然value可以是子查询,Query的实例,但是查询的表不能和更新的表是同一个
      * @param string|array $condition 更新的条件,参见where()
      * @param array $params 条件的参数,参见where()
-     * @return int 返回受影响的行数,有可能是0行
+     * @return int|boolean 返回受影响的行数,有可能是0行,失败返回false
      */
     public function update($table, $datas, $condition = '', $params = [])
     {
@@ -670,8 +667,7 @@ class Query
         $where = $this->buildCondition($condition, $params, $p);
         $statement = $statement . (empty($where) ? '' : " WHERE $where");
         $sth = $this->connection->prepare($statement);
-        $sth->execute($p);
-        return $sth->rowCount();
+        return $sth->execute($p) ? $sth->rowCount() : false;
     }
     
     /**
@@ -679,7 +675,7 @@ class Query
      * @param string $table 要删除的表
      * @param string|array $condition 删除的条件,参见where()
      * @param array $params 条件的参数,参见where()
-     * @return int 返回受影响的行数,有可能是0行
+     * @return int|boolean 返回受影响的行数,有可能是0行,失败返回false
      */
     public function delete($table, $condition = '', $params = [])
     {
@@ -688,7 +684,6 @@ class Query
         $where = $this->buildCondition($condition, $params, $p);
         $statement = $statement . (empty($where) ? '' : " WHERE $where");
         $sth = $this->connection->prepare($statement);
-        $sth->execute($p);
-        return $sth->rowCount();
+        return $sth->execute($p) ? $sth->rowCount() : false;
     }
 }

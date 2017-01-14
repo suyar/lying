@@ -4,20 +4,17 @@ namespace lying\cache;
 class FileCache extends Cache
 {
     /**
-     * 缓存文件存放的路径
-     * @var string
+     * @var string 缓存文件存放的目录
      */
     protected $dir;
     
     /**
-     * 垃圾清除的频率,数值为0到1之间,越小回收的越频繁
-     * @var float
+     * @var float 垃圾清除的频率,数值为0到1之间,越小回收的越频繁
      */
     protected $gc = 0.5;
     
     /**
-     * 初始化缓存文件夹
-     * 默认为runtime/cache
+     * 初始化缓存文件夹,默认为runtime/cache
      */
     protected function init()
     {
@@ -67,27 +64,19 @@ class FileCache extends Cache
     {
         $cacheFile = $this->dir . '/' . md5($key) . '.bin';
         if (file_exists($cacheFile) && filemtime($cacheFile) > time()) {
-            $fp = fopen($cacheFile, 'r');
-            if ($fp !== false) {
-                flock($fp, LOCK_SH);
-                $cacheValue = stream_get_contents($fp);
-                flock($fp, LOCK_UN);
-                fclose($fp);
-                return unserialize($cacheValue);
-            }
+            return unserialize(file_get_contents($cacheFile));
         }
         return false;
     }
     
     /**
      * @see \lying\cache\Cache::mset()
-     * @return array 返回设置失败的键值数组
      */
     public function mset($data, $expiration = 0)
     {
-        $failed = [];
+        $res = true;
         foreach ($data as $k => $d) {
-            $this->set($k, $d) ? $failed[] = $k : '';
+            $failed = $failed && $this->set($k, $d);
         }
         return $failed;
     }

@@ -4,8 +4,7 @@ namespace lying\cache;
 class ApcCache extends Cache
 {
     /**
-     * 缓存类型,apc或者apcu
-     * @var boolean
+     * @var boolean 是否使用apcu
      */
     protected $apcu = false;
     
@@ -27,12 +26,11 @@ class ApcCache extends Cache
     
     /**
      * @see \lying\cache\Cache::mset()
-     * @return array 返回设置失败的键值数组
      */
     public function mset($data, $expiration = 0)
     {
         $res = $this->apcu ? apcu_store($data, null, $expiration) : apc_store($data, null, $expiration);
-        return is_array($res) ? array_keys($res) : [];
+        return empty($res) ? true : false;
     }
     
     /**

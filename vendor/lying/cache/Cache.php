@@ -65,4 +65,3 @@ abstract class Cache extends Service
      */
     abstract public function flush();
 }
-

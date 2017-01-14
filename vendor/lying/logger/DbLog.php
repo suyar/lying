@@ -1,56 +1,52 @@
 <?php
 namespace lying\logger;
 
-use lying\db\QueryBuilder;
-
 class DbLog extends Logger
 {
     /**
-     * 数据库连接
-     * @var \lying\db\Connection
+     * @var \lying\db\Connection 数据库连接实例
      */
     protected $connection = 'db';
     
     /**
-     * 日志表名
-     * @var string
+     * @var string 日志表名
      */
     protected $table = 'log';
     
     /**
-     * 查询构造器
-     * @var QueryBuilder
+     * @var \lying\db\Query 查询构造器
      */
-    protected $qb;
+    private $qb;
     
     /**
      * 初始化数据库链接
      * 可以用以下语句来创建表
-     * CREATE TABLE IF NOT EXISTS `log` (
-     *     `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-     *     `time` DATETIME NOT NULL,
-     *     `ip` VARCHAR(20) NOT NULL,
-     *     `level` VARCHAR(10) NOT NULL,
-     *     `request` VARCHAR(1024) NOT NULL,
-     *     `file` VARCHAR(256) NOT NULL,
-     *     `line` INT(10) UNSIGNED NOT NULL,
-     *     `data` VARCHAR(1024) NOT NULL,
-     *     PRIMARY KEY (`id`)
+     * CREATE TABLE `log` (
+	 * `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+     * `time` DATETIME NULL DEFAULT NULL,
+	 * `ip` VARCHAR(20) NULL DEFAULT NULL,
+	 * `level` VARCHAR(20) NULL DEFAULT NULL,
+	 * `request` VARCHAR(1024) NULL DEFAULT NULL,
+	 * `file` VARCHAR(256) NULL DEFAULT NULL,
+	 * `line` INT(10) UNSIGNED NULL DEFAULT NULL,
+	 * `data` MEDIUMTEXT NULL,
+	 * PRIMARY KEY (`id`)
      * )
      * COLLATE='utf8_general_ci'
      * ENGINE=InnoDB
+     * ;
      */
     protected function init()
     {
-        $this->connection = $this->make()->getDb($this->connection);
+        $this->connection = maker()->db($this->connection);
         $this->qb = $this->connection->createQuery();
-        register_shutdown_function([$this, 'flush']);
+        parent::init();
     }
     
     /**
      * 生成日志信息
-     * @param array $data
-     * @return array
+     * @param array $data 编译日志格式
+     * @return array 返回数组形式的数据
      */
     protected function buildTrace($data)
     {

@@ -13,26 +13,22 @@ class MemCached extends Cache
     protected $servers = [];
     
     /**
-     * Memcached的选项
-     * @var array
+     * @var array 额外的Memcached的选项
      */
     protected $options = [];
     
     /**
-     * Memcached sasl用户名
-     * @var string
+     * @var string Memcached sasl用户名
      */
     protected $username;
     
     /**
-     * Memcached sasl密码
-     * @var string
+     * @var string Memcached sasl密码
      */
     protected $password;
     
     /**
-     * Memcache的实例
-     * @var \Memcached
+     * @var \Memcached Memcache的实例
      */
     private $instance;
     
