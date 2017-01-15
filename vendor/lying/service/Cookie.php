@@ -3,6 +3,9 @@ namespace lying\service;
 
 class Cookie extends Service
 {
+    /**
+     * @var string cookie加密密钥
+     */
     protected $key;
     
     /**

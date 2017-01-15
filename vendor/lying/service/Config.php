@@ -4,8 +4,7 @@ namespace lying\service;
 class Config extends Service
 {
     /**
-     * 缓存全局配置
-     * @var array
+     * @var array 缓存全局配置
      */
     private $config = [];
     
@@ -18,7 +17,7 @@ class Config extends Service
     {
         if (isset($this->config[$config])) {
             return $this->config[$config];
-        }else {
+        } else {
             $this->config[$config] = require DIR_CONF . "/$config.php";
             return $this->config[$config];
         }

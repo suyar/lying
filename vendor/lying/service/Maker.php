@@ -4,14 +4,12 @@ namespace lying\service;
 class Maker
 {
     /**
-     * 服务类实例容器
-     * @var Service[]
+     * @var Service[] 服务类实例容器
      */
     private static $instances = [];
     
     /**
-     * 所有注册的服务
-     * @var array
+     * @var array 所有注册的服务
      */
     private static $service = [
         'config'=>'lying\service\Config',
@@ -24,7 +22,7 @@ class Maker
     
     /**
      * 按需注册服务,服务类可以一样,服务id不能重复
-     * @param array $service
+     * @param array $service 配置文件配置的服务
      */
     public function __construct($service)
     {
@@ -41,16 +39,16 @@ class Maker
     {
         if (isset(self::$instances[$id])) {
             return self::$instances[$id];
-        }elseif (isset(self::$service[$id])) {
+        } elseif (isset(self::$service[$id])) {
             if (is_array(self::$service[$id])) {
                 $class = array_shift(self::$service[$id]);
                 self::$instances[$id] = new $class(self::$service[$id]);
-            }else {
+            } else {
                 self::$instances[$id] = new self::$service[$id]();
             }
             unset(self::$service[$id]);
             return self::$instances[$id];
-        }else {
+        } else {
             throw new \Exception("Unkonw service ID: $id", 500);
         }
     }

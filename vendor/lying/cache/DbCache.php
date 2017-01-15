@@ -14,7 +14,13 @@ class DbCache extends Cache
     protected $table = 'cache';
     
     /**
+     * @var float 垃圾清除的频率,数值为0到100之间,越小回收的越频繁
+     */
+    protected $gc = 50;
+    
+    /**
      * 设置数据库连接实例
+     * 可以用以下语句来创建表
      */
     protected function init()
     {
@@ -22,12 +28,26 @@ class DbCache extends Cache
     }
     
     /**
+     * 概率回收垃圾
+     * @return boolean 回收成功返回true,失败或者未回收返回false
+     */
+    public function gc()
+    {
+        if (mt_rand(0, 100) > $this->gc) {
+            return $this->flush(true);
+        }
+        return false;
+    }
+    
+    /**
      * @see \lying\cache\Cache::set()
      */
     public function set($key, $data, $expiration = 0)
     {
+        $this->gc();
         $query = $this->connection->createQuery();
-        return $this->exist($key) ? $query->update($this->table, [
+        $exist = $query->select('key')->from([$this->table])->where(['key' => $key])->one();
+        $exist = $exist ? $query->update($this->table, [
             'expire' => $expiration > 0 ? time() + $expiration : 0,
             'data' => serialize($data),
         ], ['key' => $key]) : $query->insert($this->table, [
@@ -35,6 +55,7 @@ class DbCache extends Cache
             'expire' => $expiration > 0 ? time() + $expiration : 0,
             'data' => serialize($data),
         ]);
+        return $exist === false ? false : true;
     }
     
     /**
@@ -54,11 +75,14 @@ class DbCache extends Cache
     
     /**
      * @see \lying\cache\Cache::mset()
-     * @return array 返回设置失败的键值数组
      */
     public function mset($data, $expiration = 0)
     {
-        
+        $res = true;
+        foreach ($data as $key => $d) {
+            $res = $res && $this->set($key, $d, $expiration);
+        }
+        return $res;
     }
     
     /**
@@ -66,7 +90,24 @@ class DbCache extends Cache
      */
     public function mget($keys)
     {
-        
+        $rows = $this->connection->createQuery()
+        ->select(['key', 'data'])
+        ->from([$this->table])
+        ->where([
+            'key' => $keys,
+            ['or', 'expire' => 0, ['>', 'expire', time()]],
+        ])
+        ->all();
+        if ($rows === false) {
+            return false;
+        }
+        foreach ($keys as $key) {
+            $result[$key] = false;
+        }
+        foreach ($rows as $row) {
+            $result[$row['key']] = unserialize($row['data']);
+        }
+        return $result;
     }
     
     /**
@@ -88,7 +129,9 @@ class DbCache extends Cache
      */
     public function del($key)
     {
-        
+        $res = $this->connection->createQuery()
+        ->delete($this->table, ['key' => $key]);
+        return $res === false ? false : true;
     }
     
     /**
@@ -96,14 +139,24 @@ class DbCache extends Cache
      */
     public function touch($key, $expiration = 0)
     {
-        
+        $res = $this->connection->createQuery()
+        ->update($this->table, ['expire' => $expiration > 0 ? time() + $expiration : 0], [
+            'key' => $key
+        ]);
+        return $res === false ? false : true;
     }
     
     /**
+     * @param boolean $gc 是否只回收过期垃圾
      * @see \lying\cache\Cache::flush()
      */
-    public function flush()
+    public function flush($gc = false)
     {
-        
+        $query = $this->connection->createQuery();
+        $res = $gc ? $query->delete($this->table, [
+            ['>', 'expire', 0],
+            ['<', 'expire', time()]
+        ]) : $query->delete($this->table);
+        return $res === false ? false : true;
     }
 }

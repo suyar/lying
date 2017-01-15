@@ -6,8 +6,7 @@ use lying\service\Service;
 class Ctrl extends Service
 {
     /**
-     * layout参数
-     * @var string
+     * @var string layout参数
      */
     protected $layout = false;
     
@@ -38,9 +37,9 @@ class Ctrl extends Service
         while (ob_get_level() !== 0) ob_end_clean();
         if ($request->isPjax()) {
             header("X-Pjax-Url: $url");
-        }else if ($request->isAjax()) {
+        } else if ($request->isAjax()) {
             header("X-Redirect: $url");
-        }else {
+        } else {
             header("Location: $url");
         }
     }

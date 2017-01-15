@@ -2,14 +2,12 @@
 class Lying
 {
     /**
-     * 类文件映射
-     * @var array
+     * @var array 类文件映射
      */
     public static $classMap = [];
     
     /**
-     * 工厂实例
-     * @var \lying\service\Maker
+     * @var \lying\service\Maker 工厂实例
      */
     public static $maker;
     
@@ -35,12 +33,11 @@ class Lying
      */
     public function run()
     {
-        $router = maker()->router();
-        list($m, $c, $a) = $router->parse();
+        list($m, $c, $a) = maker()->router()->parse();
         $class = "module\\$m\\ctrl\\$c";
         if (class_exists($class) && method_exists($class, $a) && (new \ReflectionMethod($class, $a))->isPublic()) {
             echo (new $class())->$a();
-        }else {
+        } else {
             throw new \Exception('Page not found.', 404);
         }
     }

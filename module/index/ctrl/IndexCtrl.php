@@ -14,9 +14,7 @@ class IndexCtrl extends Ctrl
     
     public function index()
     {
-        $res = maker()->cache('dbCache')->set('name', 'suyaqi');
-        $res = maker()->cache('dbCache')->get('name');
-        var_dump($res);
+        
     }
     
     public function get()

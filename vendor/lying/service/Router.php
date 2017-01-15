@@ -4,8 +4,7 @@ namespace lying\service;
 class Router extends Service
 {
     /**
-     * 当前路由
-     * @var array
+     * @var array 当前路由
      */
     private $router;
     

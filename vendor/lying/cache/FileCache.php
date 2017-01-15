@@ -9,9 +9,9 @@ class FileCache extends Cache
     protected $dir;
     
     /**
-     * @var float 垃圾清除的频率,数值为0到1之间,越小回收的越频繁
+     * @var float 垃圾清除的频率,数值为0到100之间,越小回收的越频繁
      */
-    protected $gc = 0.5;
+    protected $gc = 100;
     
     /**
      * 初始化缓存文件夹,默认为runtime/cache
@@ -38,8 +38,8 @@ class FileCache extends Cache
      */
     public function gc()
     {
-        if (mt_rand(0, 10000) > $this->gc * 10000) {
-            return $this->flush();
+        if (mt_rand(0, 100) > $this->gc) {
+            return $this->flush(true);
         }
         return false;
     }
@@ -121,12 +121,17 @@ class FileCache extends Cache
     }
     
     /**
+     * @param boolean $gc 是否只回收过期垃圾
      * @see \lying\cache\Cache::flush()
      */
-    public function flush()
+    public function flush($gc = false)
     {
         foreach (glob($this->dir . '/*.bin') as $file) {
-            if (filemtime($file) < time()) {
+            if ($gc) {
+                if (filemtime($file) < time()) {
+                    unlink($file);
+                }
+            } else {
                 unlink($file);
             }
         }

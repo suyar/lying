@@ -25,7 +25,7 @@ abstract class Cache extends Service
      * 批量设置缓存
      * @param array $data 一个key=>value形式的数组
      * @param integer $expiration 有效时间,默认为0
-     * @return boolean 成功返回true,失败返回false或者未成功的键的数组,具体请参考各个缓存类的注释
+     * @return boolean 成功返回true,只要有一个失败就返回false
      */
     abstract public function mset($data, $expiration = 0);
     

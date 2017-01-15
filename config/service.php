@@ -28,7 +28,7 @@ return [
     'cache' => [
         'class' => 'lying\cache\FileCache',
         'dir' => DIR_RUNTIME . '/cache', //缓存文件存放的目录,默认'runtime/cache'
-        'gc' => 0.5, //垃圾清除的频率,数值为0到1之间,越小回收的越频繁,默认0.5
+        'gc' => 50, //垃圾清除的频率,数值为0到100之间,越小回收的越频繁,默认50
     ],
     'ApcCache' => [
         'class' => 'lying\cache\ApcCache',
@@ -47,29 +47,10 @@ return [
     ],
     'dbCache' => [
         'class' => 'lying\cache\DbCache',
-        
+        'connection' => 'db', //缓存要写入的数据库,写数据库连接的id,默认'db'
+        'table' => 'cache', //存储缓存的表名,默认'cache'
+        'gc' => '', //垃圾清除的频率,数值为0到100之间,越小回收的越频繁,默认50
     ],
-    
-    
-    
-    
-    
-    'session'=>[
-        'class'=>'lying\session\Session',
-        'cache'=>'db',
-    ],
-    'cookie'=>[
-        'class'=>'lying\service\Cookie',
-        'key'=>'123456',
-    ],
-    //以上session和cookie的id都不可变更
-    
-    
-    
-    
-    
-    
-    
     
     
 ];

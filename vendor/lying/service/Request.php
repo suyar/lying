@@ -68,7 +68,7 @@ class Request extends Service
     {
         if ($msec) {
             return isset($_SERVER['REQUEST_TIME_FLOAT']) ? $_SERVER['REQUEST_TIME_FLOAT'] * 1000 : null;
-        }else {
+        } else {
             return isset($_SERVER['REQUEST_TIME']) ? $_SERVER['REQUEST_TIME'] : null;
         }
     }

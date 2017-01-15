@@ -14,7 +14,7 @@ class Session
     }
     
     /**
-     * 是否启用
+     * session是否已经启用
      * @return boolean
      */
     public function isActive()
@@ -24,8 +24,8 @@ class Session
     
     /**
      * 设置session
-     * @param string $key
-     * @param mixed $value
+     * @param string $key 键
+     * @param mixed $value 值
      */
     public function set($key, $value)
     {
@@ -35,8 +35,8 @@ class Session
     
     /**
      * 获取session
-     * @param $key
-     * @return Ambigous <NULL, unknown>
+     * @param $key 键
+     * @return mixed
      */
     public function get($key)
     {
@@ -46,7 +46,7 @@ class Session
     
     /**
      * 移除session
-     * @param string $key
+     * @param string $key 键
      * @return mixed|NULL 返回移除的值
      */
     public function remove($key)
