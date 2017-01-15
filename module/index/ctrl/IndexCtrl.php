@@ -9,12 +9,13 @@ class IndexCtrl extends Ctrl
     
     protected function init()
     {
-        
+        parent::init();
     }
+    
     
     public function index()
     {
-        
+        echo 'index';
     }
     
     public function get()

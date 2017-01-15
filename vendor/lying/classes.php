@@ -21,6 +21,7 @@ return [
     'lying\service\Config' => DIR_LYING . '/service/Config.php',
     'lying\service\Maker' => DIR_LYING . '/service/Maker.php',
     'lying\service\Cookie' => DIR_LYING . '/service/Cookie.php',
+    'lying\service\Dispatch' => DIR_LYING . '/service/Dispatch.php',
     'lying\service\Request' => DIR_LYING . '/service/Request.php',
     'lying\service\Router' => DIR_LYING . '/service/Router.php',
     'lying\service\Secure' => DIR_LYING . '/service/Secure.php',

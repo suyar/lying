@@ -26,19 +26,4 @@ class Lying
             require $file;
         }
     }
-    
-    /**
-     * 程序执行入口
-     * @throws \Exception
-     */
-    public function run()
-    {
-        list($m, $c, $a) = maker()->router()->parse();
-        $class = "module\\$m\\ctrl\\$c";
-        if (class_exists($class) && method_exists($class, $a) && (new \ReflectionMethod($class, $a))->isPublic()) {
-            echo (new $class())->$a();
-        } else {
-            throw new \Exception('Page not found.', 404);
-        }
-    }
 }

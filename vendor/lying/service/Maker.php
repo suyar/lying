@@ -12,12 +12,13 @@ class Maker
      * @var array 所有注册的服务
      */
     private static $service = [
-        'config'=>'lying\service\Config',
-        'request'=>'lying\service\Request',
-        'router'=>'lying\service\Router',
-        'secure'=>'lying\service\Secure',
-        'session'=>'lying\session\Session',
-        'cookie'=>'lying\service\Cookie',
+        'config' => 'lying\service\Config',
+        'request' => 'lying\service\Request',
+        'router' => 'lying\service\Router',
+        'secure' => 'lying\service\Secure',
+        'session' => 'lying\session\Session',
+        'cookie' => 'lying\service\Cookie',
+        'dispatch' => 'lying\service\Dispatch',
     ];
     
     /**
@@ -108,8 +109,17 @@ class Maker
     }
     
     /**
+     * 返回调度器
+     * @return Dispatch
+     */
+    public function dispatch()
+    {
+        return $this->createService('dispatch');
+    }
+    
+    /**
      * 数据库服务
-     * @param string $id
+     * @param string $id 数据库连接的ID
      * @return \lying\db\Connection
      */
     public function db($id = 'db')
@@ -119,7 +129,7 @@ class Maker
     
     /**
      * 日志服务
-     * @param string $id
+     * @param string $id 日志服务的ID
      * @return \lying\logger\Logger
      */
     public function logger($id = 'logger')
@@ -129,7 +139,7 @@ class Maker
     
     /**
      * 缓存服务
-     * @param string $id
+     * @param string $id 缓存服务的ID
      * @return \lying\cache\Cache
      */
     public function cache($id = 'cache')

@@ -6,9 +6,40 @@ use lying\service\Service;
 class Ctrl extends Service
 {
     /**
+     * @var string 方法执行前事件id
+     */
+    const EVENT_BEFORE_ACTION = 'beforeAction';
+    
+    /**
+     * @var string 方法执行后事件id
+     */
+    const EVENT_AFTER_ACTION = 'afterAction';
+    
+    /**
      * @var string layout参数
      */
     protected $layout = false;
+    
+    /**
+     * 绑定事件,子类需要在init方法里的首行调用parent::init();
+     */
+    protected function init()
+    {
+        $this->bindEvent(self::EVENT_BEFORE_ACTION, [$this, 'beforeAction']);
+        $this->bindEvent(self::EVENT_AFTER_ACTION, [$this, 'afterAction']);
+    }
+    
+    /**
+     * 在执行action之前执行
+     * @param string $action 执行的方法
+     */
+    public function beforeAction($action) {}
+    
+    /**
+     * 在执行action之后执行
+     * @param unknown $action 执行的方法
+     */
+    public function afterAction($action) {}
     
     /**
      * 渲染
