@@ -42,19 +42,21 @@ class Ctrl extends Service
     
     /**
      * 在执行action之后执行
-     * @param unknown $action 执行的方法
+     * @param string $action 执行的方法
      */
     public function afterAction($action) {}
     
     /**
-     * 渲染
+     * 渲染页面
      * @param string $view 视图文件名称
      * @param array $params 视图参数
-     * @param array $layoutParams layout的参数
+     * @param string $layout 布局文件
+     * @param array $subparams 布局文件的参数
+     * @return string 渲染的HTML代码
      */
-    final protected function render($view, $params= [], $layoutParams = [])
+    final protected function render($view, $params= [], $layout = false, $subparams = [])
     {
-        return (new View())->render($view, $params, $this->layout, $layoutParams);
+        return (new View())->render($view, $params, $layout ? $layout : $this->layout, $subparams);
     }
     
     /**

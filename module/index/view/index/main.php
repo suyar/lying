@@ -7,6 +7,5 @@
 <body>
 	<?= $container ?>
 	<hr>
-	<?= $this->import('ad',$ad) ?>
 </body>
 </html>

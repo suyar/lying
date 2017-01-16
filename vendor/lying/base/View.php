@@ -8,42 +8,29 @@ class View
      * @param string $view 视图文件名称
      * @param array $params 视图文件参数
      * @param string|boolean $layout 布局文件
-     * @param array $layoutParams 布局文件参数
+     * @param array $subparams 布局文件参数
      * @return string 返回渲染后的HTML
      */
-    public function render($view, $params, $layout, $layoutParams)
+    public function render($view, $params, $layout = false, $subparams = [])
     {
         $content = $this->renderFile($this->findViewPath($view), $params);
-        if (false === $layout) {
-            return $content;
-        }else {
-            $layoutFile = $this->findViewPath($layout, true);
-            return $this->renderFile($layoutFile, array_merge($layoutParams, ['container'=>$content]));
-        }
-    }
-    
-    /**
-     * 导入其他视图文件
-     * @param string $view 视图文件名称
-     * @param array $params 视图文件参数
-     * @return string
-     */
-    public function import($view, $params = [])
-    {
-        return $this->render($view, $params, false, []);
+        return $layout === false ? $content : $this->renderFile(
+            $this->findViewPath($layout),
+            array_merge($subparams, ['container'=>$content])
+        );
     }
     
     /**
      * 渲染视图文件
      * @param string $file 视图文件绝对路径
      * @param array $params 视图文件参数
-     * @return string
+     * @return string 返回渲染后的页面
      */
     private function renderFile($file, $params)
     {
         ob_start();
         ob_implicit_flush(false);
-        $params == [] ? '' : extract($params);
+        extract($params);
         require $file;
         return ob_get_clean();
     }
@@ -52,7 +39,7 @@ class View
      * 查找视图文件的路径
      * @param string $view 视图文件名称
      * @throws \Exception
-     * @return string
+     * @return string 返回视图文件的绝对路径
      */
     private function findViewPath($view)
     {
@@ -71,6 +58,10 @@ class View
             default:
                 throw new \Exception("Unknown view path: $view", 500);
         }
-        return $file;
+        if (file_exists($file)) {
+            return $file;
+        } else {
+            throw new \Exception("View file not found: $view", 500);
+        }
     }
 }

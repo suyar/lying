@@ -5,7 +5,7 @@ use lying\base\Ctrl;
 
 class IndexCtrl extends Ctrl
 {
-    //public $layout = 'admin/layout/main';
+    public $layout = 'main';
     
     public $deny = [];
     
@@ -18,8 +18,7 @@ class IndexCtrl extends Ctrl
     {
         return $this->render('index', [
             'name' => 'suyaqi',
-            'ad' => ['name' => 'taobao'],
-        ]);
+        ], $this->layout, ['title'=>'主页']);
     }
     
     public function get()
