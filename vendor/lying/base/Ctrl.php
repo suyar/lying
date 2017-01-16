@@ -21,6 +21,11 @@ class Ctrl extends Service
     protected $layout = false;
     
     /**
+     * @var array 设置不被访问的public方法,用正则匹配,此属性必须设置为public
+     */
+    public $deny = [];
+    
+    /**
      * 绑定事件,子类需要在init方法里的首行调用parent::init();
      */
     protected function init()

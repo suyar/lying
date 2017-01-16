@@ -6,7 +6,7 @@ class Service
     /**
      * @var array 存事件绑定的数组
      */
-    private $events = [];
+    private static $events = [];
     
     /**
      * 初始化子类的成员变量
@@ -32,19 +32,19 @@ class Service
      */
     public function bindEvent($id, callable $callback)
     {
-        $this->events[$id][] = $callback;
+        self::$events[$id][] = $callback;
     }
     
     /**
      * 触发一个事件
      * @param string $id 事件的ID
-     * @param mixed $data 传到绑定的方法的参数
+     * @param array $data 传到绑定的方法的参数,按照参数的顺序提供一个索引数组
      */
-    public function trigger($id, $data = null)
+    public function trigger($id, $data = [])
     {
-        if (isset($this->events[$id])) {
-            foreach ($this->events[$id] as $call) {
-                call_user_func($call, $data);
+        if (isset(self::$events[$id])) {
+            foreach (self::$events[$id] as $call) {
+                call_user_func_array($call, $data);
             }
         }
     }

@@ -7,14 +7,13 @@ class View
      * 渲染视图文件
      * @param string $view 视图文件名称
      * @param array $params 视图文件参数
-     * @param string|boolean $layout layout文件
-     * @param array $layoutParams layout参数
-     * @return string
+     * @param string|boolean $layout 布局文件
+     * @param array $layoutParams 布局文件参数
+     * @return string 返回渲染后的HTML
      */
-    public function render($view, $params, $layout,$layoutParams)
+    public function render($view, $params, $layout, $layoutParams)
     {
-        $file = $this->findViewPath($view);
-        $content = $this->renderFile($file, $params);
+        $content = $this->renderFile($this->findViewPath($view), $params);
         if (false === $layout) {
             return $content;
         }else {
@@ -50,37 +49,28 @@ class View
     }
     
     /**
-     * 查找视图文件、模板的路径
+     * 查找视图文件的路径
      * @param string $view 视图文件名称
-     * @param boolean $layout 是否查找layout
      * @throws \Exception
      * @return string
      */
-    private function findViewPath($view, $layout = false)
+    private function findViewPath($view)
     {
-        if (false !== strpos($view, '/')) {
-            $tmp = explode('/', $view);
-            $length = count($tmp);
-            switch ($length) {
-                case 2:
-                    if ($layout) {
-                        $m = $tmp[0];
-                        $tmp[0] = 'layout';
-                    }else {
-                        $m = __MODULE__;
-                    }
-                    $file = DIR_APP . "/$m/view/$tmp[0]/$tmp[1].php";
-                    break;
-                default:
-                    $file = DIR_APP . '/'  . $tmp[0] . "/view/$tmp[1]/$tmp[2].php";
-            }
-        }else {
-            $file = DIR_APP . '/' . __MODULE__ . "/view/" . ($layout ? 'layout' : __CTRL__) . "/$view.php";
+        $path = explode('/', trim($view, '/'));
+        list($m, $c, $a) = maker()->router()->router();
+        switch (count($path)) {
+            case 1:
+                $file = DIR_MODULE . '/' . $m . '/view/' . $c . '/' . $view . '.php';
+                break;
+            case 2:
+                $file = DIR_MODULE . '/' . $m . '/view/' . $view . '.php';
+                break;
+            case 3:
+                $file = DIR_MODULE . '/' . $path[0] . '/view/' . $path[1] . '/' . $path[2] . '.php';
+                break;
+            default:
+                throw new \Exception("Unknown view path: $view", 500);
         }
-        if (file_exists($file)) {
-            return $file;
-        }else {
-            throw new \Exception("The view file does not exist: $file", 500);
-        }
+        return $file;
     }
 }

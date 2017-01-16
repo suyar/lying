@@ -7,15 +7,19 @@ class IndexCtrl extends Ctrl
 {
     public $layout = 'admin/main';
     
-    protected function init()
+    public $deny = [];
+    
+    public function init()
     {
         parent::init();
     }
     
-    
-    public function index()
+    public function index($id = 1)
     {
-        echo 'index';
+        return $this->render('index', [
+            'name' => 'suyaqi',
+            'ad' => ['name' => 'taobao'],
+        ]);
     }
     
     public function get()
