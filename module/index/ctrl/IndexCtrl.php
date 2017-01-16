@@ -5,7 +5,7 @@ use lying\base\Ctrl;
 
 class IndexCtrl extends Ctrl
 {
-    public $layout = 'admin/main';
+    //public $layout = 'admin/layout/main';
     
     public $deny = [];
     
