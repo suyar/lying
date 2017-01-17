@@ -16,6 +16,8 @@ class IndexCtrl extends Ctrl
     
     public function index($id = 1)
     {
+        new \PHPExcel();
+        
         return $this->render('index', [
             'name' => 'suyaqi',
         ], $this->layout, ['title'=>'主页']);

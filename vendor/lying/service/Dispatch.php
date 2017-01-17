@@ -16,8 +16,9 @@ class Dispatch extends Service
             $method = new \ReflectionMethod($instance, $a);
             if ($method->isPublic() && $this->checkAccess($instance->deny, $a)) {
                 $this->trigger(\lying\base\Ctrl::EVENT_BEFORE_ACTION, [$a]);
-                echo call_user_func_array([$instance, $a], $this->parseArgs($method->getParameters()));
+                $responce = call_user_func_array([$instance, $a], $this->parseArgs($method->getParameters()));
                 $this->trigger(\lying\base\Ctrl::EVENT_AFTER_ACTION, [$a]);
+                exit($responce instanceof $class ? 0 : $responce);
             } else {
                 throw new \Exception('Page not found.', 404);
             }

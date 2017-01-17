@@ -60,19 +60,27 @@ class Ctrl extends Service
     }
     
     /**
-     * 跳转
-     * @param string $url 形如"post"、"post/index"、"admin/post/index"或者完整网址,否则报错
-     * @param array $params 要带的参数，使用path模式/id/1/name/carol.
-     * 此参数只接受数组+字母组成的键/值,包含非数字、字母的参数会被忽略.
-     * 注意：如果此参数的键值为纯数字，则键值将会被忽略，如createUrl('post', [1])将会变成/path/1而不是/path/0/1.
-     * @param array $query 接受一个数组，此数组的参数会被编码成get参数的形式放在"?"之后.
-     * 所有带有特殊字符(+、空格、|、/、?、%、#、&、<、>等)的键/值对，都应该放在此参数.
+     * 重定向到某个URL
+     * @param string $url
+     * redirect('get', ['id' => 100]); 跳转到当前模块当前控制器下get方法
+     * redirect('admin/post', ['id' => 100]); 跳转到当前模块admin控制器post方法
+     * redirect('lying/index/name', ['id' => 100]); 跳转到lying模块index控制器name方法
+     * redirect('https://www.baidu.com'); 必须带协议头,跳转到百度
+     * @param array $params
+     * @return \lying\base\Ctrl
      */
-    final protected function redirect($url, $params = [], $query = [])
+    final protected function redirect($url, $params = [])
     {
-        $url = $this->make()->getRouter()->createUrl(is_array($url) ? $url[0] : $url, $params, $query);
-        $request = $this->make()->getRequest();
+        if (preg_match('/^https?:\/\/\S+\.\S+/', $url)) {
+            $q = http_build_query($params, '', '&', PHP_QUERY_RFC3986);
+            $url .= empty($q) ? '' : (strpos($url, '?') === false ? "?$q" : "&$q");
+        } else {
+            $url = maker()->router()->createUrl($url, $params);
+        }
+        
+        $request = maker()->request();
         while (ob_get_level() !== 0) ob_end_clean();
+        http_response_code(302);
         if ($request->isPjax()) {
             header("X-Pjax-Url: $url");
         } else if ($request->isAjax()) {
@@ -80,5 +88,6 @@ class Ctrl extends Service
         } else {
             header("Location: $url");
         }
+        return $this;
     }
 }

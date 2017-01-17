@@ -61,7 +61,7 @@ class View
         if (file_exists($file)) {
             return $file;
         } else {
-            throw new \Exception("View file not found: $view", 500);
+            throw new \Exception("View file not found: $file", 500);
         }
     }
 }
