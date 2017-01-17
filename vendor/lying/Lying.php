@@ -41,7 +41,7 @@ class Lying
         if (isset(self::$classMap[$className])) {
             $file = self::$classMap[$className];
         } else {
-            $file = self::psr4Loader($className);
+            ($file = self::psr4Loader($className)) || ($file = self::psr0Loader($className));
         }
         if ($file) {
             require $file;
@@ -80,10 +80,22 @@ class Lying
         return false;
     }
     
-    public static function psr4Loader1($className)
+    public static function psr0Loader($className)
     {
-        if (isset(self::$extend['psr-4'])) {
-            
+        if (isset(self::$extend['psr-0'])) {
+            if (isset(self::$extend['psr-0'][$className])) {
+                if (false === $pos = strrpos($className, '\\')) {
+                    $file = self::$extend['psr-0'][$className] . '/' . str_replace('_', '/', $className) . '.php';
+                    if (file_exists($file)) {
+                        return $file;
+                    }
+                } else {
+                    $prefix = substr($className, 0, $pos);
+                    $class = substr($className, $pos);
+                    var_dump($prefix, $class);
+                }
+            }
         }
+        return false;
     }
 }

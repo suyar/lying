@@ -5,6 +5,9 @@ return [
         'module' => DIR_MODULE,
         'PHPExcel' => DIR_EXTEND,
     ],
+    'psr-0' => [
+        'PHPExcel' => DIR_EXTEND . '/Excel',
+    ],
     'files' => [
         
     ]
