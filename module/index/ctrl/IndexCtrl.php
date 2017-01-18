@@ -17,7 +17,7 @@ class IndexCtrl extends Ctrl
     public function index($id = 1)
     {
         
-        throw new \Exception('测试异常', 404);
+        //throw new \Exception('测试异常', 404);
         //strpos($haystack, $needle);
         //trigger_error('主动触发了一个错误');
         //strpos($haystack, $needle)
