@@ -22,12 +22,12 @@ abstract class Logger extends Service
     ];
     
     /**
-     * @var int 要记录的日志等级
+     * @var integer 要记录的日志等级
      */
     protected $level = LOG_NOTICE;
     
     /**
-     * @var int 最大存储条数,默认500
+     * @var integer 最大存储条数,默认500
      */
     protected $maxItem = 500;
     

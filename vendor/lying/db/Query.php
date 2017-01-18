@@ -208,10 +208,10 @@ class Query
     
     /**
      * 设置限制查询的条数
-     * @param int $offset 偏移的条数,如果只提供此参数,则等同于limit(0, $offset)
+     * @param integer $offset 偏移的条数,如果只提供此参数,则等同于limit(0, $offset)
      * e.g. limit(10);
      * e.g. limit(5, 20);
-     * @param int $limit 限制的条数
+     * @param integer $limit 限制的条数
      * @return \lying\db\Query
      */
     public function limit($offset, $limit = null)
@@ -598,7 +598,7 @@ class Query
      * @param string $table 要插入的表名
      * @param array $datas 要插入的数据,(name => value)形式的数组
      * 当然value可以是子查询,Query的实例,但是查询的表不能和插入的表是同一个
-     * @return int|boolean 返回受影响的行数,有可能是0行,失败返回false
+     * @return integer|boolean 返回受影响的行数,有可能是0行,失败返回false
      */
     public function insert($table, $datas)
     {
@@ -627,7 +627,7 @@ class Query
      *     ['user2', 0],
      *     ['user3', 1],
      * ])
-     * @return int|boolean 返回受影响的行数,有可能是0行,失败返回false
+     * @return integer|boolean 返回受影响的行数,有可能是0行,失败返回false
      */
     public function batchInsert($table, $columns, $datas)
     {
@@ -650,7 +650,7 @@ class Query
      * 当然value可以是子查询,Query的实例,但是查询的表不能和更新的表是同一个
      * @param string|array $condition 更新的条件,参见where()
      * @param array $params 条件的参数,参见where()
-     * @return int|boolean 返回受影响的行数,有可能是0行,失败返回false
+     * @return integer|boolean 返回受影响的行数,有可能是0行,失败返回false
      */
     public function update($table, $datas, $condition = '', $params = [])
     {
@@ -675,7 +675,7 @@ class Query
      * @param string $table 要删除的表
      * @param string|array $condition 删除的条件,参见where()
      * @param array $params 条件的参数,参见where()
-     * @return int|boolean 返回受影响的行数,有可能是0行,失败返回false
+     * @return integer|boolean 返回受影响的行数,有可能是0行,失败返回false
      */
     public function delete($table, $condition = '', $params = [])
     {

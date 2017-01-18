@@ -3,6 +3,9 @@ namespace lying\base;
 
 class Exception
 {
+    /**
+     * 注册错误,异常处理函数
+     */
     public static function register()
     {
         set_exception_handler([self::class, 'exceptionHandler']);
@@ -10,27 +13,70 @@ class Exception
         register_shutdown_function([self::class, 'shutdownHandler']);
     }
     
+    /**
+     * 注册异常处理函数
+     * @param \Exception|\Error $exception 未捕获的异常
+     */
     public static function exceptionHandler($exception)
     {
-        echo '异常';
-        var_dump($exception);exit;
+        self::showHandler(
+            [
+                'message' => $exception->getMessage(),
+                'file' => $exception->getFile(),
+                'line' => $exception->getLine()
+            ],
+            explode("\n", $exception->getTraceAsString()),
+            $exception->getCode()
+        );
     }
     
-    public static function errorHandler($errno, $errstr, $errfile, $errline, $errcontext)
+    /**
+     * 注册错误处理函数
+     * @param integer $errno 错误的级别
+     * @param string $errstr 错误的信息
+     * @param string $errfile 发生错误的文件名
+     * @param integer $errline 错误发生的行号
+     * @throws \ErrorException 抛出一个错误异常
+     */
+    public static function errorHandler($errno, $errstr, $errfile, $errline)
     {
-        var_dump('错误：' . $errstr);exit;
+        throw new \ErrorException($errstr, 500, $errno, $errfile, $errline);
     }
     
+    /**
+     * 脚本执行结束后调用的错误处理函数
+     */
     public static function shutdownHandler()
     {
-        $err = error_get_last();
-        if ($err) {
-            while (ob_get_level() !== 0) ob_end_clean();
-            echo '关闭出错';
-            var_dump($err);
-            exit;
+        if (null !== $err = error_get_last()) {
+            self::showHandler([
+                'message' => $err['message'],
+                'file' => $err['file'],
+                'line' => $err['line']
+            ], [], 500);
         }
     }
     
-    
+    /**
+     * 显示错误页面
+     * @param array $msg 错误信息[message, file, line]
+     * @param array $trace 代码回溯
+     * @param integer $code 错误代码
+     */
+    public static function showHandler($msg, $trace, $code)
+    {
+        while (ob_get_level() !== 0) ob_end_clean();
+        
+        $path = DIR_LYING . '/view/exception/';
+        
+        $file = file_exists($file = $path . $code . '.php') ? $file : $path . 'trace.php';
+        
+        ob_start();
+        ob_implicit_flush(false);
+        require $file;
+        ob_end_flush();
+        flush();
+        
+        exit(0);
+    }
 }

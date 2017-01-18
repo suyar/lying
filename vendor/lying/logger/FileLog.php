@@ -14,12 +14,12 @@ class FileLog extends Logger
     protected $file = 'default';
     
     /**
-     * @var int 单个日志文件的最大值(kb)
+     * @var integer 单个日志文件的最大值(kb)
      */
     protected $maxSize = 10240;
     
     /**
-     * @var int 最大的日志文件个数
+     * @var integer 最大的日志文件个数
      */
     protected $maxFile = 5;
     

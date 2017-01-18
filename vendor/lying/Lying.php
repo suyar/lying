@@ -41,7 +41,9 @@ class Lying
         if (isset(self::$classMap[$className])) {
             $file = self::$classMap[$className];
         } else {
-            ($file = self::psr4Loader($className)) || ($file = self::psr0Loader($className));
+            ($file = self::classMapLoader($className)) ||
+            ($file = self::psr4Loader($className)) ||
+            ($file = self::psr0Loader($className));
         }
         if ($file) {
             require $file;
@@ -49,11 +51,24 @@ class Lying
     }
     
     /**
-     * PSR-4自动加载,从完整命名空间前缀到最简命名空间前缀,贪婪加载
-     * @param string $className 类全名
-     * @return string|boolean 成功返回文件,失败返回false
+     * classMap加载
+     * @param string $className 类名
+     * @return string|boolean 成功返回文件绝对路径,失败返回false
      */
-    public static function psr4Loader($className)
+    private static function classMapLoader($className)
+    {
+        if (isset(self::$extend['classMap'][$className]) && file_exists(self::$extend['classMap'][$className])) {
+            return self::$extend['classMap'][$className];
+        }
+        return false;
+    }
+    
+    /**
+     * PSR-4自动加载,参考 http://www.php-fig.org/psr/psr-4/
+     * @param string $className 类名
+     * @return string|boolean 成功返回文件绝对路径,失败返回false
+     */
+    private static function psr4Loader($className)
     {
         if (isset(self::$extend['psr-4'])) {
             $prefix = $className;
@@ -80,19 +95,25 @@ class Lying
         return false;
     }
     
-    public static function psr0Loader($className)
+    /**
+     * PSR-0自动加载,参考 http://www.php-fig.org/psr/psr-0/
+     * @param string $className 类名
+     * @return string|boolean 成功返回文件绝对路径,失败返回false
+     */
+    private static function psr0Loader($className)
     {
         if (isset(self::$extend['psr-0'])) {
-            if (isset(self::$extend['psr-0'][$className])) {
-                if (false === $pos = strrpos($className, '\\')) {
-                    $file = self::$extend['psr-0'][$className] . '/' . str_replace('_', '/', $className) . '.php';
-                    if (file_exists($file)) {
-                        return $file;
-                    }
-                } else {
-                    $prefix = substr($className, 0, $pos);
-                    $class = substr($className, $pos);
-                    var_dump($prefix, $class);
+            if (false === $pos = strrpos($className, '\\')) {
+                $file = str_replace('_', '/', $className) . '.php';
+            } else {
+                $namespace = str_replace('\\', '/', substr($className, 0, $pos));
+                $class = str_replace(['_', '\\'], '/', substr($className, $pos));
+                $file = $namespace . $class . '.php';
+            }
+            foreach (self::$extend['psr-0'] as $baseDir) {
+                $absoluteFile = $baseDir . '/' . $file;
+                if (file_exists($absoluteFile)) {
+                    return $absoluteFile;
                 }
             }
         }
