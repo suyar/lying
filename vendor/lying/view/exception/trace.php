@@ -9,7 +9,7 @@
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      font-family: "Microsoft YaHei";
+      font-family: "NSimSun";
       user-select:none;
     }
     body {
@@ -29,8 +29,10 @@
       border: 1px outset #fff;
       background-color: #000;
       box-shadow: 2px 2px 0 0 #ccc inset;
+      opacity: 0;
     }
     .title {
+      font-weight: normal;
       text-indent: 32px;
       height: 24px;
       line-height: 24px;
@@ -39,15 +41,15 @@
       box-shadow: 2px 2px 0 0 #ccc inset;
     }
     .icon {
-      height: 18px;
+      height: 14px;
       position: absolute;
-      top: 4px;
-      left: 4px;
+      top: 6px;
+      left: 6px;
     }
     .btn {
       float: right;
-      position: relative;
-      top: -23px;
+      position: absolute;
+      top: 1px;
       right: 2px;
     }
     .btn li {
@@ -63,9 +65,17 @@
       font-weight: bold;
       cursor: pointer;
     }
+	.btn li button:focus {
+	  outline: none;
+	}
     .cmd-body {
+      font-size: 14px;
       border: 3px inset #fff;
+      width: 100%;
       height: 426px;
+      letter-spacing: .5px;
+      overflow-y: scroll;
+      padding: 0 1px;
     }
   </style>
 </head>
@@ -79,18 +89,20 @@
       <li><button>X</button></li>
     </ul>
     <div class="cmd-body">
+      <p>Lying Framework [Version 2.0.0]</p>
+      <p>Copyright (c) 2017 Lying. All rights reserved.</p>
+      <br>
       <dl class="info">
-        <dd>&gt;BUG代号：500</dd>
-        <dd>&gt;BUG信息：内部服务器错误</dd>
-        <dd>&gt;BUG文件：不予显示诶</dd>
-        <dd>&gt;BUG行数：好像是...</dd>
+        <dd>C:\Info&gt;BUG代号：<?= $code ?></dd>
+        <dd>C:\Info&gt;BUG信息：<?= $msg['message'] ?></dd>
+        <dd>C:\Info&gt;BUG文件：<?= $msg['file'] ?></dd>
+        <dd>C:\Info&gt;BUG行数：<?= $msg['line'] ?></dd>
       </dl>
+      <br>
       <dl class="trace">
-        <dd>&gt;Trace1</dd>
-        <dd>&gt;Trace1</dd>
-        <dd>&gt;Trace1</dd>
-        <dd>&gt;Trace1</dd>
-        <dd>&gt;Trace1</dd>
+      	<?php foreach ($trace as $t): ?>
+        <dd>C:\Trace&gt;<?= $t ?></dd>
+        <?php endforeach; ?>
       </dl>
     </div>
   </div>
@@ -112,7 +124,7 @@
         selector.style.position = 'absolute';
         selector.style.cursor = 'move';
         selector.style.opacity = '.5';
-        selector.style.transition = 'opacity .5s';
+        selector.style.transition = 'opacity .3s';
         flag = true;
       }).mouseup(function(e) {
         selector.style.cursor = 'default';
@@ -127,6 +139,7 @@
           selector.style.top = (e.pageY - ry > 0 ? (e.pageY - ry < diffy ? e.pageY - ry : diffy) : 0) + 'px';
         }
       });
+      return this;
     }
 
     this.mousedown = function(call) {
@@ -143,6 +156,21 @@
       selector.onmousemove = call;
     }
 
+    this.fadeIn = function(time) {
+      selector.style.transition = 'opacity ' + time + 's';
+      selector.style.opacity = '1';
+      return this;
+    }
+
+    this.ready = function(call) {
+      var timer = setInterval(function() {
+        if(document && document.getElementsByTagName && document.getElementById && document.body) {
+          call();
+          clearInterval(timer);
+        }
+      }, 10);
+    }
+
     this.redirect = function(selector) {
       return $(selector);
     }
@@ -153,7 +181,8 @@
 })(window);
 
 
-$('#cmd').drag();
-
+$(document).ready(function() {
+  $('#cmd').fadeIn(3).drag();
+});
 </script>
 </html>
