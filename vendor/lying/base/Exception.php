@@ -22,10 +22,10 @@ class Exception
         self::showHandler(
             [
                 'message' => $exception->getMessage(),
-                'file' => $exception->getFile(),
+                'file' => self::trimPath($exception->getFile()),
                 'line' => $exception->getLine()
             ],
-            explode("\n", $exception->getTraceAsString()),
+            self::trimPath(explode("\n", $exception->getTraceAsString())),
             $exception->getCode()
         );
     }
@@ -51,10 +51,20 @@ class Exception
         if (null !== $err = error_get_last()) {
             self::showHandler([
                 'message' => $err['message'],
-                'file' => $err['file'],
+                'file' => self::trimPath($err['file']),
                 'line' => $err['line']
             ], [], 500);
         }
+    }
+    
+    /**
+     * 去除绝对路径
+     * @param mixed $subject 要去除的信息
+     * @return mixed
+     */
+    public static function trimPath($subject)
+    {
+        return str_replace(ROOT, '', $subject);
     }
     
     /**
@@ -66,9 +76,9 @@ class Exception
     public static function showHandler($msg, $trace, $code)
     {
         while (ob_get_level() !== 0) ob_end_clean();
+        http_response_code($code);
         
         $path = DIR_LYING . '/view/exception/';
-        
         $file = file_exists($file = $path . $code . '.php') ? $file : $path . 'trace.php';
         
         ob_start();
@@ -76,7 +86,6 @@ class Exception
         require $file;
         ob_end_flush();
         flush();
-        
         exit(0);
     }
 }
