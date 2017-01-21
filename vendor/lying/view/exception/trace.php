@@ -153,7 +153,8 @@
     }
 
     this.mousemove = function(call) {
-      selector.onmousemove = call;
+      selector.addEventListener('mousemove', call);
+      return this;
     }
 
     this.fadeIn = function(time) {
