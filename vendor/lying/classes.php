@@ -1,5 +1,6 @@
 <?php
 return [
+    'lying\base\AR' => DIR_LYING . '/base/AR.php',
     'lying\base\Ctrl' => DIR_LYING . '/base/Ctrl.php',
     'lying\base\Exception' => DIR_LYING . '/base/Exception.php',
     'lying\base\Model' => DIR_LYING . '/base/Model.php',

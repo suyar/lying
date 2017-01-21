@@ -18,7 +18,7 @@ class Dispatch extends Service
                 $this->trigger(\lying\base\Ctrl::EVENT_BEFORE_ACTION, [$a]);
                 $responce = call_user_func_array([$instance, $a], $this->parseArgs($method->getParameters()));
                 $this->trigger(\lying\base\Ctrl::EVENT_AFTER_ACTION, [$a]);
-                exit($responce instanceof $class ? 0 : $responce);
+                echo($responce instanceof $class ? null : $responce);
             } else {
                 throw new \Exception('Page not found.', 404);
             }
