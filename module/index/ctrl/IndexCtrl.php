@@ -15,14 +15,17 @@ class IndexCtrl extends Ctrl
         parent::init();
     }
     
-    public function index($id = 1)
+    public function index()
     {
         
         $user = new UserModel();
         
-        return $this->render('index', [
+        
+        
+        
+        /*return $this->render('index', [
             'name' => 'suyaqi',
-        ], $this->layout, ['title'=>'主页']);
+        ], $this->layout, ['title'=>'主页']);*/
     }
     
     public function get()
