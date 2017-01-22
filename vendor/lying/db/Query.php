@@ -232,38 +232,41 @@ class Query extends QueryBuilder
         return $this;
     }
     
-    
-    
     /**
      * 查询数据
      * @param string $method 查询的方法
+     * @param array $args 要带入的参数列表
      * @return mixed 查询的数据,失败返回false
      */
-    private function fetch($method)
+    protected function fetch($method, $args = [])
     {
         list($statement, $params) = $this->build();
         $sth = $this->connection->prepare($statement);
-        $res = $sth->execute($params) ? call_user_func([$sth, $method]) : false;
+        $res = $sth->execute($params) ? call_user_func_array([$sth, $method], $args) : false;
         $sth->closeCursor();
         return $res;
     }
     
     /**
      * 返回结果集中的一条记录
+     * @param boolean $obj 是否返回对象(默认返回关联数组)
+     * @param string $class 要实例化的对象,不写默认为匿名对象
      * @return mixed
      */
-    public function one()
+    public function one($obj = false, $class = null)
     {
-        return $this->fetch('fetch');
+        return $this->fetch($obj ? 'fetchObject' : 'fetch', $class === null ? [] : [$class]);
     }
     
     /**
      * 返回所有查询结果的数组
+     * @param boolean $obj 是否返回对象(默认返回关联数组)
+     * @param string $class 要实例化的对象,不写默认为匿名对象
      * @return mixed
      */
-    public function all()
+    public function all($obj = false, $class = null)
     {
-        return $this->fetch('fetchAll');
+        return $this->fetch('fetchAll', $obj ? ($class === null ? [\PDO::FETCH_OBJ] : [\PDO::FETCH_CLASS, $class]) : []);
     }
     
     /**

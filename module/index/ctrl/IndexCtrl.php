@@ -20,8 +20,8 @@ class IndexCtrl extends Ctrl
         
         $user = new UserModel();
         
-        
-        
+        $res = UserModel::find()->where(['id'=>10])->one();
+        var_dump($res);
         
         /*return $this->render('index', [
             'name' => 'suyaqi',

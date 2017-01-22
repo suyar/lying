@@ -1,17 +1,26 @@
 <?php
 namespace lying\db;
 
-abstract class AR
+use lying\service\Service;
+
+class AR extends Service
 {
     /**
-     * @var 表字段值
+     * @var array 表字段值
      */
     public $attr = [];
     
     /**
-     * @var 旧的字段值
+     * @var array 旧的字段值
      */
     public $oldAttr;
+    
+    /**
+     * @var array 存表结构
+     */
+    private static $schema = [];
+    
+
     
     /**
      * 设置模型对应的表名,默认去除末尾Model
@@ -57,7 +66,12 @@ abstract class AR
     
     public static function find()
     {
-        
+        return (new ARQuery(self::db(), get_called_class()))->from([self::table()]);
+    }
+    
+    public function toOld(AR $record)
+    {
+        $record->oldAttr = $record->attr;
     }
     
     
