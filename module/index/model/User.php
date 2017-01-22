@@ -3,10 +3,10 @@ namespace module\index\model;
 
 use lying\db\AR;
 
-class UserModel extends AR
+class User extends AR
 {
     
-
+    
     
     
     

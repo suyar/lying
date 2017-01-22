@@ -1,6 +1,8 @@
 <?php
 namespace lying\db;
 
+use module;
+
 class Query extends QueryBuilder
 {
     /**

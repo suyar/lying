@@ -2,7 +2,7 @@
 namespace module\index\ctrl;
 
 use lying\base\Ctrl;
-use module\index\model\UserModel;
+use module\index\model\User;
 
 class IndexCtrl extends Ctrl
 {
@@ -18,10 +18,9 @@ class IndexCtrl extends Ctrl
     public function index()
     {
         
-        $user = new UserModel();
+        $user = User::findAll(['id'=>13]);
         
-        $res = UserModel::find()->where(['id'=>10])->one();
-        var_dump($res);
+        var_dump($user);
         
         /*return $this->render('index', [
             'name' => 'suyaqi',
