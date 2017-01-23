@@ -1,8 +1,6 @@
 <?php
 namespace lying\db;
 
-use module;
-
 class Query extends QueryBuilder
 {
     /**
@@ -69,6 +67,11 @@ class Query extends QueryBuilder
      * @see union()
      */
     protected $union = [];
+    
+    /**
+     * @var \PDOStatement
+     */
+    protected $sth;
     
     /**
      * 初始化Query查询
@@ -185,7 +188,7 @@ class Query extends QueryBuilder
     
     /**
      * 设置排序
-     * @param $columns 要排序的字段和排序方式
+     * @param string|array $columns 要排序的字段和排序方式
      * e.g. orderBy('id, name desc');
      * e.g. orderBy(['id'=>SORT_DESC, 'name']);
      * @return \lying\db\Query
@@ -235,6 +238,31 @@ class Query extends QueryBuilder
     }
     
     /**
+     * 执行一条sql语句
+     * @param string $statement sql语句
+     * @param array $params 绑定的参数
+     * @return boolean
+     */
+    public function execute($statement, $params = [])
+    {
+        $this->sth = $this->connection->prepare($statement);
+        return $this->sth->execute($params);
+    }
+    
+    /**
+     * 执行原生SQL,返回的是语句执行后的PDOStatement对象,直接调用fetch,fetchAll,rowCount等函数即可
+     * e.g. maker()->db()->createQuery()->RawSql('select * from user')->fetchAll(\PDO::FETCH_ASSOC);
+     * @param string $statement sql语句
+     * @param array $params 绑定的参数
+     * @return PDOStatement|boolean 失败返回false
+     */
+    public function RawSql($statement, $params = [])
+    {
+        $sth = $this->connection->prepare($statement);
+        return $this->execute($statement, $params) ? $this->sth : false;
+    }
+    
+    /**
      * 查询数据
      * @param string $method 查询的方法
      * @param array $args 要带入的参数列表
@@ -243,9 +271,8 @@ class Query extends QueryBuilder
     protected function fetch($method, $args = [])
     {
         list($statement, $params) = $this->build();
-        $sth = $this->connection->prepare($statement);
-        $res = $sth->execute($params) ? call_user_func_array([$sth, $method], $args) : false;
-        $sth->closeCursor();
+        $res = $this->execute($statement, $params) ? call_user_func_array([$this->sth, $method], $args) : false;
+        $this->sth->closeCursor();
         return $res;
     }
     
@@ -300,8 +327,7 @@ class Query extends QueryBuilder
         }
         $table = $this->quoteColumn($table);
         $statement = "INSERT INTO $table (" . implode(', ', $cols) . ') VALUES (' . implode(', ', $palceholders) . ')';
-        $sth = $this->connection->prepare($statement);
-        return $sth->execute($params) ? $sth->rowCount() : false;
+        return $this->execute($statement, $params) ? $this->sth->rowCount() : false;
     }
     
     /**
@@ -326,8 +352,7 @@ class Query extends QueryBuilder
             return $this->quoteColumn($col);
         }, $columns);
         $statement = "INSERT INTO $table (" . implode(', ', $columns) . ') VALUES ' . implode(', ', $v);
-        $sth = $this->connection->prepare($statement);
-        return $sth->execute($params) ? $sth->rowCount() : false;
+        return $this->execute($statement, $params) ? $this->sth->rowCount() : false;
     }
     
     /**
@@ -353,8 +378,7 @@ class Query extends QueryBuilder
         $statement = "UPDATE $table SET " . implode(', ', $palceholders);
         $where = $this->buildCondition($condition, $params, $p);
         $statement = $statement . (empty($where) ? '' : " WHERE $where");
-        $sth = $this->connection->prepare($statement);
-        return $sth->execute($p) ? $sth->rowCount() : false;
+        return $this->execute($statement, $p) ? $this->sth->rowCount() : false;
     }
     
     /**
@@ -370,7 +394,6 @@ class Query extends QueryBuilder
         $statement = "DELETE FROM $table";
         $where = $this->buildCondition($condition, $params, $p);
         $statement = $statement . (empty($where) ? '' : " WHERE $where");
-        $sth = $this->connection->prepare($statement);
-        return $sth->execute($p) ? $sth->rowCount() : false;
+        return $this->execute($statement, $p) ? $this->sth->rowCount() : false;
     }
 }

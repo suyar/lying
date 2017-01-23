@@ -62,6 +62,15 @@ class Connection extends Service
     }
     
     /**
+     * 返回最后插入行的ID,或者是一个序列对象最后的值
+     * @param string $name 应该返回ID的那个序列对象的名称
+     */
+    public function lastInsertId($name = null)
+    {
+        return $this->pdo()->lastInsertId($name);
+    }
+    
+    /**
      * 启动一个事务
      * @return boolean 成功时返回true,或者在失败时返回false
      */

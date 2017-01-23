@@ -6,12 +6,12 @@ class ARQuery extends Query
     /**
      * @var string 类名
      */
-    private $className;
+    private $classMode;
     
     /**
      * @var boolean 是否返回数组
      */
-    private $array = false;
+    private $isArray = false;
     
     /**
      * 初始化连接
@@ -21,7 +21,7 @@ class ARQuery extends Query
     public function __construct(Connection $connection, $class = null)
     {
         $this->connection = $connection;
-        $this->className = $class;
+        $this->classMode = $class;
     }
     
     /**
@@ -30,7 +30,7 @@ class ARQuery extends Query
      */
     public function asArray()
     {
-        $this->array = true;
+        $this->isArray = true;
         return $this;
     }
     
@@ -42,7 +42,7 @@ class ARQuery extends Query
      */
     public function one($obj = false, $class = null)
     {
-        $row = $this->array ? parent::one() : parent::one(true, $this->className);
+        $row = $this->isArray ? parent::one() : parent::one(true, $this->classMode);
         return $row instanceof AR ? $row::populate($row) : $row;
     }
     
@@ -54,8 +54,8 @@ class ARQuery extends Query
      */
     public function all($obj = false, $class = null)
     {
-        $rows = $this->array ? parent::all() : parent::all(true, $this->className);
-        if (!$this->array && is_array($rows)) {
+        $rows = $this->isArray ? parent::all() : parent::all(true, $this->classMode);
+        if (!$this->isArray && is_array($rows)) {
             foreach ($rows as $key => $row) {
                 $rows[$key] = $row::populate($row);
             }

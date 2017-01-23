@@ -18,7 +18,12 @@ class IndexCtrl extends Ctrl
     public function index()
     {
         
-        $user = User::findAll(['id'=>13]);
+        
+        $user = new User();
+        $user->username = "suyaqi";
+        
+        var_dump($user->insert());
+        
         
         var_dump($user);
         
