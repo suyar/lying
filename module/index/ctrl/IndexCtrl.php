@@ -17,10 +17,16 @@ class IndexCtrl extends Ctrl
     
     public function index()
     {
-        
+        $s = microtime(true);
         $user = User::findOne(1);
-        
-        var_dump($user);
+        echo microtime(true) - $s;
+        echo "<br>";
+        $e = microtime(true);
+        for ($i = 0; $i < 100; $i++) {
+            $user = User::findOne(1);
+        }
+        echo microtime(true) - $e;
+        //var_dump($user);
         
         /*return $this->render('index', [
             'name' => 'suyaqi',
