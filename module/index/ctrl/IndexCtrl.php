@@ -2,7 +2,6 @@
 namespace module\index\ctrl;
 
 use lying\base\Ctrl;
-use module\index\model\User;
 
 class IndexCtrl extends Ctrl
 {
@@ -17,20 +16,12 @@ class IndexCtrl extends Ctrl
     
     public function index()
     {
-        $s = microtime(true);
-        $user = User::findOne(1);
-        echo microtime(true) - $s;
-        echo "<br>";
-        $e = microtime(true);
-        for ($i = 0; $i < 100; $i++) {
-            $user = User::findOne(1);
-        }
-        echo microtime(true) - $e;
-        //var_dump($user);
         
-        /*return $this->render('index', [
+        
+        
+        return $this->render('index', [
             'name' => 'suyaqi',
-        ], $this->layout, ['title'=>'主页']);*/
+        ], $this->layout, ['title'=>'主页']);
     }
     
     public function get()

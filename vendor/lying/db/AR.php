@@ -147,7 +147,7 @@ class AR extends Service
                 $condition = [reset($pks) => $condition];
             }
         }
-        return self::createARQuery()->where($condition)->one();
+        return self::createARQuery()->where($condition)->limit(1)->one();
     }
     
     /**
@@ -155,19 +155,19 @@ class AR extends Service
      * @param array $condition 查看Query::where()的数组使用方式
      * @return self|boolean
      */
-    public static function findAll($condition)
+    public static function findAll($condition = [])
     {
         return self::createARQuery()->where($condition)->all();
     }
     
     /**
      * 插入当前设置的数据
-     * @return 成功返回插入的行数,失败返回false
+     * @return number|boolean 成功返回插入的行数,失败返回false
      */
     public function insert()
     {
         $res = self::db()->createQuery()->insert(static::table(), $this->attr);
-        if ($res !== false && (false !== $keys = self::pk())) {
+        if (false !== $res && (false !== $keys = self::pk())) {
             foreach ($keys as $key) {
                 $this->attr[$key] = self::db()->lastInsertId($key);
             }
@@ -177,7 +177,7 @@ class AR extends Service
     }
     
     /**
-     * 返回旧数据的条件
+     * 返回旧数据的条件(主键键值对)
      * @param array $pks 主键数组
      * @return array 条件数组
      */
@@ -192,17 +192,36 @@ class AR extends Service
     
     /**
      * 更新当前数据
-     * @return 成功返回更新的行数,失败返回false
+     * @return number|boolean 成功返回更新的行数,失败返回false
      * @throws \Exception
      */
     public function update()
     {
         if (false === $pks = self::pk()) {
             throw new \Exception(get_called_class() . ' does not have a primary key.');
-        } else {
-            $condition = $this->oldCondition($pks);
         }
-        return self::db()->createQuery()->update(static::table(), $this->attr, $condition);
+        $res = self::db()->createQuery()->update(static::table(), $this->attr, $this->oldCondition($pks));
+        if (false !== $res) {
+            self::populate($this);
+        }
+        return $res;
+    }
+    
+    /**
+     * 删除本条数据
+     * @return number|boolean 成功返回删除的行数,失败返回false
+     * @throws \Exception
+     */
+    public function delete()
+    {
+        if (false === $pks = self::pk()) {
+            throw new \Exception(get_called_class() . ' does not have a primary key.');
+        }
+        $res = self::db()->createQuery()->delete(static::table(), $this->oldCondition($pks));
+        if (false !== $res) {
+            $this->oldAttr = null;
+        }
+        return $res;
     }
     
     /**
