@@ -37,7 +37,8 @@ class AR extends Service
      */
     public static function table()
     {
-        return strtolower(preg_replace('/((?<=[a-z])(?=[A-Z]))/', '_', array_pop(explode('\\', get_called_class()))));
+        $tmp = explode('\\', get_called_class());
+        return strtolower(preg_replace('/((?<=[a-z])(?=[A-Z]))/', '_', array_pop($tmp)));
     }
     
     /**
