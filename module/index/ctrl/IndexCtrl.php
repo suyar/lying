@@ -18,12 +18,7 @@ class IndexCtrl extends Ctrl
     public function index()
     {
         
-        
-        $user = new User();
-        $user->username = "suyaqi";
-        
-        var_dump($user->insert());
-        
+        $user = User::findOne(1);
         
         var_dump($user);
         
