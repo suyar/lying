@@ -2,6 +2,7 @@
 namespace module\index\ctrl;
 
 use lying\base\Ctrl;
+use module\index\model\User;
 
 class IndexCtrl extends Ctrl
 {
@@ -16,7 +17,6 @@ class IndexCtrl extends Ctrl
     
     public function index()
     {
-        
         
         
         return $this->render('index', [

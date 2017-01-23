@@ -6,6 +6,36 @@ use lying\service\Service;
 class AR extends Service
 {
     /**
+     * @var string 插入前触发的事件ID
+     */
+    const EVENT_BEFORE_INSERT = 'beforeInsert';
+    
+    /**
+     * @var string 插入后触发的事件ID
+     */
+    const EVENT_AFTER_INSERT = 'afterInsert';
+    
+    /**
+     * @var string 更新前触发的事件ID
+     */
+    const EVENT_BEFORE_UPDATE = 'beforeUpdate';
+    
+    /**
+     * @var string 更新后触发的事件ID
+     */
+    const EVENT_AFTER_UPDATE = 'afterUpdate';
+    
+    /**
+     * @var string 删除前触发的事件ID
+     */
+    const EVENT_BEFORE_DELETE = 'beforeDelete';
+    
+    /**
+     * @var string 删除后触发的事件ID
+     */
+    const EVENT_AFTER_DELETE = 'afterDelete';
+    
+    /**
      * @var array 新数据
      */
     private $attr = [];
@@ -166,6 +196,7 @@ class AR extends Service
      */
     public function insert()
     {
+        $this->trigger(self::EVENT_BEFORE_INSERT);
         $res = self::db()->createQuery()->insert(static::table(), $this->attr);
         if (false !== $res && (false !== $keys = self::pk())) {
             foreach ($keys as $key) {
@@ -173,6 +204,7 @@ class AR extends Service
             }
             self::populate($this);
         }
+        $this->trigger(self::EVENT_AFTER_INSERT);
         return $res;
     }
     
@@ -197,6 +229,7 @@ class AR extends Service
      */
     public function update()
     {
+        $this->trigger(self::EVENT_BEFORE_UPDATE);
         if (false === $pks = self::pk()) {
             throw new \Exception(get_called_class() . ' does not have a primary key.');
         }
@@ -204,6 +237,7 @@ class AR extends Service
         if (false !== $res) {
             self::populate($this);
         }
+        $this->trigger(self::EVENT_AFTER_UPDATE);
         return $res;
     }
     
@@ -214,6 +248,7 @@ class AR extends Service
      */
     public function delete()
     {
+        $this->trigger(self::EVENT_BEFORE_DELETE);
         if (false === $pks = self::pk()) {
             throw new \Exception(get_called_class() . ' does not have a primary key.');
         }
@@ -221,7 +256,26 @@ class AR extends Service
         if (false !== $res) {
             $this->oldAttr = null;
         }
+        $this->trigger(self::EVENT_AFTER_DELETE);
         return $res;
+    }
+    
+    /**
+     * 是否为新记录
+     * @return boolean
+     */
+    public function isNewRecord()
+    {
+        return $this->oldAttr === null;
+    }
+    
+    /**
+     * 保存数据
+     * @return number|boolean 成功返回保存的行数,失败返回false
+     */
+    public function save()
+    {
+        return $this->isNewRecord() ? $this->insert() : $this->update();
     }
     
     /**
