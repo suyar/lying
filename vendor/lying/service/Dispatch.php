@@ -15,10 +15,11 @@ class Dispatch extends Service
             $instance = new $class();
             $method = new \ReflectionMethod($instance, $a);
             if ($method->isPublic() && $this->checkAccess($instance->deny, $a)) {
-                $this->trigger(\lying\base\Ctrl::EVENT_BEFORE_ACTION, [$a]);
+                $instance->trigger($instance::EVENT_BEFORE_ACTION, [$a]);
                 $responce = call_user_func_array([$instance, $a], $this->parseArgs($method->getParameters()));
-                $this->trigger(\lying\base\Ctrl::EVENT_AFTER_ACTION, [$a]);
+                $instance->trigger($instance::EVENT_AFTER_ACTION, [$a]);
                 echo($responce instanceof $class ? null : $responce);
+                exit(0);
             } else {
                 throw new \Exception('Page not found.', 404);
             }

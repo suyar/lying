@@ -2,7 +2,6 @@
 namespace module\index\ctrl;
 
 use lying\base\Ctrl;
-use module\index\model\User;
 
 class IndexCtrl extends Ctrl
 {
@@ -18,16 +17,24 @@ class IndexCtrl extends Ctrl
     public function index()
     {
         
-        
         return $this->render('index', [
             'name' => 'suyaqi',
         ], $this->layout, ['title'=>'主页']);
     }
     
-    public function get()
+    public function setApc($count)
     {
-        
+        var_dump(apcu_store('cards', (int)$count));
     }
+    
+    
+    public function dec()
+    {
+        var_dump(apcu_dec('cards', 1, $success));
+        var_dump($success);
+        var_dump(apcu_clear_cache());
+    }
+    
     
     public function userName()
     {

@@ -4,9 +4,9 @@ namespace lying\service;
 class Service
 {
     /**
-     * @var array 存事件绑定的数组
+     * @var array 实例事件绑定数组
      */
-    private static $events = [];
+    private $events = [];
     
     /**
      * 初始化子类的成员变量
@@ -28,11 +28,11 @@ class Service
     /**
      * 绑定一个函数到某个事件
      * @param string $id 事件的ID
-     * @param callable $callback
+     * @param callable $callback 绑定的事件
      */
-    public function bindEvent($id, callable $callback)
+    final public function bindEvent($id, callable $callback)
     {
-        self::$events[$id][] = $callback;
+        $this->events[$id][] = $callback;
     }
     
     /**
@@ -40,10 +40,10 @@ class Service
      * @param string $id 事件的ID
      * @param array $data 传到绑定的方法的参数,按照参数的顺序提供一个索引数组
      */
-    public function trigger($id, $data = [])
+    final public function trigger($id, $data = [])
     {
-        if (isset(self::$events[$id])) {
-            foreach (self::$events[$id] as $call) {
+        if (isset($this->events[$id])) {
+            foreach ($this->events[$id] as $call) {
                 call_user_func_array($call, $data);
             }
         }
