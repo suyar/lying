@@ -20,21 +20,6 @@ class DbLog extends Logger
     
     /**
      * 初始化数据库链接
-     * 可以用以下语句来创建表
-     * CREATE TABLE `log` (
-	 * `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-     * `time` DATETIME NULL DEFAULT NULL,
-	 * `ip` VARCHAR(20) NULL DEFAULT NULL,
-	 * `level` VARCHAR(20) NULL DEFAULT NULL,
-	 * `request` VARCHAR(1024) NULL DEFAULT NULL,
-	 * `file` VARCHAR(256) NULL DEFAULT NULL,
-	 * `line` INT(10) UNSIGNED NULL DEFAULT NULL,
-	 * `data` MEDIUMTEXT NULL,
-	 * PRIMARY KEY (`id`)
-     * )
-     * COLLATE='utf8_general_ci'
-     * ENGINE=InnoDB
-     * ;
      */
     protected function init()
     {
