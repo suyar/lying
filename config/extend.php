@@ -11,12 +11,12 @@ return [
     ],
     'psr-4' => [
         //命名空间前缀 => 目录
-        //目录可以是一个数组,参考 http://www.php-fig.org/psr/psr-4/examples/
+        //目录可以是一个数组,参见 http://www.php-fig.org/psr/psr-4/examples/
         //e.g. 'module' => DIR_MODULE,
         'module' => DIR_MODULE,
     ],
     'psr-0' => [
-        //跟目录列表,参见 https://gist.github.com/jwage/221634
-        //e.g. DIR_MODULE
+        //根目录列表,参见 https://gist.github.com/jwage/221634
+        //e.g. ROOT
     ],
 ];

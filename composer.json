@@ -1,26 +1,21 @@
 {
-	"name":"carolkey",
+	"name":"carolkey/lying",
 	"description":"Lying Framework",
 	"keywords":[
 		"Lying Framework",
 		"PHP Framework"
 	],
-	"homepage":"https://github.com/CarolKey/lying",
-	"time":"2016-10-30 22:56:50",
+	"homepage":"https://github.com/carolkey/lying",
+	"time":"2017-01-24 21:41:50",
 	"license":"MIT",
 	"authors":[
 		{
-			"name":"Carol Key",
+			"name":"lying",
 			"email":"296399959@qq.com",
-			"homepage":"https://github.com/CarolKey",
+			"homepage":"https://github.com/carolkey",
 			"role":"Developer"
 		}
 	],
-	"autoload":{
-		"psr-4":{
-			
-		}
-	},
 	"require":{
 		
 	},
