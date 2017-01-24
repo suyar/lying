@@ -6,61 +6,69 @@ use lying\service\Service;
 abstract class Cache extends Service
 {
     /**
-     * 存储一个元素
-     * @param string $key 键名
-     * @param mixed $data 数据
-     * @param integer $expiration 有效时间,默认为0
-     * @return boolean 成功返回tuue,失败返回false
+     * 添加一个缓存,如果缓存已经存在,此次设置的值不会覆盖原来的值,并返回false
+     * @param string $key 缓存ID
+     * @param mixed $value 缓存的数据
+     * @param integer $ttl 缓存生存时间,默认为0
+     * @return boolean 成功返回true,失败返回false
      */
-    abstract public function set($key, $data, $expiration = 0);
+    abstract public function add($key, $value, $ttl = 0);
     
     /**
-     * 检索一个元素
-     * @param string $key 键名
-     * @return mixed 返回存储的值,失败返回false
+     * 添加一组缓存,如果缓存已经存在,此次设置的值不会覆盖原来的值
+     * @param array $data 一个关联数组,e.g. ['name' => 'lying']
+     * @param integer $ttl 缓存生存时间,默认为0
+     * @return array 返回设置失败的数组,e.g. ['name', 'sex'],否则返回空数组
+     */
+    abstract public function madd($data, $ttl = 0);
+    
+    /**
+     * 添加一个缓存,如果缓存已经存在,此次缓存会覆盖原来的值并且重新设置生存时间
+     * @param string $key 缓存ID
+     * @param mixed $value 缓存的数据
+     * @param integer $ttl 缓存生存时间,默认为0
+     * @return boolean 成功返回true,失败返回false
+     */
+    abstract public function set($key, $value, $ttl = 0);
+    
+    /**
+     * 添加一组缓存,如果缓存已经存在,此次缓存会覆盖原来的值并且重新设置生存时间
+     * @param array $data 一个关联数组,e.g. ['name' => 'lying']
+     * @param integer $ttl 缓存生存时间,默认为0
+     * @return array 返回设置失败的数组,e.g. ['name', 'sex'],否则返回空数组
+     */
+    abstract public function mset($data, $ttl = 0);
+    
+    /**
+     * 从缓存中提取存储的变量
+     * @param string $key 缓存ID
+     * @return boolean 成功返回true,失败返回false
      */
     abstract public function get($key);
     
     /**
-     * 批量设置缓存
-     * @param array $data 一个key=>value形式的数组
-     * @param integer $expiration 有效时间,默认为0
-     * @return boolean 成功返回true,只要有一个失败就返回false
-     */
-    abstract public function mset($data, $expiration = 0);
-    
-    /**
-     * 批量读取缓存
-     * @param array $keys 检索key的数组
-     * @return array|boolean 成功返回元素的数组,失败返回false
+     * 从缓存中提取一组存储的变量
+     * @param array $key 缓存ID数组
+     * @return array 返回查找到的数据数组,没找到则返回空数组
      */
     abstract public function mget($keys);
     
     /**
-     * 检索一个键名是否存在(过期为不存在),与值无关;
-     * 此函数可以区分值为false和取值失败,值为false也可能返回true
-     * @param string $key 键名
-     * @return boolean 存在返回true,不存在或者失败返回false
+     * 检查缓存是否存在
+     * @param string $key 要查找的缓存ID
+     * @return boolean 如果键存在,则返回true,否则返回false
      */
     abstract public function exist($key);
     
     /**
-     * 删除一个缓存
-     * @param string $key 键名
-     * @return boolean 成功返回true,失败或者不存在返回false
+     * 从缓存中删除存储的变量
+     * @param string $key 从缓存中删除存储的变量
+     * @return boolean 成功返回true,失败返回false
      */
     abstract public function del($key);
     
     /**
-     * 重新设置有效时间
-     * @param string $key 键名
-     * @param integer $expiration 有效时间,默认为0
-     * @return boolean 成功返回true,失败返回false
-     */
-    abstract public function touch($key, $expiration = 0);
-    
-    /**
-     * 删除所有缓存
+     * 清除所有缓存 
      * @return boolean 成功返回true,失败返回false
      */
     abstract public function flush();

@@ -16,6 +16,8 @@ class IndexCtrl extends Ctrl
     
     public function index()
     {
+        $c = maker()->cache('dbCache');
+        var_dump($c->set('name', 'lying', 10));
         
         return $this->render('index', [
             'name' => 'suyaqi',
@@ -24,15 +26,17 @@ class IndexCtrl extends Ctrl
     
     public function setApc($count)
     {
-        var_dump(apcu_store('cards', (int)$count));
+        var_dump(apcu_store([
+            'name1'=>1,
+            'name2'=>2,
+            'name3'=>3,
+        ], null, 5));
     }
     
     
     public function dec()
     {
-        var_dump(apcu_dec('cards', 1, $success));
-        var_dump($success);
-        var_dump(apcu_clear_cache());
+        var_dump(maker()->cache('dbCache')->get('name'));
     }
     
     

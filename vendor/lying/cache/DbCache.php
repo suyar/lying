@@ -20,7 +20,6 @@ class DbCache extends Cache
     
     /**
      * 设置数据库连接实例
-     * 可以用以下语句来创建表
      */
     protected function init()
     {
@@ -28,38 +27,94 @@ class DbCache extends Cache
     }
     
     /**
-     * 概率回收垃圾
-     * @return boolean 回收成功返回true,失败或者未回收返回false
+     * 回收垃圾
+     * @param boolean $all 是否全部删除
      */
-    public function gc()
+    public function gc($all = false)
     {
-        if (mt_rand(0, 100) > $this->gc) {
-            return $this->flush(true);
+        if ($all || mt_rand(0, 100) > $this->gc) {
+            $query = $this->connection->createQuery();
+            $res = $all ? $query->delete($this->table) : $query->delete($this->table, [
+                ['>', 'expire', 0],
+                ['<', 'expire', time()]
+            ]);
         }
-        return false;
     }
     
     /**
-     * @see \lying\cache\Cache::set()
+     * 添加一个缓存,如果缓存已经存在,此次设置的值不会覆盖原来的值,并返回false
+     * @param string $key 缓存ID
+     * @param mixed $value 缓存的数据
+     * @param integer $ttl 缓存生存时间,默认为0
+     * @return boolean 成功返回true,失败返回false
      */
-    public function set($key, $data, $expiration = 0)
+    public function add($key, $value, $ttl = 0)
+    {
+        $this->gc();
+        return $this->exist($key) ? false : $this->set($key, $value, $ttl);
+    }
+    
+    /**
+     * 添加一组缓存,如果缓存已经存在,此次设置的值不会覆盖原来的值
+     * @param array $data 一个关联数组,e.g. ['name' => 'lying']
+     * @param integer $ttl 缓存生存时间,默认为0
+     * @return array 返回设置失败的数组,e.g. ['name', 'sex'],否则返回空数组
+     */
+    public function madd($data, $ttl = 0)
+    {
+        $fieldKeys = [];
+        foreach ($data as $key => $value) {
+            if (false === $this->add($key, $value, $ttl)) {
+                $fieldKeys[] = $key;
+            }
+        }
+        return $fieldKeys;
+    }
+    
+    /**
+     * 添加一个缓存,如果缓存已经存在,此次缓存会覆盖原来的值并且重新设置生存时间
+     * @param string $key 缓存ID
+     * @param mixed $value 缓存的数据
+     * @param integer $ttl 缓存生存时间,默认为0
+     * @return boolean 成功返回true,失败返回false
+     */
+    public function set($key, $value, $ttl = 0)
     {
         $this->gc();
         $query = $this->connection->createQuery();
-        $exist = $query->select('key')->from([$this->table])->where(['key' => $key])->one();
-        $exist = $exist ? $query->update($this->table, [
-            'expire' => $expiration > 0 ? time() + $expiration : 0,
-            'data' => serialize($data),
+        $res = $query->select('key')->from([$this->table])->where(['key' => $key])->one();
+        $res = $res ? $query->update($this->table, [
+            'expire' => $ttl > 0 ? time() + $ttl : 0,
+            'data' => serialize($value),
         ], ['key' => $key]) : $query->insert($this->table, [
             'key' => $key,
-            'expire' => $expiration > 0 ? time() + $expiration : 0,
-            'data' => serialize($data),
+            'expire' => $ttl > 0 ? time() + $ttl : 0,
+            'data' => serialize($value),
         ]);
-        return $exist === false ? false : true;
+        return $res !== false;
     }
     
     /**
-     * @see \lying\cache\Cache::get()
+     * 添加一组缓存,如果缓存已经存在,此次缓存会覆盖原来的值并且重新设置生存时间
+     * @param array $data 一个关联数组,e.g. ['name' => 'lying']
+     * @param integer $ttl 缓存生存时间,默认为0
+     * @return array 返回设置失败的数组,e.g. ['name', 'sex'],否则返回空数组
+     */
+    public function mset($data, $ttl = 0)
+    {
+        $fieldKeys = [];
+        foreach ($data as $key => $value) {
+            if (false === $this->set($key, $value, $ttl)) {
+                $fieldKeys[] = $key;
+            }
+        }
+        return $fieldKeys;
+    }
+    
+    /**
+     * 从缓存中提取存储的变量
+     * @param string $key 缓存ID
+     * @return boolean 成功返回true,失败返回false
      */
     public function get($key)
     {
@@ -74,19 +129,9 @@ class DbCache extends Cache
     }
     
     /**
-     * @see \lying\cache\Cache::mset()
-     */
-    public function mset($data, $expiration = 0)
-    {
-        $res = true;
-        foreach ($data as $key => $d) {
-            $res = $res && $this->set($key, $d, $expiration);
-        }
-        return $res;
-    }
-    
-    /**
-     * @see \lying\cache\Cache::mget()
+     * 从缓存中提取一组存储的变量
+     * @param array $key 缓存ID数组
+     * @return array 返回查找到的数据数组,没找到则返回空数组
      */
     public function mget($keys)
     {
@@ -99,11 +144,9 @@ class DbCache extends Cache
         ])
         ->all();
         if ($rows === false) {
-            return false;
+            return [];
         }
-        foreach ($keys as $key) {
-            $result[$key] = false;
-        }
+        $result = [];
         foreach ($rows as $row) {
             $result[$row['key']] = unserialize($row['data']);
         }
@@ -111,11 +154,14 @@ class DbCache extends Cache
     }
     
     /**
-     * @see \lying\cache\Cache::exist()
+     * 检查缓存是否存在
+     * @param string $key 要查找的缓存ID
+     * @return boolean 如果键存在,则返回true,否则返回false
      */
     public function exist($key)
     {
-        return $this->connection->createQuery()->select(['key'])
+        return $this->connection->createQuery()
+        ->select(['key'])
         ->from([$this->table])
         ->where([
             'key' => $key,
@@ -125,38 +171,23 @@ class DbCache extends Cache
     }
     
     /**
-     * @see \lying\cache\Cache::del()
+     * 从缓存中删除存储的变量
+     * @param string $key 从缓存中删除存储的变量
+     * @return boolean 成功返回true,失败返回false
      */
     public function del($key)
     {
-        $res = $this->connection->createQuery()
-        ->delete($this->table, ['key' => $key]);
+        $res = $this->connection->createQuery()->delete($this->table, ['key' => $key]);
         return $res === false ? false : true;
     }
     
     /**
-     * @see \lying\cache\Cache::touch()
+     * 清除所有缓存
+     * @return boolean 成功返回true,失败返回false
      */
-    public function touch($key, $expiration = 0)
+    public function flush()
     {
-        $res = $this->connection->createQuery()
-        ->update($this->table, ['expire' => $expiration > 0 ? time() + $expiration : 0], [
-            'key' => $key
-        ]);
-        return $res === false ? false : true;
-    }
-    
-    /**
-     * @param boolean $gc 是否只回收过期垃圾
-     * @see \lying\cache\Cache::flush()
-     */
-    public function flush($gc = false)
-    {
-        $query = $this->connection->createQuery();
-        $res = $gc ? $query->delete($this->table, [
-            ['>', 'expire', 0],
-            ['<', 'expire', time()]
-        ]) : $query->delete($this->table);
-        return $res === false ? false : true;
+        $this->gc(true);
+        return true;
     }
 }

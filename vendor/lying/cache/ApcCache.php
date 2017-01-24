@@ -9,15 +9,57 @@ class ApcCache extends Cache
     protected $apcu = false;
     
     /**
-     * @see \lying\cache\Cache::set()
+     * 添加一个缓存,如果缓存已经存在,此次设置的值不会覆盖原来的值,并返回false
+     * @param string $key 缓存ID
+     * @param mixed $value 缓存的数据
+     * @param integer $ttl 缓存生存时间,默认为0
+     * @return boolean 成功返回true,失败返回false
      */
-    public function set($key, $data, $expiration = 0)
+    public function add($key, $value, $ttl = 0)
     {
-        return $this->apcu ? apcu_store($key, $data, $expiration) : apc_store($key, $data, $expiration);
+        return $this->apcu ? apcu_add($key, $value, $ttl) : apc_add($key, $value, $ttl);
     }
     
     /**
-     * @see \lying\cache\Cache::get()
+     * 添加一组缓存,如果缓存已经存在,此次设置的值不会覆盖原来的值
+     * @param array $data 一个关联数组,e.g. ['name' => 'lying']
+     * @param integer $ttl 缓存生存时间,默认为0
+     * @return array 返回设置失败的数组,e.g. ['name', 'sex'],否则返回空数组
+     */
+    public function madd($data, $ttl = 0)
+    {
+        $res = $this->apcu ? apcu_add($data, null, $ttl) : apc_add($data, null, $ttl);
+        return is_array($res) ? array_keys($res) : [];
+    }
+    
+    /**
+     * 添加一个缓存,如果缓存已经存在,此次缓存会覆盖原来的值并且重新设置生存时间
+     * @param string $key 缓存ID
+     * @param mixed $value 缓存的数据
+     * @param integer $ttl 缓存生存时间,默认为0
+     * @return boolean 成功返回true,失败返回false
+     */
+    public function set($key, $value, $ttl = 0)
+    {
+        return $this->apcu ? apcu_store($key, $value, $ttl) : apc_store($key, $value, $ttl);
+    }
+    
+    /**
+     * 添加一组缓存,如果缓存已经存在,此次缓存会覆盖原来的值并且重新设置生存时间
+     * @param array $data 一个关联数组,e.g. ['name' => 'lying']
+     * @param integer $ttl 缓存生存时间,默认为0
+     * @return array 返回设置失败的数组,e.g. ['name', 'sex'],否则返回空数组
+     */
+    public function mset($data, $ttl = 0)
+    {
+        $res = $this->apcu ? apcu_store($data, null, $ttl) : apc_store($data, null, $ttl);
+        return is_array($res) ? array_keys($res) : [];
+    }
+    
+    /**
+     * 从缓存中提取存储的变量
+     * @param string $key 缓存ID
+     * @return boolean 成功返回true,失败返回false
      */
     public function get($key)
     {
@@ -25,16 +67,9 @@ class ApcCache extends Cache
     }
     
     /**
-     * @see \lying\cache\Cache::mset()
-     */
-    public function mset($data, $expiration = 0)
-    {
-        $res = $this->apcu ? apcu_store($data, null, $expiration) : apc_store($data, null, $expiration);
-        return empty($res) ? true : false;
-    }
-    
-    /**
-     * @see \lying\cache\Cache::mget()
+     * 从缓存中提取一组存储的变量
+     * @param array $key 缓存ID数组
+     * @return array 返回查找到的数据数组,没找到则返回空数组
      */
     public function mget($keys)
     {
@@ -42,7 +77,9 @@ class ApcCache extends Cache
     }
     
     /**
-     * @see \lying\cache\Cache::exist()
+     * 检查缓存是否存在
+     * @param string $key 要查找的缓存ID
+     * @return boolean 如果键存在,则返回true,否则返回false
      */
     public function exist($key)
     {
@@ -50,7 +87,9 @@ class ApcCache extends Cache
     }
     
     /**
-     * @see \lying\cache\Cache::del()
+     * 从缓存中删除存储的变量
+     * @param string $key 从缓存中删除存储的变量
+     * @return boolean 成功返回true,失败返回false
      */
     public function del($key)
     {
@@ -58,15 +97,8 @@ class ApcCache extends Cache
     }
     
     /**
-     * @see \lying\cache\Cache::touch()
-     */
-    public function touch($key, $expiration = 0)
-    {
-        return $this->exist($key) !== false ? $this->set($key, $this->get($key), $expiration) : false;
-    }
-    
-    /**
-     * @see \lying\cache\Cache::flush()
+     * 清除所有APC缓存 
+     * @return boolean 成功返回true,失败返回false
      */
     public function flush()
     {

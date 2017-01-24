@@ -33,108 +33,142 @@ class FileCache extends Cache
     }
     
     /**
-     * 概率回收垃圾
-     * @return boolean 回收成功返回true,失败或者未回收返回false
+     * 回收垃圾
+     * @param boolean $all 是否全部删除
      */
-    public function gc()
+    private function gc($all = false)
     {
-        if (mt_rand(0, 100) > $this->gc) {
-            return $this->flush(true);
+        if ($all || mt_rand(0, 100) > $this->gc) {
+            foreach (glob($this->dir . '/*.bin') as $file) {
+                if ($all) {
+                    @unlink($file);
+                } elseif (@filemtime($file) < time()) {
+                    @unlink($file);
+                }
+            }
         }
-        return false;
     }
     
     /**
-     * @see \lying\cache\Cache::set()
+     * 添加一个缓存,如果缓存已经存在,此次设置的值不会覆盖原来的值,并返回false
+     * @param string $key 缓存ID
+     * @param mixed $value 缓存的数据
+     * @param integer $ttl 缓存生存时间,默认为0
+     * @return boolean 成功返回true,失败返回false
      */
-    public function set($key, $data, $expiration = 0)
+    public function add($key, $value, $ttl = 0)
     {
         $this->gc();
         $cacheFile = $this->cacheFile($key);
-        if (file_put_contents($cacheFile, serialize($data), LOCK_EX) !== false) {
-            return touch($cacheFile, time() + ($expiration > 0 ? $expiration : 31536000));
+        return $this->exist($key) ? false : $this->set($key, $value, $ttl);
+    }
+    
+    /**
+     * 添加一组缓存,如果缓存已经存在,此次设置的值不会覆盖原来的值
+     * @param array $data 一个关联数组,e.g. ['name' => 'lying']
+     * @param integer $ttl 缓存生存时间,默认为0
+     * @return array 返回设置失败的数组,e.g. ['name', 'sex'],否则返回空数组
+     */
+    public function madd($data, $ttl = 0)
+    {
+        $fieldKeys = [];
+        foreach ($data as $key => $value) {
+            if (false === $this->add($key, $value, $ttl)) {
+                $fieldKeys[] = $key;
+            }
+        }
+        return $fieldKeys;
+    }
+    
+    /**
+     * 添加一个缓存,如果缓存已经存在,此次缓存会覆盖原来的值并且重新设置生存时间
+     * @param string $key 缓存ID
+     * @param mixed $value 缓存的数据
+     * @param integer $ttl 缓存生存时间,默认为0
+     * @return boolean 成功返回true,失败返回false
+     */
+    public function set($key, $value, $ttl = 0)
+    {
+        $this->gc();
+        $cacheFile = $this->cacheFile($key);
+        if (file_put_contents($cacheFile, serialize($value), LOCK_EX) !== false) {
+            return touch($cacheFile, time() + ($ttl > 0 ? $ttl : 31536000));
         }
         return false;
     }
     
     /**
-     * @see \lying\cache\Cache::get()
+     * 添加一组缓存,如果缓存已经存在,此次缓存会覆盖原来的值并且重新设置生存时间
+     * @param array $data 一个关联数组,e.g. ['name' => 'lying']
+     * @param integer $ttl 缓存生存时间,默认为0
+     * @return array 返回设置失败的数组,e.g. ['name', 'sex'],否则返回空数组
+     */
+    public function mset($data, $ttl = 0)
+    {
+        $fieldKeys = [];
+        foreach ($data as $key => $value) {
+            if (false === $this->set($key, $value, $ttl)) {
+                $fieldKeys[] = $key;
+            }
+        }
+        return $fieldKeys;
+    }
+    
+    /**
+     * 从缓存中提取存储的变量
+     * @param string $key 缓存ID
+     * @return boolean 成功返回true,失败返回false
      */
     public function get($key)
     {
         $cacheFile = $this->dir . '/' . md5($key) . '.bin';
-        if (file_exists($cacheFile) && filemtime($cacheFile) > time()) {
-            return unserialize(file_get_contents($cacheFile));
-        }
-        return false;
+        return $this->exist($key) ? unserialize(file_get_contents($cacheFile)) : false;
     }
     
     /**
-     * @see \lying\cache\Cache::mset()
-     */
-    public function mset($data, $expiration = 0)
-    {
-        $res = true;
-        foreach ($data as $k => $d) {
-            $failed = $failed && $this->set($k, $d);
-        }
-        return $failed;
-    }
-    
-    /**
-     * @see \lying\cache\Cache::mget()
+     * 从缓存中提取一组存储的变量
+     * @param array $key 缓存ID数组
+     * @return array 返回查找到的数据数组,没找到则返回空数组
      */
     public function mget($keys)
     {
         $values = [];
-        foreach ($keys as $k) {
-            $values[] = $this->get($k);
+        foreach ($keys as $key) {
+            if ($this->exist($key)) {
+                $values[$key] = $this->get($key);
+            }
         }
-        return $values ? $values : false;
+        return $values;
     }
     
     /**
-     * @see \lying\cache\Cache::exist()
+     * 检查缓存是否存在
+     * @param string $key 要查找的缓存ID
+     * @return boolean 如果键存在,则返回true,否则返回false
      */
     public function exist($key)
     {
         $cacheFile = $this->cacheFile($key);
-        return file_exists($cacheFile) && filemtime($cacheFile) > time();
+        return @filemtime($cacheFile) > time();
     }
     
     /**
-     * @see \lying\cache\Cache::del()
+     * 从缓存中删除存储的变量
+     * @param string $key 从缓存中删除存储的变量
+     * @return boolean 成功返回true,失败返回false
      */
     public function del($key)
     {
-        $cacheFile = $this->cacheFile($key);
-        return file_exists($cacheFile) && unlink($cacheFile);
+        return @unlink($this->cacheFile($key));
     }
     
     /**
-     * @see \lying\cache\Cache::touch()
+     * 清除所有缓存 
+     * @return boolean 成功返回true,失败返回false
      */
-    public function touch($key, $expiration = 0)
+    public function flush()
     {
-        $cacheFile = $this->cacheFile($key);
-        return file_exists($cacheFile) && touch($cacheFile, time() + ($expiration > 0 ? $expiration : 31536000));
-    }
-    
-    /**
-     * @param boolean $gc 是否只回收过期垃圾
-     * @see \lying\cache\Cache::flush()
-     */
-    public function flush($gc = false)
-    {
-        foreach (glob($this->dir . '/*.bin') as $file) {
-            if ($gc) {
-                if (filemtime($file) < time()) {
-                    unlink($file);
-                }
-            } else {
-                unlink($file);
-            }
-        }
+        $this->gc(true);
         return true;
     }
 }
