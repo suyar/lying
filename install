@@ -1,7 +1,7 @@
 [Apache2.4.25]
 gcc,
 apr, apr-devel,
-apr-util, apr-util-devel,
+apr-util, apr-util-devel,//要支持event mpm需要apr1.5以上
 pcre, pcre-devel,
 perl 5,
 openssl, openssl-devel
