@@ -1,20 +1,27 @@
 <?php
 namespace lying\service;
 
-class Session
+class Session extends Service implements \ArrayAccess
 {
     /**
-     * 开启session
+     * 实例化的时候启用session
      */
-    public function start()
+    protected function init()
     {
-        if (!$this->isActive()) {
-            session_start();
-        }
+        $this->start();
     }
     
     /**
-     * session是否已经启用
+     * 启用session
+     * @return boolean 成功开始会话返回true,反之返回false
+     */
+    public function start()
+    {
+        return $this->isActive() ? true : session_start();
+    }
+    
+    /**
+     * 检测session是否已经启用
      * @return boolean
      */
     public function isActive()
@@ -29,7 +36,6 @@ class Session
      */
     public function set($key, $value)
     {
-        $this->start();
         $_SESSION[$key] = $value;
     }
     
@@ -40,7 +46,6 @@ class Session
      */
     public function get($key)
     {
-        $this->start();
         return isset($_SESSION[$key]) ? $_SESSION[$key] : null;
     }
     
@@ -65,7 +70,7 @@ class Session
      */
     public function removeAll()
     {
-        session_unset();
+        $_SESSION = [];
     }
     
     /**
@@ -74,8 +79,49 @@ class Session
     public function destroy()
     {
         if ($this->isActive()) {
-            session_unset();
+            setcookie(session_name(), '', time() - 1);
+            $this->removeAll();
             session_destroy();
         }
+    }
+    
+    /**
+     * 设置一个偏移位置的值
+     * {@inheritDoc}
+     * @see ArrayAccess::offsetSet()
+     */
+    public function offsetSet($offset, $value)
+    {
+        $this->set($offset, $value);
+    }
+    
+    /**
+     * 检查一个偏移位置是否存在
+     * {@inheritDoc}
+     * @see ArrayAccess::offsetExists()
+     */
+    public function offsetExists($offset)
+    {
+        return isset($_SESSION[$key]);
+    }
+    
+    /**
+     * 复位一个偏移位置的值
+     * {@inheritDoc}
+     * @see ArrayAccess::offsetUnset()
+     */
+    public function offsetUnset($offset)
+    {
+        $this->remove($offset);
+    }
+    
+    /**
+     * 获取一个偏移位置的值
+     * {@inheritDoc}
+     * @see ArrayAccess::offsetGet()
+     */
+    public function offsetGet($offset)
+    {
+        return $this->get($offset);
     }
 }

@@ -18,6 +18,7 @@ class IndexCtrl extends Ctrl
     {
         
         
+        
         return $this->render('index', [
             'name' => 'suyaqi',
         ], $this->layout, ['title'=>'主页']);

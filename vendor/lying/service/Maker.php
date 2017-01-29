@@ -16,7 +16,7 @@ class Maker
         'request' => 'lying\service\Request',
         'router' => 'lying\service\Router',
         'secure' => 'lying\service\Secure',
-        'session' => 'lying\session\Session',
+        'session' => 'lying\service\Session',
         'cookie' => 'lying\service\Cookie',
         'dispatch' => 'lying\service\Dispatch',
     ];
