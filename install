@@ -1,67 +1,91 @@
 [Apache2.4.25]
-gcc,
-pcre, pcre-devel,
-perl 5,
-openssl, openssl-devel
+<see:http://httpd.apache.org/docs/2.4/install.html>
+1.dependencies
+yum install gcc pcre pcre-devel perl openssl openssl-devel
 
-wget http://mirrors.hust.edu.cn/apache//httpd/httpd-2.4.25.tar.gz
-wget http://mirrors.hust.edu.cn/apache//apr/apr-1.5.2.tar.gz
-wget http://mirrors.hust.edu.cn/apache//apr/apr-util-1.5.4.tar.gz
-全部解压后
+2.download
+wget http://mirrors.hust.edu.cn/apache/httpd/httpd-2.4.25.tar.gz
+wget http://mirrors.hust.edu.cn/apache/apr/apr-1.5.2.tar.gz
+wget http://mirrors.hust.edu.cn/apache/apr/apr-util-1.5.4.tar.gz
+
+3.install
+tar -zxvf ...
 mv apr-1.5.2 httpd-2.4.25/srclib/apr
 mv apr-util-1.5.4 httpd-2.4.25/srclib/apr-util
 ./configure --prefix=/usr/local/httpd --with-ssl --with-included-apr
+make
+make install
+<note:apr 和 apr-util 应该下载最新版,否则mpm可能用不了event模式>
 
+4.control
+./apachectl -k start|stop|restart
+
+[PHP7.1.1]
+1.dependencies
+yum install gcc libxml2 libxml2-devel bzip2 bzip2-devel zlib zlib-devel libmcrypt libmcrypt-devel openssl openssl-devel libjpeg-turbo libjpeg-turbo-devel libpng libpng-devel libcurl libcurl-devel
+
+2.download
+wget http://hk2.php.net/distributions/php-7.1.1.tar.gz
+
+3.install
+tar -zxvf ...
+with apache
+./configure --prefix=/usr/local/php --with-apxs2=/usr/local/httpd/bin/apxs --with-bz2 --with-zlib --with-mcrypt --with-openssl --enable-mbstring --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --enable-calendar --enable-exif --with-gd --with-jpeg-dir --with-png-dir --enable-gd-native-ttf --enable-bcmath --with-curl --enable-ftp --enable-sockets --enable-libxml
+with php-fpm
+./configure --prefix=/usr/local/php --with-apxs2=/usr/local/httpd/bin/apxs --with-bz2 --with-zlib --with-mcrypt --with-openssl --enable-mbstring --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --enable-calendar --enable-exif --with-gd --with-jpeg-dir --with-png-dir --enable-gd-native-ttf --enable-bcmath --with-curl --enable-ftp --enable-sockets --enable-libxml --enable-fpm
 make
 make install
 
-./apachectl -k start|stop|restart
+4.control
+./php-fpm 启动
+kill -QUIT pid 平滑终止
+kill -INT|TERM pid 立即终止
+kill -USR1 pid 重新打开日志文件
+kill -USR1 pid 平滑重载所有worker进程并重新载入配置和二进制模块
 
-[PHP7.1.0]
-gcc,
-libxml2, libxml2-devel,
-bzip2, bzip2-devel,
-zlib, zlib-devel,
-libmcrypt, libmcrypt-devel,
-openssl, openssl-devel,
-libjpeg-turbo, libjpeg-turbo-devel,
-libpng, libpng-devel,
-libcurl, libcurl-devel,
+5.extends
+5.1 pecl
+5.1.1 dependencies
+yum install autoconf
 
-./configure
---prefix=/usr/local/php
---with-apxs2=/usr/local/httpd/bin/apxs
---with-bz2
---with-zlib
---with-mcrypt
---with-openssl
---enable-mbstring
---with-mysqli=mysqlnd
---with-pdo-mysql=mysqlnd
---enable-calendar
---enable-exif
+5.1.2 memcached
+yum install libmemcahced libmemcached-devel
+./pecl -install memcached
+extension=memcached.so
 
---with-gd
---with-jpeg-dir
---with-png-dir
---enable-gd-native-ttf
+5.1.3 apcu
+./pecl -install memcached
+extension=apcu.so
 
---enable-bcmath
---with-curl
---enable-ftp
---enable-sockets
---enable-libxml
+[nginx1.10.3]
+<see:http://nginx.org/en/docs/configure.html>
+1.dependencies
+yum install gcc zlib zlib-devel pcre pcre-devel
 
+2.download
+wget http://nginx.org/download/nginx-1.10.3.tar.gz
 
-./configure --prefix=/usr/local/php --with-apxs2=/usr/local/httpd/bin/apxs --with-bz2 --with-zlib --with-mcrypt --with-openssl --enable-mbstring --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --enable-calendar --enable-exif --with-gd --with-jpeg-dir --with-png-dir --enable-gd-native-ttf --enable-bcmath --with-curl --enable-ftp --enable-sockets --enable-libxml
+3.install
+./configure --prefix=/usr/local/nginx --with-pcre --with-zlib --with-http_ssl_module
+make
+make install
+
+4.control
+./nginx 启动
+./nginx -s stop 立即终止
+./nginx -s quit 平滑终止
+./nginx -s reload 重新加载配置文件
+./nginx -s reopen 重新打开日志文件
 
 [mysql5.7.17]
-清除之前残留的mysql文件,my.cnf等
+1.清除之前残留的mysql文件,my.cnf等
 find / -name *mysql*
 find / -name *my.cnf*
 
-libaio,
+2.dependencies
+yum install libaio
 
+3.install
 groupadd mysql
 useradd -r -g mysql -s /bin/false mysql
 cd /usr/local
@@ -79,6 +103,6 @@ chown -R mysql data mysql-files
 bin/mysqld_safe --user=mysql &
 cp support-files/mysql.server /etc/init.d/mysql.server
 
+4.control
 /etc/init.d/mysql.server start|stop|restart
-
 
