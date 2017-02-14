@@ -5,7 +5,6 @@
 DEPENDENCIES
 ------------
 * PHP >= 5.5.0
-* 如果要使用`apc/apcu/memcached`缓存，需要安装PHP的`apc/apcu/memcached`扩展
 
 DOCUMENTATION
 -------------
@@ -16,37 +15,27 @@ FEATURES
 * 单入口
 * 经典MVC
 * 遵循psr-0,psr-1,psr-2,psr-4规范
-* 多种代码加载方式：psr-0，psr-4(推荐)，classMap(推荐)
-* PDO实现的QueryBuilder + ActiveRecord支持
-* 核心类基于服务容器的设计，按需加载，配置和逻辑代码分离
+* 多种类自动加载方式：psr-0，psr-4，classMap
+* 核心类基于服务模式的设计，服务类懒加载，配置和逻辑代码分离，扩展方便
 * 统一功能接口，在配置文件即可自由切换功能类实现机制，不影响逻辑代码
-* ApcCache/ApcuCache/DbCache/Memcached/FileCache多种缓存实现，在配置按需加载
-* DbLog/FileLog日志实现，在配置按需加载
+* PDO实现的QueryBuilder + ActiveRecord支持
+* ApcCache/ApcuCache/DbCache/Memcached/FileCache多种缓存实现
+* DbLog/FileLog日志实现
+* Apache，Nginx，IIS简易部署，支持pathinfo模和rewrite模式的路由，支持虚拟主机部署
 * 路由支持正反向解析(不是非常完善，考虑重构)
 * cookie加密，session，加密类，请求类等类的封装
-* 核心类扩展实现方便
-* 工厂函数maker简便实例化服务类
-* 基于layout的原生模板引擎，渲染更快，适合pjax，ajax开发
+* 工厂函数maker()简便实例化服务类
+* 基于layout的PHP原生模板，渲染更快
 * 一些辅助函数帮助你更快开发
-* 
+* And so on...
 
-## FAQ
+LICENCE
+-------
+**MIT**
 
->
-### Lying是什么鬼？
->Lying是我学习PHP的时候写的一个MVC小框架。
-### Lying好用吗？
->不好用。没有强大的功能（Active Record、SQL Builder等等等）也没有详细的文档，但是勉强能用。
-###Lying有什么优点？
->没有。如果你不喜欢这个框架，请移步Yii等其他框架。如果非要说有，就是代码量少，灵活（你爱怎么改怎么改，完全重写也没问题）。
-###Lying为什么叫Lying？
->因为Flying = Framework Lying啊（简直是歪理）。
-###Lying源码能拿来学习用吗？
->既然放github来就是让你用的，随便拿（世界上怎么会有我这么大方的人）。但是如果你拿来使用，请尊重作者，保留作者信息，或者给个github源码链接。
-###和我交流PHP的心得
->_↓ ↓ ↓ ↓ ↓_
+FEEDBACK
+--------
+* Issue：[Lying](https://github.com/carolkey/lying/issues)
+* QQ：[296399959](http://wpa.qq.com/msgrd?v=3&uin=296399959&site=qq&menu=yes)
+* MAIL：<296399959@qq.com>
 
-## 反馈与建议
-- Q Q：<a target="_blank" href="http://wpa.qq.com/msgrd?v=3&uin=296399959&site=qq&menu=yes"><img border="0" src="http://wpa.qq.com/pa?p=2:296399959:52" alt="点击这里给我发消息" title="点击这里给我发消息"/></a>
-- 微博：[@宝宝左手边](http://weibo.com/514070127)
-- 邮箱：<a target="_blank" href="http://mail.qq.com/cgi-bin/qm_share?t=qm_mailme&email=tIaNgoeNjY2BjfTFxZrX29k" style="text-decoration:none;"><img src="http://rescdn.qqmail.com/zh_CN/htmledition/images/function/qm_open/ico_mailme_01.png"/></a>
