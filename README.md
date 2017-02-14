@@ -10,6 +10,13 @@ DOCUMENTATION
 -------------
 TODO
 
+TODO
+----
+* redis缓存
+* 数据库主从分离
+* 路由反向解析优化
+* session服务考虑重写
+
 FEATURES
 --------
 * 单入口，经典MVC
@@ -22,6 +29,7 @@ FEATURES
 * DbLog/FileLog日志实现
 * Apache，Nginx，IIS简易部署，支持pathinfo模和rewrite模式的路由，支持虚拟主机部署
 * 路由支持正反向解析(不是非常完善，考虑重构)
+* 模块<->域名绑定，简易实现前后台分离
 * cookie加密，session，加密类，请求类等类的封装
 * 工厂函数maker()简便实例化服务类
 * 基于layout的PHP原生模板，渲染更快
