@@ -1,8 +1,6 @@
-# ['Lying' => 'A simple PHP framework']
-
-## Lying简介
-
-> Lying 是朕在学习PHP的时候写的一个MVC框架，它非常的简陋不规范但是我喜欢。由于代码量非常少，又是学习使用，所以如果它能给正在学习PHP的同学一点启发，那再好不过了。现在还没空来写文档，所以有什么不明白的地方，可以点击这里联系我→_→<a target="_blank" href="http://wpa.qq.com/msgrd?v=3&uin=296399959&site=qq&menu=yes"><img border="0" src="http://wpa.qq.com/pa?p=2:296399959:52" alt="点击这里给我发消息" title="点击这里给我发消息"/></a>
+![LOGO](web/favicon.ico "Lying") $Lying = ['PHP Framework'] :cn:
+===============================================================
+>Lying是我在学习PHP的时候写的一个MVC框架，第一个版本它非常的简陋，不规范，没有设计模式，没有方便的QueryBuilder和ActiveRecord，杂乱的目录结构等。近期我对Lying进行了一次大的重构，完善它的工作机制，使它成为一个真正可用在生产环境的PHP框架。如果有兴趣的同学可以fork去看看代码，如果它能给你的PHP之路带来一点启发，那是再好不过了。当然，如果你觉得Lying的某些地方有缺陷，你可以提Issues或者PR，我会根据你的意见考虑对Lying进行完善:blush:。
 
 ## FAQ
 
