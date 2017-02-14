@@ -1,28 +1,16 @@
 {
-	"name":"carolkey/lying",
-	"description":"Lying Framework",
-	"keywords":[
-		"Lying Framework",
-		"PHP Framework"
-	],
-	"homepage":"https://github.com/carolkey/lying",
-	"time":"2017-01-24 21:41:50",
-	"license":"MIT",
-	"authors":[
-		{
-			"name":"lying",
-			"email":"296399959@qq.com",
-			"homepage":"https://github.com/carolkey",
-			"role":"Developer"
-		}
+	"name": "carolkey/lying",
+	"description": "PHP Framework",
+	"type": "project",
+	"keywords": ["PHP", "Framework"],
+	"homepage": "https://github.com/carolkey/lying",
+	"time": "2017-02-14",
+	"license": "MIT",
+	"authors": [
+		{"name": "lying", "email": "296399959@qq.com", "homepage": "https://github.com/carolkey", "role": "Developer"}
 	],
 	"require":{
-		
-	},
-	"repositories":{
-		"packagist":{
-			"type":"composer",
-			"url":"https://packagist.phpcomposer.com"
-		}
+		"php": ">=5.5.0",
+		"ext-pdo": "*"
 	}
 }
