@@ -15,16 +15,19 @@ class Router extends Service
     public function parse()
     {
         $uri = maker()->request()->requestUri();
+        
+        //解析URL
         $parse = parse_url($uri);
         
-        //解析原生GET;这里是为了去除转发规则中$_GET本身中无用的参数,可以注释掉
+        //解析原生GET;这里是为了去除转发规则中$_GET本身中无用的参数,本句代码可选
         parse_str(isset($parse['query']) ? $parse['query'] : '', $_GET);
         
-        //查找域名配置
+        //查找路由域名配置
         $host = maker()->request()->host();
         $config = maker()->config()->get('router');
         $config = isset($config[$host]) ? $config[$host] : $config['default'];
-        //重新设置已经载入的router配置
+        
+        //重新设置已经载入的router配置(因为已经确定配置)
         maker()->config()->set('router', $config);
         
         //解析路由
@@ -36,22 +39,22 @@ class Router extends Service
      * @param string $path 请求的路径,不包括queryString
      * @param array $conf 配置参数
      * @throws \Exception
-     * @return array
+     * @return array 返回[$m, $c, $a]
      */
     private function resolve($path, $conf)
     {
-        //去掉index.php
+        //去掉index.php,不区分大小写
         $path = trim(preg_replace('/^\/index\.php/i', '', $path, 1), '/');
         
         //检查后缀名
         if ($path !== '' && isset($conf['suffix'])) {
-            $path = trim(preg_replace('/\\' . $conf['suffix'] . '$/i', '', $path, 1, $validate), '/');
+            $path = rtrim(preg_replace('/\\' . $conf['suffix'] . '$/i', '', $path, 1, $validate), '/');
             if ($validate === 0) {
                 throw new \Exception('Page not found.', 404);
             }
         }
         
-        //分割
+        //分割路径
         $tmpArr = explode('/', $path);
         
         //对每个元素进行url解码,包括键值
@@ -60,10 +63,10 @@ class Router extends Service
         }, $tmpArr);
         
         //设置module
-        $m = isset($conf['module']) && $conf['module'] ? $conf['module'] : (($m = array_shift($tmpArr)) ? $m : 'index');
+        $m = isset($conf['module']) ? $conf['module'] : (($m = array_shift($tmpArr)) ? $m : 'index');
         
         //路由匹配
-        foreach ($conf['rule'] as $pattern => $rule) {
+        foreach (isset($conf['rule']) ? $conf['rule'] : [] as $pattern => $rule) {
             $patternArr = explode('/', $pattern);
             //path个数不匹配,匹配下一个
             if (count($tmpArr) < count($patternArr)) {
@@ -76,13 +79,13 @@ class Router extends Service
             foreach ($patternArr as $i => $r) {
                 if (strncmp($r, ':', 1) === 0) {
                     $key = ltrim($r, ':');
-                    //正则匹配
                     if (isset($rule[$key]) && preg_match($rule[$key], $tmpArr[$i]) === 0) {
                         $match = false;
                         break;
+                    } else {
+                        array_push($params, $key, $tmpArr[$i]);
                     }
-                    array_push($params, $key, $tmpArr[$i]);
-                }elseif ($tmpArr[$i] !== $r) {
+                } elseif ($tmpArr[$i] !== $r) {
                     $match = false;
                     break;
                 }
@@ -96,8 +99,8 @@ class Router extends Service
         }
         
         //设置ctrl,action
-        $c = ($c = array_shift($tmpArr)) ? $c : (isset($conf['ctrl']) && $conf['ctrl'] ? $conf['ctrl'] : 'index');
-        $a = ($a = array_shift($tmpArr)) ? $a : (isset($conf['action']) && $conf['action'] ? $conf['action'] : 'index');
+        $c = ($c = array_shift($tmpArr)) ? $c : (isset($conf['ctrl']) ? $conf['ctrl'] : 'index');
+        $a = ($a = array_shift($tmpArr)) ? $a : (isset($conf['action']) ? $conf['action'] : 'index');
         
         //存下当前的路由,全部小写,没有转换成驼峰
         $this->router = [strtolower($m), strtolower($c), strtolower($a)];
@@ -117,7 +120,7 @@ class Router extends Service
      * 把m,c,a的'-'转换为驼峰
      * @param string $val 要转换的字符串
      * @param boolean $ucfirst 首字母大写
-     * @return string
+     * @return string 返回转换后的字符串
      */
     private function convert($val, $ucfirst = false)
     {
@@ -127,7 +130,7 @@ class Router extends Service
     
     /**
      * 多余的path参数用来解析成get变量
-     * @param array $params
+     * @param array $params path中的参数数组
      */
     private function parseGet($params)
     {
@@ -203,9 +206,9 @@ class Router extends Service
         $webconf = maker()->config()->get('web');
         $pathinfo = isset($webconf['pathinfo']) && $webconf['pathinfo'];
         //后缀
-        $suffix = isset($conf['suffix']) && $conf['suffix'] ? $conf['suffix'] : '';
+        $suffix = isset($conf['suffix']) ? $conf['suffix'] : '';
         //没有匹配到并且设置了默认module,就去掉route的module
-        if (!isset($match) && isset($conf['module']) && $conf['module']) {
+        if (!isset($match) && isset($conf['module'])) {
             $route = preg_replace('/^'.$conf['module'].'\//', '', $route);
         }
         return $scheme . '://' . $host . ($pathinfo ? '/index.php/' : '/') . $route . '/' . $query . $suffix;
