@@ -3,7 +3,7 @@ return [
     //数据库服务
     'db' => [
         'class' => 'lying\db\Connection',
-        'dsn' => 'mysql:host=127.0.0.1;dbname=lying',
+        'dsn' => 'mysql:host=127.0.0.1;dbname=lying;charset=utf8',
         'user' => 'root',
         'pass' => 'root',
     ],
