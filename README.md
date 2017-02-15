@@ -4,7 +4,7 @@
 
 INSTALL
 -------
-`git clone git@github.com:carolkey/lying.git`
+`git clone git@github.com:carolkey/lying.git`  
 `composer create-project carolkey/lying lying`
 
 REQUIREMENTS
