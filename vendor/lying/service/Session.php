@@ -4,35 +4,17 @@ namespace lying\service;
 class Session extends Service implements \ArrayAccess
 {
     /**
-     * 实例化的时候启用session
+     * 实例化的时候启用SESSION
      */
     protected function init()
     {
-        $this->start();
+        session_status() == PHP_SESSION_ACTIVE ? true : session_start();
     }
     
     /**
-     * 启用session
-     * @return boolean 成功开始会话返回true,反之返回false
-     */
-    public function start()
-    {
-        return $this->isActive() ? true : session_start();
-    }
-    
-    /**
-     * 检测session是否已经启用
-     * @return boolean
-     */
-    public function isActive()
-    {
-        return session_status() == PHP_SESSION_ACTIVE;
-    }
-    
-    /**
-     * 设置session
-     * @param string $key 键
-     * @param mixed $value 值
+     * 设置SESSION
+     * @param string $key
+     * @param mixed $value
      */
     public function set($key, $value)
     {
@@ -40,33 +22,37 @@ class Session extends Service implements \ArrayAccess
     }
     
     /**
-     * 获取session
-     * @param $key 键
-     * @return mixed
+     * SESSION是否存在
+     * @param string $key
      */
-    public function get($key)
+    public function exists($key)
     {
-        return isset($_SESSION[$key]) ? $_SESSION[$key] : null;
+        return isset($_SESSION[$key]);
     }
     
     /**
-     * 移除session
-     * @param string $key 键
-     * @return mixed|NULL 返回移除的值
+     * 获取SESSION
+     * @param $key
+     * @return mixed 不存在返回null
+     */
+    public function get($key)
+    {
+        return $this->exists($key) ? $_SESSION[$key] : null;
+    }
+    
+    /**
+     * 移除某个SESSION
+     * @param string $key
      */
     public function remove($key)
     {
-        if (isset($_SESSION[$key])) {
-            $value = $_SESSION[$key];
+        if ($this->exists($key)) {
             unset($_SESSION[$key]);
-            return $value;
-        } else {
-            return null;
         }
     }
     
     /**
-     * 清空session数组
+     * 清空SESSION数组
      */
     public function removeAll()
     {
@@ -74,21 +60,19 @@ class Session extends Service implements \ArrayAccess
     }
     
     /**
-     * 销毁session
+     * 销毁SESSION
      */
     public function destroy()
     {
-        if ($this->isActive()) {
-            setcookie(session_name(), '', time() - 1);
-            $this->removeAll();
-            session_destroy();
-        }
+        setcookie(session_name(), '', time() - 1);
+        $this->removeAll();
+        session_destroy();
     }
     
     /**
-     * 设置一个偏移位置的值
-     * {@inheritDoc}
-     * @see ArrayAccess::offsetSet()
+     * 设置一个SESSION的值
+     * @param string $offset
+     * @param mixed $value
      */
     public function offsetSet($offset, $value)
     {
@@ -96,18 +80,18 @@ class Session extends Service implements \ArrayAccess
     }
     
     /**
-     * 检查一个偏移位置是否存在
-     * {@inheritDoc}
-     * @see ArrayAccess::offsetExists()
+     * 检查一个SESSION是否存在
+     * @param string $offset
+     * @return boolean
      */
     public function offsetExists($offset)
     {
-        return isset($_SESSION[$key]);
+        return $this->exists($offset);
     }
     
     /**
-     * 复位一个偏移位置的值
-     * {@inheritDoc}
+     * 删除一个SESSION的值
+     * @param string $offset
      * @see ArrayAccess::offsetUnset()
      */
     public function offsetUnset($offset)
@@ -116,9 +100,9 @@ class Session extends Service implements \ArrayAccess
     }
     
     /**
-     * 获取一个偏移位置的值
-     * {@inheritDoc}
-     * @see ArrayAccess::offsetGet()
+     * 获取一个SESSION的值
+     * @param string $offset
+     * @return mixed
      */
     public function offsetGet($offset)
     {

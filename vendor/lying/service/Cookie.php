@@ -9,13 +9,11 @@ class Cookie extends Service implements \ArrayAccess
     protected $key;
     
     /**
-     * 没有设置key的时候,用域名当key
+     * 初始化cookie密钥
      */
     protected function init()
     {
-        if (!$this->key) {
-            $this->key = maker()->request()->host();
-        }
+        $this->key = $this->key ? $this->key : maker()->request()->docRoot();
     }
     
     /**
@@ -71,9 +69,9 @@ class Cookie extends Service implements \ArrayAccess
     }
     
     /**
-     * 设置一个偏移位置的值
-     * {@inheritDoc}
-     * @see ArrayAccess::offsetSet()
+     * 设置一个cookie的值
+     * @param string $offset
+     * @param mixed $value
      */
     public function offsetSet($offset, $value)
     {
@@ -81,9 +79,9 @@ class Cookie extends Service implements \ArrayAccess
     }
     
     /**
-     * 检查一个偏移位置是否存在
-     * {@inheritDoc}
-     * @see ArrayAccess::offsetExists()
+     * 检查一个cookie是否存在
+     * @param string $offset
+     * @return boolean
      */
     public function offsetExists($offset)
     {
@@ -91,9 +89,8 @@ class Cookie extends Service implements \ArrayAccess
     }
     
     /**
-     * 复位一个偏移位置的值
-     * {@inheritDoc}
-     * @see ArrayAccess::offsetUnset()
+     * 删除一个cookie的值
+     * @param string $offset
      */
     public function offsetUnset($offset)
     {
@@ -101,9 +98,9 @@ class Cookie extends Service implements \ArrayAccess
     }
     
     /**
-     * 获取一个偏移位置的值
-     * {@inheritDoc}
-     * @see ArrayAccess::offsetGet()
+     * 获取一个cookie的值
+     * @param string $offset
+     * @return mixed
      */
     public function offsetGet($offset)
     {
