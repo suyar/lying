@@ -3,11 +3,9 @@ date_default_timezone_set('Asia/Shanghai');
 
 define('DIR_LYING', __DIR__);
 
-define('ROOT', realpath(DIR_LYING . '/../../'));
+define('ROOT', realpath('../'));
 
 define('DIR_CONF', ROOT . '/config');
-
-define('DIR_EXTEND', ROOT . '/extend');
 
 define('DIR_MODULE', ROOT . '/module');
 
