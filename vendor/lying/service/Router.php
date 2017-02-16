@@ -203,8 +203,7 @@ class Router extends Service
         //主机名
         $host = maker()->request()->host();
         //是否启用pathinfo
-        $webconf = maker()->config()->get('web');
-        $pathinfo = isset($webconf['pathinfo']) && $webconf['pathinfo'];
+        $pathinfo = isset($conf['pathinfo']) && $conf['pathinfo'];
         //后缀
         $suffix = isset($conf['suffix']) ? $conf['suffix'] : '';
         //没有匹配到并且设置了默认module,就去掉route的module

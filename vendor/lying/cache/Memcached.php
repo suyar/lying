@@ -13,11 +13,6 @@ class MemCached extends Cache
     protected $servers = [];
     
     /**
-     * @var array 额外的Memcached的选项
-     */
-    protected $options = [];
-    
-    /**
      * @var string Memcached sasl用户名
      */
     protected $username;
@@ -75,7 +70,6 @@ class MemCached extends Cache
                 \Memcached::OPT_DISTRIBUTION => \Memcached::DISTRIBUTION_CONSISTENT,
                 \Memcached::OPT_LIBKETAMA_COMPATIBLE => true,
             ]);
-            $this->instance->setOptions($this->options);
         }
         return $this->instance;
     }

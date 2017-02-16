@@ -78,7 +78,7 @@ class Exception
         while (ob_get_level() !== 0) ob_end_clean();
         http_response_code($code === 404 ? 404 : 500);
         
-        $path = DIR_LYING . '/view/exception/';
+        $path = DIR_LYING . '/view/';
         $file = file_exists($file = $path . $code . '.php') ? $file : $path . 'trace.php';
         
         ob_start();

@@ -39,18 +39,13 @@ return [
         'servers' => [ //Memcached服务器连接列表,必填
             ['127.0.0.1', 11211, 50],
         ],
-        /*'options' => [ //额外的Memcached的选项,选填
-         \Memcached::OPT_BINARY_PROTOCOL=>true,
-        ],
-    'username' => 'user', //用户名,选填
-    'password' => 'pass', //密码,选填*/
+        'username' => 'user', //用户名,选填
+        'password' => 'pass', //密码,选填
     ],
     'dbCache' => [
         'class' => 'lying\cache\DbCache',
         'connection' => 'db', //缓存要写入的数据库,写数据库连接的id,默认'db'
         'table' => 'cache', //存储缓存的表名,默认'cache'
-        'gc' => '', //垃圾清除的频率,数值为0到100之间,越小回收的越频繁,默认50
+        'gc' => '50', //垃圾清除的频率,数值为0到100之间,越小回收的越频繁,默认50
     ],
-
-    
 ];

@@ -1,6 +1,5 @@
 <?php
-//可选参数如果不需要都应该被注释或者设置成null
-//配置对大小写敏感
+//配置对大小写敏感;可选参数如果不需要都应该被注释或者设置成null
 return [
     //默认域名配置;必须
     'default'=>[
@@ -12,6 +11,8 @@ return [
         'action'=>'index',
         //默认后缀;可选
         'suffix'=>'.html',
+        //可选,默认为false;当此选项为true,就是不支持rewrite,开启pathinfo模式,具体表现为生成url的时候,路径上会带index.php
+        'pathinfo' => false,
         //路由规则;必须,可以为空数组
         'rule'=>[
             //规则对应的路径应该为全部小写,并且是从module开始写,不管是否设置了默认module
@@ -29,9 +30,9 @@ return [
         'action'=>'index',
         //默认后缀;可选
         'suffix'=>'.html',
+        //可选,默认为false;当此选项为true,就是不支持rewrite,开启pathinfo模式,具体表现为生成url的时候,路径上会带index.php
+        'pathinfo' => false,
         //路由规则;必须,可以为空数组
-        'rule'=>[
-            
-        ],
+        'rule'=>[],
     ],
 ];
