@@ -40,6 +40,9 @@ class Exception
      */
     public static function errorHandler($errno, $errstr, $errfile, $errline)
     {
+        if ($errno === E_DEPRECATED) {
+            return true;
+        }
         throw new \ErrorException($errstr, 500, $errno, $errfile, $errline);
     }
     
