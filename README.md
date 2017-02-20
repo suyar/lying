@@ -19,6 +19,10 @@ TODO
 
 TODO
 ----
+* fileCache异常捕获bug修复
+* fileLog异常捕获bug修复
+* 锁函数
+* 工厂拆分成辅助函数
 * redis缓存
 * 数据库主从分离
 * 路由反向解析优化
