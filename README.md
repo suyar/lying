@@ -1,5 +1,5 @@
-![LOGO](web/favicon.ico "Lying") $Lying = ['PHP Framework'] :cn:
-===============================================================
+![L](https://box.kancloud.cn/8e58155c9787bf4f9d733941a1eb88df_48x48.png)![Y](https://box.kancloud.cn/bdcd2fcf24c101e52b03fda375f8cf6e_48x48.png)![I](https://box.kancloud.cn/b7a823224b5c836fe27eab8804fe57d4_48x48.png)![N](https://box.kancloud.cn/21d716329fbddfc83f5fc850970df7c9_48x48.png)![G](https://box.kancloud.cn/2ed8f2b1963d88f0c3a7ceb3868d44be_48x48.png)
+
 >Lying是我在学习PHP的时候写的一个MVC框架，第一个版本它非常的简陋，不规范，没有设计模式，没有方便的QueryBuilder和ActiveRecord，杂乱的目录结构等。近期我对Lying进行了一次大的重构，完善它的工作机制，使它成为一个真正可用在生产环境的PHP框架。如果有兴趣的同学可以fork去看看代码，如果它能给你的PHP之路带来一点启发，那是再好不过了。当然，如果你觉得Lying的某些地方有缺陷，你可以提Issue或者PR，我会根据你的意见考虑对Lying进行完善:blush:。
 
 INSTALL
