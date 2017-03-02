@@ -15,7 +15,7 @@ REQUIREMENTS
 
 DOCUMENTATION
 -------------
-TODO
+[Lying](http://www.kancloud.cn/carol/lying)
 
 TODO
 ----
@@ -51,5 +51,5 @@ FEEDBACK
 --------
 * Issue：[Lying](https://github.com/carolkey/lying/issues)
 * QQ：[296399959](http://wpa.qq.com/msgrd?v=3&uin=296399959&site=qq&menu=yes)
-* MAIL：<296399959@qq.com>
+* MAIL：<me@suyaqi.cn>
 
