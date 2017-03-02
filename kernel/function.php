@@ -43,3 +43,37 @@ function url($path, $params = [])
 {
     return maker()->router()->createUrl($path, $params);
 }
+
+/**
+ * 锁函数
+ * @param strings $name 锁名称
+ * @param integer $type 锁类型
+ * LOCK_SH 共享锁
+ * LOCK_EX 独占锁
+ * LOCK_NB 非阻塞(Windows 上不支持),用法LOCK_EX | LOCK_NB
+ * @return resource|boolean 成功返回锁文件句柄,失败返回false
+ */
+function lock($name, $type)
+{
+    if (is_dir(ROOT . '/runtime/lock') || mkdir(ROOT . '/runtime/lock', 0777, true)) {
+        if (false !== $fp = fopen(ROOT . '/runtime/lock/' . $name, 'w')) {
+            if (flock($fp, $type)) {
+                return $fp;
+            } else {
+                fclose($fp);
+                return false;
+            }
+        }
+    }
+    return false;
+}
+
+/**
+ * 解锁
+ * @param resource $handle 锁句柄
+ * @return boolean 成功返回true,失败返回false
+ */
+function unlock($handle)
+{
+    return is_resource($handle) ? flock($handle, LOCK_UN) && fclose($handle) : false;
+}

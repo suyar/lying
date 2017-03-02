@@ -42,7 +42,7 @@ abstract class Cache extends Service
     /**
      * 从缓存中提取存储的变量
      * @param string $key 缓存ID
-     * @return boolean 成功返回true,失败返回false
+     * @return boolean 成功返回值,失败返回false
      */
     abstract public function get($key);
     
