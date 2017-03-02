@@ -117,12 +117,19 @@ class FileCache extends Cache
     /**
      * 从缓存中提取存储的变量
      * @param string $key 缓存ID
-     * @return boolean 成功返回true,失败返回false
+     * @return boolean 成功返回值,失败返回false
      */
     public function get($key)
     {
-        $cacheFile = $this->dir . '/' . md5($key) . '.bin';
-        return $this->exist($key) ? unserialize(file_get_contents($cacheFile)) : false;
+        $cacheFile = $this->cacheFile($key);
+        if ($this->exist($key) && $fp = @fopen($cacheFile, 'r')) {
+            flock($fp, LOCK_SH);
+            $value = unserialize(stream_get_contents($fp));
+            flock($fp, LOCK_UN);
+            fclose($fp);
+            return $value;
+        }
+        return false;
     }
     
     /**

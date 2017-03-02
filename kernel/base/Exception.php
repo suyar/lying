@@ -40,10 +40,10 @@ class Exception
      */
     public static function errorHandler($errno, $errstr, $errfile, $errline)
     {
-        if ($errno === E_DEPRECATED) {
+        if ($errno === E_DEPRECATED || error_reporting() === 0) {
             return true;
         }
-        throw new \ErrorException($errstr, 500, $errno, $errfile, $errline);
+        throw new \ErrorException($errstr, $errno, $errno, $errfile, $errline);
     }
     
     /**
@@ -56,7 +56,7 @@ class Exception
                 'message' => $err['message'],
                 'file' => self::trimPath($err['file']),
                 'line' => $err['line']
-            ], [], 500);
+            ], [], $err['type']);
         }
     }
     
