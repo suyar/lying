@@ -7,7 +7,7 @@
 return [
     'classMap' => [
         //类名 => 类文件绝对路径
-        //e.g. 'PHPExcel' => DIR_EXTEND . '/Excel/PHPExcel.php',
+        //e.g. 'PHPExcel' => ROOT . '/Excel/PHPExcel.php',
     ],
     'psr-4' => [
         //命名空间前缀 => 目录
