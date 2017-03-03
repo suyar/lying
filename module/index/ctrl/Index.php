@@ -3,7 +3,7 @@ namespace module\index\ctrl;
 
 use lying\base\Ctrl;
 
-class IndexCtrl extends Ctrl
+class Index extends Ctrl
 {
     public $layout = 'layout';
     

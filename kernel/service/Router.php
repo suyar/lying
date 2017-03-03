@@ -111,7 +111,7 @@ class Router extends Service
         //转换为驼峰,返回当前请求的m,c,a
         return [
             $this->convert($this->router[0]),
-            $this->convert($this->router[1], true).'Ctrl',
+            $this->convert($this->router[1], true),
             $this->convert($this->router[2])
         ];
     }
