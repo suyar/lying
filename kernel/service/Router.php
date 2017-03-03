@@ -155,8 +155,8 @@ class Router extends Service
      * url生成,支持反解析
      * @param string $path 要生成的相对路径
      * 如果路径post,则生成当前module,当前ctrl下的post方法;
-     * 如果路径post/index,则生成当前module,ctrl为PostCtrl下的index方法;
-     * 如果路径admin/post/index,则生成当前module为admin,ctrl为PostCtrl下的index方法;
+     * 如果路径post/index,则生成当前module,ctrl为Post下的index方法;
+     * 如果路径admin/post/index,则生成当前module为admin,ctrl为Post下的index方法;
      * @param array $params 要生成的参数,一个关联数组,如果有路由规则,参数中必须包含rule中的参数才能反解析
      * @return string
      */
