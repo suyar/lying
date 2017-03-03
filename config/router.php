@@ -3,7 +3,7 @@
 return [
     //默认域名配置;必须
     'default'=>[
-        //绑定的module;可选,默认为index,如果定义了此参数,就没有办法通过path访问其他模块了
+        //绑定的module;可选,默认为index,如果定义了此参数,就没有办法通过path访问其他模块了,如果要访问其他模块,可以通过路由规则
         'module'=>'index',
         //默认控制器;可选,默认为index
         'ctrl'=>'index',
@@ -22,7 +22,7 @@ return [
     ],
     //指定域名配置;可选
     'admin.lying.com'=>[
-        //绑定的module;可选,默认为index,如果定义了此参数,就没有办法通过path访问其他模块了
+        //绑定的module;可选,默认为index,如果定义了此参数,就没有办法通过path访问其他模块了,如果要访问其他模块,可以通过路由规则
         'module'=>'admin',
         //默认控制器;可选,默认为index
         'ctrl'=>'index',
