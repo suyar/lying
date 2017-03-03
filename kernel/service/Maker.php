@@ -36,7 +36,7 @@ class Maker
      * @throws \Exception
      * @return Service
      */
-    private function createService($id)
+    public function createService($id)
     {
         if (isset(self::$instances[$id])) {
             return self::$instances[$id];
