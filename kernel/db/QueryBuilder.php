@@ -303,7 +303,7 @@ class QueryBuilder
     }
     
     /**
-     * 组件sql语句
+     * 组建sql语句
      * @param array $params 引用获取参数
      * @return array 返回[$statement, $params]
      */

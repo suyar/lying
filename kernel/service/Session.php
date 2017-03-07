@@ -8,6 +8,14 @@ class Session extends Service implements \ArrayAccess
      */
     protected function init()
     {
+        $this->active();
+    }
+    
+    /**
+     * 启用SESSION
+     */
+    public function active()
+    {
         session_status() == PHP_SESSION_ACTIVE ? true : session_start();
     }
     

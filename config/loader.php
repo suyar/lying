@@ -6,13 +6,12 @@
  */
 return [
     'classMap' => [
-        //类名 => 类文件绝对路径
+        //完整类名 => 类文件绝对路径
         //e.g. 'PHPExcel' => ROOT . '/Excel/PHPExcel.php',
     ],
     'psr-4' => [
-        //命名空间前缀 => 目录
-        //目录可以是一个数组,参见 http://www.php-fig.org/psr/psr-4/examples/
-        //e.g. 'module' => DIR_MODULE,
+        //命名空间前缀 => 路径
+        //路径可以是一个数组,参见 http://www.php-fig.org/psr/psr-4/examples/
         'module' => DIR_MODULE,
     ],
     'psr-0' => [
