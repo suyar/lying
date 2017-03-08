@@ -280,7 +280,7 @@ class Query extends QueryBuilder
      * 返回结果集中的一条记录
      * @param boolean $obj 是否返回对象(默认返回关联数组)
      * @param string $class 要实例化的对象,不写默认为匿名对象
-     * @return mixed|\lying\db\ARQuery
+     * @return mixed|\lying\db\AR
      */
     public function one($obj = false, $class = null)
     {
@@ -291,7 +291,7 @@ class Query extends QueryBuilder
      * 返回所有查询结果的数组
      * @param boolean $obj 是否返回对象(默认返回关联数组)
      * @param string $class 要实例化的对象,不写默认为匿名对象
-     * @return mixed|\lying\db\ARQuery
+     * @return mixed|\lying\db\AR
      */
     public function all($obj = false, $class = null)
     {
