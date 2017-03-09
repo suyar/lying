@@ -3,7 +3,7 @@ date_default_timezone_set('Asia/Shanghai');
 
 define('DIR_LYING', __DIR__);
 
-define('ROOT', realpath('../'));
+define('ROOT', realpath(DIR_LYING . '/../'));
 
 define('DIR_CONF', ROOT . '/config');
 
