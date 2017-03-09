@@ -205,7 +205,7 @@ class Request extends Service
         return $this->scheme() . '://' . $this->host() . $this->requestUri();
     }
     
-    
+
     
     /**
      * 是否为POST请求
