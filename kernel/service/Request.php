@@ -184,9 +184,7 @@ class Request extends Service
         return isset($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO'] : null;
     }
     
-    
-    
-    
+
     
     /**
      * 返回不为空的主机名;例如,abc.com,127.0.0.1
@@ -197,8 +195,15 @@ class Request extends Service
         $host = $this->httpHost();
         return $host ? $host : $this->serverName();
     }
-    
-    
+
+    /**
+     * 返回当前请求的完整URL,不包含#后面
+     * @return string
+     */
+    public function currentUrl()
+    {
+        return $this->scheme() . '://' . $this->host() . $this->requestUri();
+    }
     
     
     
