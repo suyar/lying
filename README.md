@@ -1,6 +1,6 @@
 ![L](https://box.kancloud.cn/8e58155c9787bf4f9d733941a1eb88df_48x48.png)![Y](https://box.kancloud.cn/bdcd2fcf24c101e52b03fda375f8cf6e_48x48.png)![I](https://box.kancloud.cn/b7a823224b5c836fe27eab8804fe57d4_48x48.png)![N](https://box.kancloud.cn/21d716329fbddfc83f5fc850970df7c9_48x48.png)![G](https://box.kancloud.cn/2ed8f2b1963d88f0c3a7ceb3868d44be_48x48.png)
 
-> Lying是我在学习PHP的时候，为了理解MVC，设计模式等PHP知识而写的一个轻量级的PHP框架，渐渐地我已经把Lying当做自己的一个项目来维护。经过几次大改版之后，Lying已经成为一个真正可用在生产环境的PHP框架。它可能不是那么完美，却是我的一番心血，有兴趣的同学可以fork去看看代码，如果它能给你的PHP之路带来一点启发，那是再好不过了。当然，如果你觉得Lying的某些地方有缺陷，你可以提Issue或者PR，我会根据你的意见对Lying进行完善。如果你喜欢Lying，欢迎你来学习、使用。但是如果你不喜欢它，也请你不要玷污它，因为每个人心中都有一门世界上最好的语言（比如PHP）和一个世界上最好的框架（比如Lying）。:blush:。
+> Lying是我在学习PHP的时候，为了理解MVC，设计模式等PHP知识而写的一个轻量级的PHP框架，渐渐地我已经把Lying当做自己的一个项目来维护。经过几次大改版之后，Lying已经成为一个真正可用在生产环境的PHP框架。它可能不是那么完美，却是我的一番心血，有兴趣的同学可以fork去看看代码，如果它能给你的PHP之路带来一点启发，那是再好不过了。当然，如果你觉得Lying的某些地方有缺陷，你可以提Issue或者PR，我会根据你的意见对Lying进行完善。如果你喜欢Lying，欢迎你来学习、使用。但是如果你不喜欢它，也请你不要玷污它，因为每个人心中都有一门世界上最好的语言（比如PHP）和一个世界上最好的框架（比如Lying）:blush:。
 
 INSTALL
 -------
