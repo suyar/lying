@@ -67,7 +67,7 @@ class Exception
      */
     public static function trimPath($subject)
     {
-        return str_replace(ROOT, '', $subject);
+        return str_replace([ROOT, WEB_ROOT], '', $subject);
     }
     
     /**
