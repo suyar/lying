@@ -251,7 +251,7 @@ class Query extends QueryBuilder
     
     /**
      * 执行原生SQL,返回的是语句执行后的PDOStatement对象,直接调用fetch,fetchAll,rowCount等函数即可
-     * e.g. maker()->db()->createQuery()->RawSql('select * from user')->fetchAll(\PDO::FETCH_ASSOC);
+     * e.g. db()->createQuery()->RawSql('select * from user')->fetchAll(\PDO::FETCH_ASSOC);
      * @param string $statement sql语句
      * @param array $params 绑定的参数
      * @return PDOStatement|boolean 失败返回false
@@ -280,7 +280,7 @@ class Query extends QueryBuilder
      * 返回结果集中的一条记录
      * @param boolean $obj 是否返回对象(默认返回关联数组)
      * @param string $class 要实例化的对象,不写默认为匿名对象
-     * @return mixed|\lying\db\AR
+     * @return mixed|\lying\db\ActiveRecord
      */
     public function one($obj = false, $class = null)
     {
@@ -291,7 +291,7 @@ class Query extends QueryBuilder
      * 返回所有查询结果的数组
      * @param boolean $obj 是否返回对象(默认返回关联数组)
      * @param string $class 要实例化的对象,不写默认为匿名对象
-     * @return mixed|\lying\db\AR
+     * @return mixed|\lying\db\ActiveRecord
      */
     public function all($obj = false, $class = null)
     {

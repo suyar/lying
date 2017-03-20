@@ -4,7 +4,7 @@ namespace lying\service;
 class Maker
 {
     /**
-     * @var Service[] 服务类实例容器
+     * @var array 服务类实例容器
      */
     private static $instances = [];
     
@@ -46,94 +46,9 @@ class Maker
             } else {
                 self::$instances[$id] = new self::$service[$id]();
             }
-            unset(self::$service[$id]);
             return self::$instances[$id];
         } else {
             throw new \Exception("Unkonw service ID: $id", 500);
         }
-    }
-    
-    /**
-     * 配置服务
-     * @return Config
-     */
-    public function config()
-    {
-        return $this->createService('config');
-    }
-    
-    /**
-     * 请求服务
-     * @return Request
-     */
-    public function request()
-    {
-        return $this->createService('request');
-    }
-    
-    /**
-     * 路由服务
-     * @return Router
-     */
-    public function router()
-    {
-        return $this->createService('router');
-    }
-    
-    /**
-     * 加密服务
-     * @return Secure
-     */
-    public function secure()
-    {
-        return $this->createService('secure');
-    }
-    
-    /**
-     * Cookie服务
-     * @return Cookie
-     */
-    public function cookie()
-    {
-        return $this->createService('cookie');
-    }
-    
-    /**
-     * 返回调度器
-     * @return Dispatch
-     */
-    public function dispatch()
-    {
-        return $this->createService('dispatch');
-    }
-    
-    /**
-     * 数据库服务
-     * @param string $id 数据库连接的ID
-     * @return \lying\db\Connection
-     */
-    public function db($id = 'db')
-    {
-        return $this->createService($id);
-    }
-    
-    /**
-     * 日志服务
-     * @param string $id 日志服务的ID
-     * @return \lying\logger\Logger
-     */
-    public function logger($id = 'logger')
-    {
-        return $this->createService($id);
-    }
-    
-    /**
-     * 缓存服务
-     * @param string $id 缓存服务的ID
-     * @return \lying\cache\Cache
-     */
-    public function cache($id = 'cache')
-    {
-        return $this->createService($id);
     }
 }

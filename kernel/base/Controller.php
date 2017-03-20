@@ -3,7 +3,7 @@ namespace lying\base;
 
 use lying\service\Service;
 
-class Ctrl extends Service
+class Controller extends Service
 {
     /**
      * @var string 方法执行前事件id
@@ -66,8 +66,8 @@ class Ctrl extends Service
      * redirect('admin/post', ['id' => 100]); 跳转到当前模块admin控制器post方法
      * redirect('lying/index/name', ['id' => 100]); 跳转到lying模块index控制器name方法
      * redirect('https://www.baidu.com'); 必须带协议头,跳转到百度
-     * @param array $params
-     * @return \lying\base\Ctrl
+     * @param array $params 要携带的参数
+     * @return \lying\base\Controller
      */
     final protected function redirect($url, $params = [])
     {
@@ -75,15 +75,14 @@ class Ctrl extends Service
             $q = http_build_query($params, '', '&', PHP_QUERY_RFC3986);
             $url .= empty($q) ? '' : (strpos($url, '?') === false ? "?$q" : "&$q");
         } else {
-            $url = maker()->router()->createUrl($url, $params);
+            $url = router()->createUrl($url, $params);
         }
         
-        $request = maker()->request();
         while (ob_get_level() !== 0) ob_end_clean();
         http_response_code(302);
-        if ($request->isPjax()) {
+        if (request()->isPjax()) {
             header("X-Pjax-Url: $url");
-        } else if ($request->isAjax()) {
+        } else if (request()->isAjax()) {
             header("X-Redirect: $url");
         } else {
             header("Location: $url");

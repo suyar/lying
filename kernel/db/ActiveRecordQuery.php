@@ -1,7 +1,7 @@
 <?php
 namespace lying\db;
 
-class ARQuery extends Query
+class ActiveRecordQuery extends Query
 {
     /**
      * @var string 类名
@@ -26,7 +26,7 @@ class ARQuery extends Query
     
     /**
      * 调用此方法则返回数组
-     * @return \lying\db\ARQuery
+     * @return \lying\db\ActiveRecordQuery
      */
     public function asArray()
     {
@@ -38,19 +38,19 @@ class ARQuery extends Query
      * 返回查询的对象的实例
      * @param boolean $obj 在这边没作用
      * @param string $class 在这边没作用
-     * @return AR|boolean|array
+     * @return ActiveRecord|boolean|array
      */
     public function one($obj = false, $class = null)
     {
         $row = $this->isArray ? parent::one() : parent::one(true, $this->classMode);
-        return $row instanceof AR ? $row::populate($row) : $row;
+        return $row instanceof ActiveRecord ? $row::populate($row) : $row;
     }
     
     /**
      * 返回查询的对象的实例数组
      * @param boolean $obj 在这边没作用
      * @param string $class 在这边没作用
-     * @return AR[]|boolean|array
+     * @return ActiveRecord[]|boolean|array
      */
     public function all($obj = false, $class = null)
     {

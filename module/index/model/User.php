@@ -1,9 +1,9 @@
 <?php
 namespace module\index\model;
 
-use lying\db\AR;
+use lying\db\ActiveRecord;
 
-class User extends AR
+class User extends ActiveRecord
 {
     
 }

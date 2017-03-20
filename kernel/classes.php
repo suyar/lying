@@ -1,6 +1,6 @@
 <?php
 return [
-    'lying\base\Ctrl' => DIR_LYING . '/base/Ctrl.php',
+    'lying\base\Controller' => DIR_LYING . '/base/Controller.php',
     'lying\base\Exception' => DIR_LYING . '/base/Exception.php',
     'lying\base\Model' => DIR_LYING . '/base/Model.php',
     'lying\base\View' => DIR_LYING . '/base/View.php',
@@ -11,8 +11,8 @@ return [
     'lying\cache\FileCache' => DIR_LYING . '/cache/FileCache.php',
     'lying\cache\MemCached' => DIR_LYING . '/cache/MemCached.php',
     
-    'lying\db\AR' => DIR_LYING . '/db/AR.php',
-    'lying\db\ARQuery' => DIR_LYING . '/db/ARQuery.php',
+    'lying\db\ActiveRecord' => DIR_LYING . '/db/ActiveRecord.php',
+    'lying\db\ActiveRecordQuery' => DIR_LYING . '/db/ActiveRecordQuery.php',
     'lying\db\Connection' => DIR_LYING . '/db/Connection.php',
     'lying\db\Query' => DIR_LYING . '/db/Query.php',
     'lying\db\QueryBuilder' => DIR_LYING . '/db/QueryBuilder.php',

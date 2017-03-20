@@ -1,11 +1,77 @@
 <?php
 /**
- * 返回工厂类实例
- * @return \lying\service\Maker
+ * 配置服务
+ * @return \lying\service\Config
  */
-function maker()
+function config()
 {
-    return Lying::$maker;
+    return Lying::$maker->createService('config');
+}
+
+/**
+ * 请求服务
+ * @return \lying\service\Request
+ */
+function request()
+{
+    return Lying::$maker->createService('request');
+}
+
+/**
+ * 路由服务
+ * @return \lying\service\Router
+ */
+function router()
+{
+    return Lying::$maker->createService('router');
+}
+
+/**
+ * 加密服务
+ * @return \lying\service\Secure
+ */
+function secure()
+{
+    return Lying::$maker->createService('secure');
+}
+
+/**
+ * COOKIE服务
+ * @return \lying\service\Cookie
+ */
+function cookie()
+{
+    return Lying::$maker->createService('cookie');
+}
+
+/**
+ * 数据库服务
+ * @param string $id 服务ID
+ * @return \lying\db\Connection
+ */
+function db($id = 'db')
+{
+    return Lying::$maker->createService($id);
+}
+
+/**
+ * 日志服务
+ * @param string $id 服务ID
+ * @return \lying\logger\Logger
+ */
+function logger($id = 'logger')
+{
+    return Lying::$maker->createService($id);
+}
+
+/**
+ * 缓存服务
+ * @param string $id 服务ID
+ * @return \lying\cache\Cache
+ */
+function cache($id = 'cache')
+{
+    return Lying::$maker->createService($id);
 }
 
 /**
@@ -33,15 +99,15 @@ function post($key = null, $default = null)
 /**
  * url生成,支持反解析
  * @param string $path 要生成的相对路径
- * 如果路径post,则生成当前module,当前ctrl下的post方法;
- * 如果路径post/index,则生成当前module,ctrl为Post下的index方法;
- * 如果路径admin/post/index,则生成当前module为admin,ctrl为Post下的index方法;
+ * 如果路径post,则生成当前module,当前控制器下的post方法;
+ * 如果路径post/index,则生成当前module,控制器为Post下的index方法;
+ * 如果路径admin/post/index,则生成当前module为admin,控制器为Post下的index方法;
  * @param array $params 要生成的参数,一个关联数组,如果有路由规则,参数中必须包含rule中的参数才能反解析
  * @return string
  */
 function url($path, $params = [])
 {
-    return maker()->router()->createUrl($path, $params);
+    return router()->createUrl($path, $params);
 }
 
 /**

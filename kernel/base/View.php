@@ -44,7 +44,7 @@ class View
     private function findViewPath($view)
     {
         $path = explode('/', trim($view, '/'));
-        list($m, $c, $a) = maker()->router()->router();
+        list($m, $c, $a) = router()->router();
         switch (count($path)) {
             case 1:
                 $file = DIR_MODULE . '/' . $m . '/view/' . $c . '/' . $view . '.php';

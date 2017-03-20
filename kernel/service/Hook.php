@@ -19,7 +19,7 @@ class Hook
     public static function init()
     {
         if (!self::$isInit) {
-            self::$events = maker()->config()->get('hook');
+            self::$events = config()->read('hook');
             self::$isInit = true;
         }
     }

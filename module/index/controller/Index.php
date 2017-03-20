@@ -1,15 +1,15 @@
 <?php
-namespace module\index\ctrl;
+namespace module\index\controller;
 
-use lying\base\Ctrl;
+use lying\base\Controller;
 
-class Index extends Ctrl
+class Index extends Controller
 {
     public $layout = 'layout';
     
     public function index()
     {
-        
+
         return $this->render('index');
     }
 }

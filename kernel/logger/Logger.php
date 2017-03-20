@@ -82,9 +82,9 @@ abstract class Logger extends Service
             $trace = current(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1));
             $trace = [
                 'time' => date('Y-m-d H:i:s'),
-                'ip' => maker()->request()->remoteAddr(),
+                'ip' => request()->remoteAddr(),
                 'level' => self::$levels[$level],
-                'request' => maker()->request()->requestUri(),
+                'request' => request()->requestUri(),
                 'file' => $trace['file'],
                 'line' => $trace['line'],
                 'data' => self::formatData($data),

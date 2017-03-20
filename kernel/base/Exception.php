@@ -67,7 +67,7 @@ class Exception
     /**
      * 去除绝对路径
      * @param mixed $subject 要去除的信息
-     * @return mixed
+     * @return mixed 返回替换后的数据
      */
     public static function trimPath($subject)
     {

@@ -4,7 +4,7 @@ namespace lying\db;
 use lying\service\Hook;
 use lying\service\Service;
 
-class AR extends Service
+class ActiveRecord extends Service
 {
     /**
      * @var string 插入前触发的事件ID
@@ -57,7 +57,7 @@ class AR extends Service
      */
     public static function db()
     {
-        return maker()->db();
+        return db();
     }
     
     /**
@@ -147,16 +147,16 @@ class AR extends Service
     
     /**
      * 创建AR查询对象
-     * @return \lying\db\ARQuery
+     * @return \lying\db\ActiveRecordQuery
      */
     public static function createARQuery()
     {
-        return (new ARQuery(static::db(), get_called_class()))->from([static::table()]);
+        return (new ActiveRecordQuery(static::db(), get_called_class()))->from([static::table()]);
     }
     
     /**
      * 查找数据
-     * @return \lying\db\ARQuery
+     * @return \lying\db\ActiveRecordQuery
      */
     public static function find()
     {
@@ -166,7 +166,7 @@ class AR extends Service
     /**
      * 查找一条记录
      * @param mixed $condition 如果为数组,则为查找条件;否则的话为查找第一个主键
-     * @return self|boolean
+     * @return ActiveRecord|boolean
      * @throws \Exception
      */
     public static function findOne($condition)
@@ -184,7 +184,7 @@ class AR extends Service
     /**
      * 查找所有符合条件的记录
      * @param array $condition 查看Query::where()的数组使用方式
-     * @return self|boolean
+     * @return ActiveRecord|boolean
      */
     public static function findAll($condition = [])
     {
@@ -287,10 +287,10 @@ class AR extends Service
     
     /**
      * 把新数据赋值给旧数据
-     * @param AR $record 要设置的对象
-     * @return \lying\db\AR
+     * @param ActiveRecord $record 要设置的对象
+     * @return \lying\db\ActiveRecord
      */
-    public static function populate(AR $record)
+    public static function populate(ActiveRecord $record)
     {
         $record->oldAttr = $record->attr;
         return $record;

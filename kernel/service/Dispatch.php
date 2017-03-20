@@ -9,8 +9,8 @@ class Dispatch
      */
     public function runAction()
     {
-        list($m, $c, $a) = maker()->router()->parse();
-        $class = "module\\$m\\ctrl\\$c";
+        list($m, $c, $a) = router()->parse();
+        $class = "module\\$m\\controller\\$c";
         if (class_exists($class) && method_exists($class, $a)) {
             $instance = new $class();
             $method = new \ReflectionMethod($instance, $a);

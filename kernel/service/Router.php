@@ -14,21 +14,19 @@ class Router
      */
     public function parse()
     {
-        $uri = maker()->request()->requestUri();
-        
         //解析URL
-        $parse = parse_url($uri);
+        $parse = parse_url(request()->requestUri());
         
         //解析原生GET;这里是为了去除转发规则中$_GET本身中无用的参数,本句代码可选
         parse_str(isset($parse['query']) ? $parse['query'] : '', $_GET);
         
         //查找路由域名配置
-        $host = maker()->request()->host();
-        $config = maker()->config()->get('router');
+        $host = request()->host();
+        $config = config()->read('router');
         $config = isset($config[$host]) ? $config[$host] : $config['default'];
         
         //重新设置已经载入的router配置(因为已经确定配置)
-        maker()->config()->set('router', $config);
+        config()->write('router', $config);
         
         //解析路由
         return $this->resolve($parse['path'], $config);
@@ -98,8 +96,8 @@ class Router
             }
         }
         
-        //设置ctrl,action
-        $c = ($c = array_shift($tmpArr)) ? $c : (isset($conf['ctrl']) ? $conf['ctrl'] : 'index');
+        //设置控制器,action
+        $c = ($c = array_shift($tmpArr)) ? $c : (isset($conf['controller']) ? $conf['controller'] : 'index');
         $a = ($a = array_shift($tmpArr)) ? $a : (isset($conf['action']) ? $conf['action'] : 'index');
         
         //存下当前的路由,全部小写,没有转换成驼峰
@@ -154,9 +152,9 @@ class Router
     /**
      * url生成,支持反解析
      * @param string $path 要生成的相对路径
-     * 如果路径post,则生成当前module,当前ctrl下的post方法;
-     * 如果路径post/index,则生成当前module,ctrl为Post下的index方法;
-     * 如果路径admin/post/index,则生成当前module为admin,ctrl为Post下的index方法;
+     * 如果路径post,则生成当前module,当前控制器下的post方法;
+     * 如果路径post/index,则生成当前module,控制器为Post下的index方法;
+     * 如果路径admin/post/index,则生成当前module为admin,控制器为Post下的index方法;
      * @param array $params 要生成的参数,一个关联数组,如果有路由规则,参数中必须包含rule中的参数才能反解析
      * @return string
      */
@@ -177,7 +175,7 @@ class Router
         }
         $route = implode('/', $route);
         //匹配路由,反解析
-        $conf = maker()->config()->get('router');
+        $conf = config()->read('router');
         foreach ($conf['rule'] as $r => $v) {
             if ($route === $v[0]) {
                 preg_match_all('/:([^\/]+)/', $r, $matchs);
@@ -199,9 +197,9 @@ class Router
         //拼接参数        
         $query = str_replace(['=', '&'], '/', http_build_query($params, '', '&', PHP_QUERY_RFC3986));
         //协议类型
-        $scheme = maker()->request()->scheme();
+        $scheme = request()->scheme();
         //主机名
-        $host = maker()->request()->host();
+        $host = request()->host();
         //是否启用pathinfo
         $pathinfo = isset($conf['pathinfo']) && $conf['pathinfo'];
         //后缀

@@ -29,7 +29,7 @@ class Lying
 
         self::$maker = new \lying\service\Maker(require DIR_CONF . '/service.php');
 
-        self::$extend = self::$maker->config()->get('loader');
+        self::$extend = self::$maker->createService('config')->read('loader');
     }
     
     /**

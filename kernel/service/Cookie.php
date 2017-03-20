@@ -13,7 +13,7 @@ class Cookie extends Service implements \ArrayAccess
      */
     protected function init()
     {
-        $this->key = $this->key ? $this->key : maker()->request()->docRoot();
+        $this->key = $this->key ? $this->key : 'lying';
     }
     
     /**
@@ -28,7 +28,7 @@ class Cookie extends Service implements \ArrayAccess
      * @return boolean 成功返回true,失败返回false
      */
     public function set($name, $value, $expire = 0, $path = '/', $domain = '', $secure = false, $httponly = false) {
-        $value = maker()->secure()->xorEncrypt($value, $this->key);
+        $value = secure()->xorEncrypt($value, $this->key);
         return setcookie($name, $value, $expire, $path, $domain, $secure, $httponly);
     }
     
@@ -40,7 +40,7 @@ class Cookie extends Service implements \ArrayAccess
      */
     public function get($name, $default = null) {
         if (isset($_COOKIE[$name])) {
-            $res = maker()->secure()->xorDecrypt($_COOKIE[$name], $this->key);
+            $res = secure()->xorDecrypt($_COOKIE[$name], $this->key);
             if (false !== $res) {
                 return $res;
             }

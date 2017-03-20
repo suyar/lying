@@ -23,7 +23,7 @@ class DbLog extends Logger
      */
     protected function init()
     {
-        $this->connection = maker()->db($this->connection);
+        $this->connection = db($this->connection);
         $this->qb = $this->connection->createQuery();
         parent::init();
     }
