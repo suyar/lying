@@ -1,7 +1,7 @@
 <?php
 namespace lying\service;
 
-class Router extends Service
+class Router
 {
     /**
      * @var array 当前路由

@@ -16,3 +16,11 @@ require DIR_LYING . '/Lying.php';
 Lying::boot();
 
 require DIR_LYING . '/function.php';
+
+register_shutdown_function(function() {
+    \lying\service\Hook::trigger('APP_END');
+});
+
+\lying\service\Hook::init();
+
+\lying\service\Hook::trigger('APP_READY');

@@ -30,8 +30,8 @@ class Ctrl extends Service
      */
     protected function init()
     {
-        $this->bindEvent(self::EVENT_BEFORE_ACTION, [$this, 'beforeAction']);
-        $this->bindEvent(self::EVENT_AFTER_ACTION, [$this, 'afterAction']);
+        $this->hook(self::EVENT_BEFORE_ACTION, [$this, 'beforeAction']);
+        $this->hook(self::EVENT_AFTER_ACTION, [$this, 'afterAction']);
     }
     
     /**

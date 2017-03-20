@@ -16,7 +16,6 @@ class Maker
         'request' => 'lying\service\Request',
         'router' => 'lying\service\Router',
         'secure' => 'lying\service\Secure',
-        'session' => 'lying\service\Session',
         'cookie' => 'lying\service\Cookie',
         'dispatch' => 'lying\service\Dispatch',
     ];
@@ -88,15 +87,6 @@ class Maker
     public function secure()
     {
         return $this->createService('secure');
-    }
-    
-    /**
-     * Session服务
-     * @return Session
-     */
-    public function session()
-    {
-        return $this->createService('session');
     }
     
     /**

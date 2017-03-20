@@ -1,7 +1,7 @@
 <?php
 namespace lying\service;
 
-class Config extends Service
+class Config
 {
     /**
      * @var array 缓存全局配置

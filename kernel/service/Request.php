@@ -1,7 +1,7 @@
 <?php
 namespace lying\service;
 
-class Request extends Service
+class Request
 {
     /**
      * 服务器使用的CGI规范的版本;例如,"CGI/1.1"

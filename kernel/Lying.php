@@ -22,13 +22,13 @@ class Lying
     public static function boot()
     {
         self::$classMap = require DIR_LYING . '/classes.php';
-        
+
         spl_autoload_register([self::class, 'autoload']);
-        
+
         \lying\base\Exception::register();
-        
+
         self::$maker = new \lying\service\Maker(require DIR_CONF . '/service.php');
-        
+
         self::$extend = self::$maker->config()->get('loader');
     }
     

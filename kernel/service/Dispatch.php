@@ -1,7 +1,7 @@
 <?php
 namespace lying\service;
 
-class Dispatch extends Service
+class Dispatch
 {
     /**
      * 程序执行入口
@@ -16,9 +16,11 @@ class Dispatch extends Service
             $method = new \ReflectionMethod($instance, $a);
             if ($method->isPublic() && $this->checkAccess($instance->deny, $a)) {
                 $instance->trigger($instance::EVENT_BEFORE_ACTION, [$a]);
-                $responce = call_user_func_array([$instance, $a], $this->parseArgs($method->getParameters()));
-                $instance->trigger($instance::EVENT_AFTER_ACTION, [$a]);
-                echo($responce instanceof $class ? null : $responce);
+                Hook::trigger($instance::EVENT_BEFORE_ACTION, [$a]);
+                $response = call_user_func_array([$instance, $a], $this->parseArgs($method->getParameters()));
+                $instance->trigger($instance::EVENT_AFTER_ACTION, [$a, $response]);
+                Hook::trigger($instance::EVENT_AFTER_ACTION, [$a, $response]);
+                echo($response instanceof $class ? null : $response);
                 exit(0);
             } else {
                 throw new \Exception('Page not found.', 404);

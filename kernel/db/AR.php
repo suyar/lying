@@ -1,6 +1,7 @@
 <?php
 namespace lying\db;
 
+use lying\service\Hook;
 use lying\service\Service;
 
 class AR extends Service
@@ -197,6 +198,7 @@ class AR extends Service
     public function insert()
     {
         $this->trigger(self::EVENT_BEFORE_INSERT);
+        Hook::trigger(self::EVENT_BEFORE_INSERT);
         $res = self::db()->createQuery()->insert(static::table(), $this->attr);
         if (false !== $res && (false !== $keys = self::pk())) {
             foreach ($keys as $key) {
@@ -204,7 +206,8 @@ class AR extends Service
             }
             self::populate($this);
         }
-        $this->trigger(self::EVENT_AFTER_INSERT);
+        $this->trigger(self::EVENT_AFTER_INSERT, $res);
+        Hook::trigger(self::EVENT_AFTER_INSERT, $res);
         return $res;
     }
     
@@ -230,6 +233,7 @@ class AR extends Service
     public function update()
     {
         $this->trigger(self::EVENT_BEFORE_UPDATE);
+        Hook::trigger(self::EVENT_BEFORE_UPDATE);
         if (false === $pks = self::pk()) {
             throw new \Exception(get_called_class() . ' does not have a primary key.');
         }
@@ -237,7 +241,8 @@ class AR extends Service
         if (false !== $res) {
             self::populate($this);
         }
-        $this->trigger(self::EVENT_AFTER_UPDATE);
+        $this->trigger(self::EVENT_AFTER_UPDATE, $res);
+        Hook::trigger(self::EVENT_AFTER_UPDATE, $res);
         return $res;
     }
     
@@ -249,6 +254,7 @@ class AR extends Service
     public function delete()
     {
         $this->trigger(self::EVENT_BEFORE_DELETE);
+        Hook::trigger(self::EVENT_BEFORE_DELETE);
         if (false === $pks = self::pk()) {
             throw new \Exception(get_called_class() . ' does not have a primary key.');
         }
@@ -256,7 +262,8 @@ class AR extends Service
         if (false !== $res) {
             $this->oldAttr = null;
         }
-        $this->trigger(self::EVENT_AFTER_DELETE);
+        $this->trigger(self::EVENT_AFTER_DELETE, $res);
+        Hook::trigger(self::EVENT_AFTER_DELETE, $res);
         return $res;
     }
     

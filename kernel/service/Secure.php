@@ -1,7 +1,7 @@
 <?php
 namespace lying\service;
 
-class Secure extends Service
+class Secure
 {
     /**
      * 异或加密

@@ -1,6 +1,8 @@
 <?php
 namespace lying\base;
 
+use lying\service\Hook;
+
 class Exception
 {
     /**
@@ -19,6 +21,7 @@ class Exception
      */
     public static function exceptionHandler($exception)
     {
+        Hook::trigger('APP_ERR', [$exception]);
         self::showHandler(
             [
                 'message' => $exception->getMessage(),
@@ -52,6 +55,7 @@ class Exception
     public static function shutdownHandler()
     {
         if (null !== $err = error_get_last()) {
+            Hook::trigger('APP_ERR', [$err]);
             self::showHandler([
                 'message' => $err['message'],
                 'file' => self::trimPath($err['file']),

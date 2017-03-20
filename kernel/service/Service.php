@@ -30,7 +30,7 @@ class Service
      * @param string $id 事件的ID
      * @param callable $callback 绑定的事件
      */
-    final public function bindEvent($id, callable $callback)
+    final public function hook($id, callable $callback)
     {
         $this->events[$id][] = $callback;
     }
@@ -44,7 +44,9 @@ class Service
     {
         if (isset($this->events[$id])) {
             foreach ($this->events[$id] as $call) {
-                call_user_func_array($call, $data);
+                if (is_callable($call) && call_user_func_array($call, $data)) {
+                    break;
+                }
             }
         }
     }
