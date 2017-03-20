@@ -43,10 +43,34 @@ class Hook
     {
         if (isset(self::$events[$id])) {
             foreach (self::$events[$id] as $call) {
-                if (is_callable($call) && call_user_func_array($call, $data)) {
+                if (is_callable($call) && false === call_user_func_array($call, $data)) {
                     break;
                 }
             }
         }
+    }
+
+    /**
+     * 移除钩子事件
+     * @param string $id 事件的ID
+     * @param callable|null $callback 要移除的事件
+     * @return boolean 成功返回true,失败返回false
+     */
+    public static function unhook($id, callable $callback = null)
+    {
+        if (isset(self::$events[$id])) {
+            if ($callback === null) {
+                self::$events[$id] = [];
+                return true;
+            } else {
+                foreach (self::$events[$id] as $key => $event) {
+                    if ($event === $callback) {
+                        unset(self::$events[$id][$key]);
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 }
