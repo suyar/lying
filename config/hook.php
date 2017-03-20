@@ -4,36 +4,36 @@
  */
 return [
     'APP_END' => [
-        function() {},
+        function () {},
     ],
     'APP_READY' => [
-        function() {},
+        function () {},
     ],
     'APP_ERR' => [
-        function($err) {},
+        function ($err) {},
     ],
     \lying\base\Ctrl::EVENT_BEFORE_ACTION => [
-        function($a) {},
+        function ($a) {},
     ],
     \lying\base\Ctrl::EVENT_AFTER_ACTION => [
-        function($res, $response) {},
+        function ($res, $response) {},
     ],
     \lying\db\AR::EVENT_BEFORE_INSERT => [
-        function() {},
+        function () {},
     ],
     \lying\db\AR::EVENT_AFTER_INSERT => [
-        function($res) {},
+        function ($res) {},
     ],
     \lying\db\AR::EVENT_BEFORE_UPDATE => [
-        function() {},
+        function () {},
     ],
     \lying\db\AR::EVENT_AFTER_UPDATE => [
-        function($res) {},
+        function ($res) {},
     ],
     \lying\db\AR::EVENT_BEFORE_DELETE => [
-        function() {},
+        function () {},
     ],
     \lying\db\AR::EVENT_AFTER_DELETE => [
-        function($res) {},
+        function ($res) {},
     ],
 ];
