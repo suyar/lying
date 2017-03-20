@@ -37,7 +37,7 @@ FEATURES
 * ApcCache/ApcuCache/DbCache/Memcached/FileCache多种缓存实现。
 * DbLog/FileLog日志实现。
 * Apache，Nginx，IIS，虚拟主机简易部署。
-* 支持pathinfo模和rewrite模式的路由，路由支持正反向解析（虽然弄的不太好）。
+* 支持pathinfo模式和rewrite模式的路由，路由支持正反向解析（虽然弄的不太好）。
 * 模块<->域名绑定，快速实现前后台分离。
 * cookie类，加密类，请求类，钩子类等类的封装。
 * 工厂函数maker()简便实例化服务类。
