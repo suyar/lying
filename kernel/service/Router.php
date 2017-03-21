@@ -167,10 +167,10 @@ class Router
     /**
      * url生成
      * @param string $path 要生成的相对路径
-     * 如果路径post,则生成当前module,当前控制器下的post方法;
-     * 如果路径post/index,则生成当前module,控制器为Post下的index方法;
-     * 如果路径admin/post/index,则生成当前module为admin,控制器为Post下的index方法;
-     * @param array $params 要生成的参数,一个关联数组,如果有路由规则,参数中必须包含rule中的参数才能反解析
+     * 如果路径post，则生成当前模块，当前控制器下的Post方法
+     * 如果路径post/index，则生成当前模块，控制器为Post下的index方法
+     * 如果路径admin/post/index，则生成模块为admin，控制器为Post下的index方法（如果设置了模块绑定，则解析到模块admin锁绑定的域名下去）
+     * @param array $params 要生成的参数，一个关联数组，如果有路由规则，参数中必须包含rule中的参数才能反解析
      * @return string
      */
     public function createUrl($path, $params = [])
