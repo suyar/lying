@@ -7,7 +7,9 @@ return [
         'suffix' => '.html',
         'pathinfo' => false,
         'rule' => [
-            'u/:time/:id'=>['index/index/user-name', 'time'=>'/^\d{4}-\d{1,2}-\d{1,2}$/'],
+            'admin/:id' => ['admin/index/index'],
+            'user' => ['index/index/name'],
+            'u/:time/:id' => ['index/index/user-name', 'time'=>'/^\d{4}-\d{1,2}-\d{1,2}$/'],
         ],
     ],
     'admin.lying.com' => [

@@ -1,10 +1,18 @@
 <?php
 namespace lying\service;
 
+/**
+ * 请求组件
+ *
+ * @author carolkey <me@suyaqi.cn>
+ * @since 2.0
+ * @link https://carolkey.github.io/
+ * @license MIT
+ */
 class Request
 {
     /**
-     * 服务器使用的CGI规范的版本;例如,"CGI/1.1"
+     * 服务器使用的CGI规范的版本；例如："CGI/1.1"
      * @return string|null
      */
     public function cgiVersion()
@@ -23,7 +31,7 @@ class Request
     
     /**
      * 当前运行脚本所在的服务器的主机名
-     * 如果脚本运行于虚拟主机中,该名称是由那个虚拟主机所设置的值决定
+     * 如果脚本运行于虚拟主机中，该名称是由那个虚拟主机所设置的值决定
      * @return string|null
      */
     public function serverName()
@@ -32,7 +40,7 @@ class Request
     }
     
     /**
-     * 服务器标识字符串,在响应请求时的头信息中给出
+     * 服务器标识字符串，在响应请求时的头信息中给出
      * @return string|null
      */
     public function serverSoftware()
@@ -41,20 +49,20 @@ class Request
     }
     
     /**
-     * 请求页面时通信协议的名称和版本;例如,"HTTP/1.0"
+     * 请求页面时通信协议的名称和版本；例如："HTTP/1.0"
      * @return string|null
      */
-    public function serverProtocol()
+    public function protocol()
     {
         return isset($_SERVER['SERVER_PROTOCOL']) ? $_SERVER['SERVER_PROTOCOL'] : null;
     }
     
     /**
-     * 访问页面使用的请求方法;例如,GET, POST, HEAD, PUT, PATCH, DELETE
-     * 如果请求方法为HEAD,PHP脚本将在发送 Header头信息之后终止(这意味着在产生任何输出后,不再有输出缓冲)
+     * 访问页面使用的请求方法；例如，GET，POST，HEAD，PUT，PATCH，DELETE
+     * 如果请求方法为HEAD，PHP脚本将在发送Header头信息之后终止(这意味着在产生任何输出后，不再有输出缓冲)
      * @return string|null
      */
-    public function requestMethod()
+    public function method()
     {
         return isset($_SERVER['REQUEST_METHOD']) ? strtoupper($_SERVER['REQUEST_METHOD']) : null;
     }
@@ -64,7 +72,7 @@ class Request
      * @param boolean $msec 是否返回13位时间戳
      * @return string|null
      */
-    public function requestTime($msec = false)
+    public function time($msec = false)
     {
         if ($msec) {
             return isset($_SERVER['REQUEST_TIME_FLOAT']) ? $_SERVER['REQUEST_TIME_FLOAT'] * 1000 : null;
@@ -83,7 +91,7 @@ class Request
     }
     
     /**
-     * 当前运行脚本所在的文档根目录,在服务器配置文件中定义
+     * 当前运行脚本所在的文档根目录，在服务器配置文件中定义
      * @return string|null
      */
     public function docRoot()
@@ -92,7 +100,7 @@ class Request
     }
     
     /**
-     * 当前请求头中 Host:项的内容,如果存在的话
+     * 当前请求头中Host:项的内容，如果存在的话
      * @return string|null
      */
     public function httpHost()
@@ -101,7 +109,7 @@ class Request
     }
     
     /**
-     * 当前请求头中 User-Agent:项的内容,如果存在的话
+     * 当前请求头中User-Agent:项的内容,如果存在的话
      * 该字符串表明了访问该页面的用户代理的信息
      * @return string|null
      */
@@ -139,7 +147,7 @@ class Request
     
     /**
      * 当前执行脚本的绝对路径
-     * 如果在CLI模式下使用相对路径执行脚本,那么 将包含用户指定的相对路径
+     * 如果在CLI模式下使用相对路径执行脚本，那么将包含用户指定的相对路径
      * @return string|null
      */
     public function scriptFile()
@@ -149,7 +157,7 @@ class Request
     
     /**
      * Web服务器使用的端口
-     * 如果使用SSL安全连接,则这个值为用户设置的HTTP端口
+     * 如果使用SSL安全连接，则这个值为用户设置的HTTP端口
      * @return string|null
      */
     public function serverPort()
@@ -167,7 +175,7 @@ class Request
     }
     
     /**
-     * URI用来指定要访问的页面;例如"/index.html"
+     * URI用来指定要访问的页面；例如："/index.html"
      * @return string|null
      */
     public function requestUri()
@@ -176,7 +184,7 @@ class Request
     }
     
     /**
-     * 包含由客户端提供的,跟在真实脚本名称之后并且在查询语句之前的路径信息,如果存在的话
+     * 包含由客户端提供的，跟在真实脚本名称之后并且在查询语句之前的路径信息，如果存在的话
      * @return string|null
      */
     public function pathInfo()
@@ -184,10 +192,8 @@ class Request
         return isset($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO'] : null;
     }
     
-
-    
     /**
-     * 返回不为空的主机名;例如,abc.com,127.0.0.1
+     * 返回不为空的主机名；例如：abc.com，127.0.0.1
      * @return string
      */
     public function host()
@@ -197,7 +203,7 @@ class Request
     }
 
     /**
-     * 返回当前请求的完整URL,不包含#后面
+     * 返回当前请求的完整URL
      * @return string
      */
     public function currentUrl()
@@ -205,15 +211,13 @@ class Request
         return $this->scheme() . '://' . $this->host() . $this->requestUri();
     }
     
-
-    
     /**
      * 是否为POST请求
      * @return boolean
      */
     public function isPost()
     {
-        return $this->requestMethod() === 'POST';
+        return $this->method() === 'POST';
     }
     
     /**
@@ -222,7 +226,7 @@ class Request
      */
     public function isGet()
     {
-        return $this->requestMethod() === 'GET';
+        return $this->method() === 'GET';
     }
     
     /**
@@ -231,7 +235,7 @@ class Request
      */
     public function isHead()
     {
-        return $this->requestMethod() === 'HEAD';
+        return $this->method() === 'HEAD';
     }
     
     /**
@@ -240,7 +244,7 @@ class Request
      */
     public function isPut()
     {
-        return $this->requestMethod() === 'PUT';
+        return $this->method() === 'PUT';
     }
     
     /**
@@ -249,7 +253,7 @@ class Request
      */
     public function isOptions()
     {
-        return $this->requestMethod() === 'OPTIONS';
+        return $this->method() === 'OPTIONS';
     }
     
     /**
@@ -258,7 +262,7 @@ class Request
      */
     public function isDelete()
     {
-        return $this->requestMethod() === 'DELETE';
+        return $this->method() === 'DELETE';
     }
     
     /**
@@ -267,7 +271,7 @@ class Request
      */
     public function isPatch()
     {
-        return $this->requestMethod() === 'PATCH';
+        return $this->method() === 'PATCH';
     }
     
     /**

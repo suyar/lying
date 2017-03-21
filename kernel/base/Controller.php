@@ -75,14 +75,14 @@ class Controller extends Service
             $q = http_build_query($params, '', '&', PHP_QUERY_RFC3986);
             $url .= empty($q) ? '' : (strpos($url, '?') === false ? "?$q" : "&$q");
         } else {
-            $url = router()->createUrl($url, $params);
+            $url = \Lying::$maker->router()->createUrl($url, $params);
         }
         
         while (ob_get_level() !== 0) ob_end_clean();
         http_response_code(302);
-        if (request()->isPjax()) {
+        if (\Lying::$maker->request()->isPjax()) {
             header("X-Pjax-Url: $url");
-        } else if (request()->isAjax()) {
+        } else if (\Lying::$maker->request()->isAjax()) {
             header("X-Redirect: $url");
         } else {
             header("Location: $url");

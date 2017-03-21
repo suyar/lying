@@ -1,6 +1,14 @@
 <?php
 namespace lying\service;
 
+/**
+ * 数据加密服务
+ *
+ * @author carolkey <me@suyaqi.cn>
+ * @since 2.0
+ * @link https://carolkey.github.io/
+ * @license MIT
+ */
 class Secure
 {
     /**
@@ -23,10 +31,10 @@ class Secure
     }
     
     /**
-     * 异或解密;注意,这里可能返回空的字符串,请用false === $result判断返回值
+     * 异或解密；注意，这里可能返回空的字符串，请用false === $result判断返回值
      * @param string $str 要解密的字符串
      * @param string $key 密钥
-     * @return string|boolean 成功返回解密后的字符串,失败返回false
+     * @return string|boolean 成功返回解密后的字符串，失败返回false
      */
     public function xorDecrypt($str, $key)
     {

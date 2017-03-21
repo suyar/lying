@@ -12,4 +12,10 @@ class Index extends Controller
 
         return $this->render('index');
     }
+
+    public function name()
+    {
+
+
+    }
 }

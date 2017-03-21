@@ -23,7 +23,7 @@ class DbCache extends Cache
      */
     protected function init()
     {
-        $this->connection = db($this->connection);
+        $this->connection = \Lying::$maker->db($this->connection);
     }
     
     /**

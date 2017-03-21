@@ -1,25 +1,33 @@
 <?php
 namespace lying\service;
 
+/**
+ * 钩子组件
+ *
+ * @author carolkey <me@suyaqi.cn>
+ * @since 2.0
+ * @link https://carolkey.github.io/
+ * @license MIT
+ */
 class Hook
 {
     /**
-     * @var bool 是否初始化过,防止用户重新载入
+     * @var bool 是否初始化过，防止用户重新载入
      */
     private static $isInit = false;
 
     /**
-     * @var array 全局钩子事件
+     * @var array 钩子函数容器
      */
     private static $events = [];
 
     /**
-     * 载入预定义钩子
+     * 载入预定义钩子函数
      */
     public static function init()
     {
         if (!self::$isInit) {
-            self::$events = config()->read('hook');
+            self::$events = \Lying::$maker->config()->read('hook');
             self::$isInit = true;
         }
     }
@@ -27,7 +35,7 @@ class Hook
     /**
      * 绑定触发函数到钩子
      * @param string $id 钩子ID
-     * @param callable $callback 要执行的函数
+     * @param callable $callback 钩子触发函数
      */
     public static function hook($id, callable $callback)
     {
@@ -37,7 +45,7 @@ class Hook
     /**
      * 触发钩子事件
      * @param string $id 钩子ID
-     * @param array $data 要传入触发事件的参数,按照参数的顺序提供一个索引数组
+     * @param array $data 要传入触发事件的参数，按照参数的顺序提供一个索引数组
      */
     public static function trigger($id, $data = [])
     {
@@ -51,9 +59,9 @@ class Hook
     }
 
     /**
-     * 移除钩子事件
-     * @param string $id 事件的ID
-     * @param callable|null $callback 要移除的事件
+     * 移除钩子函数
+     * @param string $id 钩子ID
+     * @param callable|null $callback 要移除钩子触发函数
      * @return boolean 成功返回true,失败返回false
      */
     public static function unhook($id, callable $callback = null)

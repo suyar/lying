@@ -1,13 +1,22 @@
 <?php
+
+/**
+ * 框架基类，用来做各种初始化和自动加载
+ *
+ * @author carolkey <me@suyaqi.cn>
+ * @since 2.0
+ * @link https://carolkey.github.io/
+ * @license MIT
+ */
 class Lying
 {
     /**
-     * @var array 类文件映射
+     * @var array 核心类文件映射
      */
     private static $classMap = [];
     
     /**
-     * @var array 命名空间映射
+     * @var array 加载方式配置
      */
     private static $extend = [];
     
@@ -29,7 +38,7 @@ class Lying
 
         self::$maker = new \lying\service\Maker(require DIR_CONF . '/service.php');
 
-        self::$extend = self::$maker->createService('config')->read('loader');
+        self::$extend = self::$maker->config()->read('loader');
     }
     
     /**
@@ -53,7 +62,7 @@ class Lying
     /**
      * classMap加载
      * @param string $className 类名
-     * @return string|boolean 成功返回文件绝对路径,失败返回false
+     * @return string|boolean 成功返回文件绝对路径，失败返回false
      */
     private static function classMapLoader($className)
     {
@@ -64,9 +73,9 @@ class Lying
     }
     
     /**
-     * PSR-4自动加载,参考 http://www.php-fig.org/psr/psr-4/
+     * PSR-4自动加载，参考 http://www.php-fig.org/psr/psr-4/
      * @param string $className 类名
-     * @return string|boolean 成功返回文件绝对路径,失败返回false
+     * @return string|boolean 成功返回文件绝对路径，失败返回false
      */
     private static function psr4Loader($className)
     {
@@ -96,9 +105,9 @@ class Lying
     }
     
     /**
-     * PSR-0自动加载,参考 http://www.php-fig.org/psr/psr-0/
+     * PSR-0自动加载，参考 http://www.php-fig.org/psr/psr-0/
      * @param string $className 类名
-     * @return string|boolean 成功返回文件绝对路径,失败返回false
+     * @return string|boolean 成功返回文件绝对路径，失败返回false
      */
     private static function psr0Loader($className)
     {

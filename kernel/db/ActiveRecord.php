@@ -57,7 +57,7 @@ class ActiveRecord extends Service
      */
     public static function db()
     {
-        return db();
+        return \Lying::$maker->db();
     }
     
     /**

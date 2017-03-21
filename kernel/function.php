@@ -1,84 +1,9 @@
 <?php
 /**
- * 配置服务
- * @return \lying\service\Config
- */
-function config()
-{
-    return Lying::$maker->createService('config');
-}
-
-/**
- * 请求服务
- * @return \lying\service\Request
- */
-function request()
-{
-    return Lying::$maker->createService('request');
-}
-
-/**
- * 路由服务
- * @return \lying\service\Router
- */
-function router()
-{
-    return Lying::$maker->createService('router');
-}
-
-/**
- * 加密服务
- * @return \lying\service\Secure
- */
-function secure()
-{
-    return Lying::$maker->createService('secure');
-}
-
-/**
- * COOKIE服务
- * @return \lying\service\Cookie
- */
-function cookie()
-{
-    return Lying::$maker->createService('cookie');
-}
-
-/**
- * 数据库服务
- * @param string $id 服务ID
- * @return \lying\db\Connection
- */
-function db($id = 'db')
-{
-    return Lying::$maker->createService($id);
-}
-
-/**
- * 日志服务
- * @param string $id 服务ID
- * @return \lying\logger\Logger
- */
-function logger($id = 'logger')
-{
-    return Lying::$maker->createService($id);
-}
-
-/**
- * 缓存服务
- * @param string $id 服务ID
- * @return \lying\cache\Cache
- */
-function cache($id = 'cache')
-{
-    return Lying::$maker->createService($id);
-}
-
-/**
  * 获取GET参数
- * @param string $key GET参数,放空为获取所有GET参数
+ * @param string $key GET参数，放空为获取所有GET参数
  * @param string $default 默认值
- * @return string|null|array
+ * @return string|null|array 成功返回键值，键不存在返回null，没有传入key返回GET数组
  */
 function get($key = null, $default = null)
 {
@@ -89,7 +14,7 @@ function get($key = null, $default = null)
  * 获取POST参数
  * @param string $key POST参数,放空为获取所有POST参数
  * @param string $default 默认值
- * @return string|null|array
+ * @return string|null|array 成功返回键值，键不存在返回null，没有传入key返回POST数组
  */
 function post($key = null, $default = null)
 {
@@ -97,27 +22,25 @@ function post($key = null, $default = null)
 }
 
 /**
- * url生成,支持反解析
+ * URL生成
+ * @see \lying\service\Router::createUrl()
  * @param string $path 要生成的相对路径
- * 如果路径post,则生成当前module,当前控制器下的post方法;
- * 如果路径post/index,则生成当前module,控制器为Post下的index方法;
- * 如果路径admin/post/index,则生成当前module为admin,控制器为Post下的index方法;
- * @param array $params 要生成的参数,一个关联数组,如果有路由规则,参数中必须包含rule中的参数才能反解析
- * @return string
+ * @param array $params URL带的参数，为一个关联数组
+ * @return string 返回生成的URL
  */
 function url($path, $params = [])
 {
-    return router()->createUrl($path, $params);
+    return \Lying::$maker->router()->createUrl($path, $params);
 }
 
 /**
  * 锁函数
- * @param strings $name 锁名称
+ * @param string $name 锁名称
  * @param integer $type 锁类型
  * LOCK_SH 共享锁
  * LOCK_EX 独占锁
- * LOCK_NB 非阻塞(Windows 上不支持),用法LOCK_EX | LOCK_NB
- * @return resource|boolean 成功返回锁文件句柄,失败返回false
+ * LOCK_NB 非阻塞(Windows上不支持)，用法LOCK_EX | LOCK_NB
+ * @return resource|boolean 成功返回锁文件句柄，失败返回false
  */
 function lock($name, $type)
 {
@@ -137,7 +60,7 @@ function lock($name, $type)
 /**
  * 解锁
  * @param resource $handle 锁句柄
- * @return boolean 成功返回true,失败返回false
+ * @return boolean 成功返回true，失败返回false
  */
 function unlock($handle)
 {
