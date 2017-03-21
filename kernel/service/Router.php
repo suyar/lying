@@ -175,7 +175,7 @@ class Router
      */
     public function createUrl($path, $params = [])
     {
-        $route = explode('/', $path);
+        $route = explode('/', trim($path, '/'));
         switch (count($route)) {
             case 1:
                 $route = [$this->router[0], $this->router[1], $route[0]];
@@ -188,12 +188,24 @@ class Router
             default:
                 $route = $this->router;
         }
+
+        //根据模块查找对应配置
+        $conf = $this->config;
+        $host = \Lying::$maker->request()->host();
+
+        foreach (\Lying::$maker->config()->read('router') as $h => $c) {
+            if (isset($c['module']) && $c['module'] === $route[0]) {
+                $conf = $c;
+                $host = $h === 'default' ? $host : $h;
+                unset($route[0]);
+                break;
+            }
+        }
         $route = implode('/', $route);
-        //匹配路由,反解析
-        $conf = \Lying::$maker->config()->read('router');
+
+        //路由反解析
         foreach (isset($conf['rule']) ? $conf['rule'] : [] as $r => $v) {
-            if ($route === $v[0]) {
-                preg_match_all('/:([^\/]+)/', $r, $matchs);
+            if ($route === $v[0] && false !== preg_match_all('/:([^\/]+)/', $r, $matchs)) {
                 foreach ($matchs[1] as $m) {
                     //寻找参数并且匹配参数正则,不匹配就继续寻找下一条规则
                     if (!isset($params[$m]) || isset($v[$m]) && !preg_match($v[$m], $params[$m])) {
@@ -208,21 +220,23 @@ class Router
                 break;
             }
         }
+
+        //过滤一些奇怪的键和值
+        foreach ($params as $key => $val) {
+            if (!is_string($key) || !is_string($val) || !is_numeric($val) || !is_bool($val)) {
+                unset($params[$key]);
+            }
+        }
         
         //拼接参数        
         $query = str_replace(['=', '&'], '/', http_build_query($params, '', '&', PHP_QUERY_RFC3986));
         //协议类型
         $scheme = \Lying::$maker->request()->scheme();
-        //主机名
-        $host = \Lying::$maker->request()->host();
         //是否启用pathinfo
         $pathinfo = isset($conf['pathinfo']) && $conf['pathinfo'];
         //后缀
-        $suffix = isset($conf['suffix']) ? $conf['suffix'] : '';
-        //没有匹配到并且设置了默认module,就去掉route的module
-        if (!isset($match) && isset($conf['module'])) {
-            $route = preg_replace('/^'.$conf['module'].'\//', '', $route);
-        }
-        return $scheme . '://' . $host . ($pathinfo ? '/index.php/' : '/') . $route . '/' . $query . $suffix;
+        $suffix = isset($conf['suffix']) && $conf['suffix'] ? $conf['suffix'] : '';
+
+        return $scheme . '://' . $host . ($pathinfo ? '/index.php/' : '/') . $route . (empty($query) ? '' : '/' . $query) . $suffix;
     }
 }

@@ -9,7 +9,7 @@ class Index extends Controller
     
     public function index()
     {
-
+        return url('index/index', ['id'=>100]);
         return $this->render('index');
     }
 
