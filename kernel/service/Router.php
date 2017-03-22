@@ -169,11 +169,12 @@ class Router
      * @param string $path 要生成的相对路径
      * 如果路径post，则生成当前模块，当前控制器下的Post方法
      * 如果路径post/index，则生成当前模块，控制器为Post下的index方法
-     * 如果路径admin/post/index，则生成模块为admin，控制器为Post下的index方法（如果设置了模块绑定，则解析到模块admin锁绑定的域名下去）
+     * 如果路径admin/post/index，则生成模块为admin，控制器为Post下的index方法（如果设置了模块绑定，则解析到模块admin所绑定的域名下去）
      * @param array $params 要生成的参数，一个关联数组，如果有路由规则，参数中必须包含rule中的参数才能反解析
-     * @return string
+     * @param boolean $normal 是否把参数设置成?a=1&b=2
+     * @return string 返回生成的url
      */
-    public function createUrl($path, $params = [])
+    public function createUrl($path, $params = [], $normal = false)
     {
         $route = explode('/', trim($path, '/'));
         switch (count($route)) {
@@ -216,27 +217,30 @@ class Router
                 //反解析的参数都存在
                 $params = array_diff_key($params, array_flip($matchs[1]));
                 $route = $r;
-                $match = true;
                 break;
             }
         }
 
-        //过滤一些奇怪的键和值
+        //过滤一些奇怪的值
+        $p1 = $p2 = [];
         foreach ($params as $key => $val) {
-            if (!is_string($key) || !is_string($val) || !is_numeric($val) || !is_bool($val)) {
-                unset($params[$key]);
+            if (in_array(gettype($val), ['string', 'integer', 'double', 'boolean', 'array'])) {
+                if ($normal || $val === '' || is_array($val)) {
+                    $p1[$key] = $val;
+                } else {
+                    $p2[$key] = $val;
+                }
             }
         }
-        
-        //拼接参数        
-        $query = str_replace(['=', '&'], '/', http_build_query($params, '', '&', PHP_QUERY_RFC3986));
-        //协议类型
-        $scheme = \Lying::$maker->request()->scheme();
-        //是否启用pathinfo
-        $pathinfo = isset($conf['pathinfo']) && $conf['pathinfo'];
-        //后缀
-        $suffix = isset($conf['suffix']) && $conf['suffix'] ? $conf['suffix'] : '';
+        $p1 = http_build_query($p1, '', '&', PHP_QUERY_RFC3986);
+        $p2 = str_replace(['=', '&'], '/', http_build_query($p2, '', '&', PHP_QUERY_RFC3986));
 
-        return $scheme . '://' . $host . ($pathinfo ? '/index.php/' : '/') . $route . (empty($query) ? '' : '/' . $query) . $suffix;
+        //URL拼接
+        $url = \Lying::$maker->request()->scheme() . '://' . $host;
+        $url .= (isset($conf['pathinfo']) && $conf['pathinfo'] ? '/index.php/' : '/') . $route;
+        $url .= empty($p2) ? '' : "/$p2";
+        $url .= isset($conf['suffix']) && $conf['suffix'] ? $conf['suffix'] : '';
+        $url .= empty($p1) ? '' : "?$p1";
+        return $url;
     }
 }

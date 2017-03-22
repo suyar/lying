@@ -4,6 +4,14 @@ namespace lying\db;
 use lying\service\Hook;
 use lying\service\Service;
 
+/**
+ * 活动记录基类
+ *
+ * @author carolkey <me@suyaqi.cn>
+ * @since 2.0
+ * @link https://carolkey.github.io/
+ * @license MIT
+ */
 class ActiveRecord extends Service
 {
     /**
@@ -62,9 +70,9 @@ class ActiveRecord extends Service
     
     /**
      * 设置模型对应的表名
-     * e.g. User 对应表 user
-     * e.g. UserName 对应表 user_name
-     * @return string
+     * User 对应表 user
+     * UserName 对应表 user_name
+     * @return string 返回表名
      */
     public static function table()
     {
@@ -74,7 +82,7 @@ class ActiveRecord extends Service
     
     /**
      * 返回表的结构
-     * @return array
+     * @return array 表的结构
      */
     private static function schema()
     {
@@ -90,11 +98,10 @@ class ActiveRecord extends Service
         }
         return  self::$schema[$table];
     }
-    
+
     /**
-     * 返回所有的主键
-     * @throws \Exception
-     * @return string[]|boolean
+     * 返回所有的主键，没有主键返回false
+     * @return array|boolean
      */
     private static function pk()
     {
@@ -146,28 +153,19 @@ class ActiveRecord extends Service
     }
     
     /**
-     * 创建AR查询对象
-     * @return \lying\db\ActiveRecordQuery
-     */
-    public static function createARQuery()
-    {
-        return (new ActiveRecordQuery(static::db(), get_called_class()))->from([static::table()]);
-    }
-    
-    /**
      * 查找数据
      * @return \lying\db\ActiveRecordQuery
      */
     public static function find()
     {
-        return self::createARQuery();
+        return (new ActiveRecordQuery(static::db(), get_called_class()))->from([static::table()]);
     }
     
     /**
      * 查找一条记录
-     * @param mixed $condition 如果为数组,则为查找条件;否则的话为查找第一个主键
-     * @return ActiveRecord|boolean
-     * @throws \Exception
+     * @param mixed $condition 如果为数组，则为查找条件；否则的话为查找第一个主键
+     * @return ActiveRecord|boolean 返回查询结果或者false
+     * @throws \Exception 主键不存在抛出异常
      */
     public static function findOne($condition)
     {
@@ -178,22 +176,22 @@ class ActiveRecord extends Service
                 $condition = [reset($pks) => $condition];
             }
         }
-        return self::createARQuery()->where($condition)->limit(1)->one();
+        return self::find()->where($condition)->limit(1)->one();
     }
     
     /**
      * 查找所有符合条件的记录
      * @param array $condition 查看Query::where()的数组使用方式
-     * @return ActiveRecord|boolean
+     * @return ActiveRecord[]|boolean 返回查询结果数组，失败返回false
      */
     public static function findAll($condition = [])
     {
-        return self::createARQuery()->where($condition)->all();
+        return self::find()->where($condition)->all();
     }
     
     /**
      * 插入当前设置的数据
-     * @return number|boolean 成功返回插入的行数,失败返回false
+     * @return integer|boolean 成功返回插入的行数，失败返回false
      */
     public function insert()
     {
@@ -227,8 +225,8 @@ class ActiveRecord extends Service
     
     /**
      * 更新当前数据
-     * @return number|boolean 成功返回更新的行数,失败返回false
-     * @throws \Exception
+     * @return number|boolean 成功返回更新的行数，失败返回false
+     * @throws \Exception 主键不存在抛出异常
      */
     public function update()
     {
@@ -248,8 +246,8 @@ class ActiveRecord extends Service
     
     /**
      * 删除本条数据
-     * @return number|boolean 成功返回删除的行数,失败返回false
-     * @throws \Exception
+     * @return integer|boolean 成功返回删除的行数，失败返回false
+     * @throws \Exception 主键不存在抛出异常
      */
     public function delete()
     {
@@ -269,7 +267,7 @@ class ActiveRecord extends Service
     
     /**
      * 是否为新记录
-     * @return boolean
+     * @return boolean 新纪录返回true，否则返回false
      */
     public function isNewRecord()
     {
@@ -278,7 +276,7 @@ class ActiveRecord extends Service
     
     /**
      * 保存数据
-     * @return number|boolean 成功返回保存的行数,失败返回false
+     * @return integer|boolean 成功返回保存的行数，失败返回false
      */
     public function save()
     {

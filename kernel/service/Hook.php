@@ -12,6 +12,21 @@ namespace lying\service;
 class Hook
 {
     /**
+     * 框架加载完成事件
+     */
+    const APP_READY = 'appReady';
+
+    /**
+     * 请求结束事件
+     */
+    const APP_END = 'appEnd';
+
+    /**
+     * 框架出错事件
+     */
+    const APP_ERROR = 'appError';
+
+    /**
      * @var bool 是否初始化过，防止用户重新载入
      */
     private static $isInit = false;

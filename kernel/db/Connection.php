@@ -3,6 +3,14 @@ namespace lying\db;
 
 use lying\service\Service;
 
+/**
+ * 数据库连接实例
+ *
+ * @author carolkey <me@suyaqi.cn>
+ * @since 2.0
+ * @link https://carolkey.github.io/
+ * @license MIT
+ */
 class Connection extends Service
 {
     /**
@@ -60,10 +68,11 @@ class Connection extends Service
     {
         return new Query($this);
     }
-    
+
     /**
-     * 返回最后插入行的ID,或者是一个序列对象最后的值
+     * 返回最后插入行的ID，或者是一个序列对象最后的值
      * @param string $name 应该返回ID的那个序列对象的名称
+     * @return string 返回ID
      */
     public function lastInsertId($name = null)
     {
@@ -72,7 +81,7 @@ class Connection extends Service
     
     /**
      * 启动一个事务
-     * @return boolean 成功时返回true,或者在失败时返回false
+     * @return boolean 成功时返回true，或者在失败时返回false
      */
     public function beginTransaction()
     {
@@ -81,7 +90,7 @@ class Connection extends Service
     
     /**
      * 提交一个事务
-     * @return boolean 成功时返回true,或者在失败时返回false
+     * @return boolean 成功时返回true，或者在失败时返回false
      */
     public function commit()
     {
@@ -90,7 +99,7 @@ class Connection extends Service
     
     /**
      * 回滚一个事务
-     * @return boolean 成功时返回true,或者在失败时返回false
+     * @return boolean 成功时返回true，或者在失败时返回false
      */
     public function rollBack()
     {

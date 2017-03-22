@@ -1,6 +1,14 @@
 <?php
 namespace lying\logger;
 
+/**
+ * 数据库日志类
+ *
+ * @author carolkey <me@suyaqi.cn>
+ * @since 2.0
+ * @link https://carolkey.github.io/
+ * @license MIT
+ */
 class DbLog extends Logger
 {
     /**
@@ -43,11 +51,11 @@ class DbLog extends Logger
      */
     public function flush()
     {
-        if ($this->logContainer) {
+        if ($this->container) {
             $this->qb->batchInsert($this->table, [
                 'time', 'ip', 'level', 'request', 'file', 'line', 'data'
-            ], $this->logContainer);
-            $this->logContainer = [];
+            ], $this->container);
+            $this->container = [];
         }
     }
 }

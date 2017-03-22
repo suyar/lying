@@ -26,11 +26,12 @@ function post($key = null, $default = null)
  * @see \lying\service\Router::createUrl()
  * @param string $path 要生成的相对路径
  * @param array $params URL带的参数，为一个关联数组
+ * @param boolean $normal 是否把参数设置成?a=1&b=2
  * @return string 返回生成的URL
  */
-function url($path, $params = [])
+function url($path, $params = [], $normal = false)
 {
-    return \Lying::$maker->router()->createUrl($path, $params);
+    return \Lying::$maker->router()->createUrl($path, $params, $normal);
 }
 
 /**

@@ -1,11 +1,21 @@
 <?php
 namespace lying\db;
 
+/**
+ * 查询构造器基类，用来组建SQL语句
+ *
+ * @author carolkey <me@suyaqi.cn>
+ * @since 2.0
+ * @link https://carolkey.github.io/
+ * @license MIT
+ */
 class QueryBuilder
 {
     /**
-     * 简单地给表名,字段加上"`"
-     * e.g. 'name' => '`name`'
+     * 简单地给表名、字段加上"`"
+     * ```
+     * 'name' => '`name`'
+     * ```
      * @param string $name 字段名
      * @return string 字段名
      */
@@ -15,9 +25,11 @@ class QueryBuilder
     }
     
     /**
-     * 给复杂的表名,字段加上"`"
-     * e.g. 'lying.name' => '`lying`.`name`'
-     * 注意:'count(id)'并不会转义成'count(`id`)',而还是原来的'count(id)'
+     * 给复杂的表名、字段加上"`"
+     * ```
+     * 'lying.name' => '`lying`.`name`'
+     * ```
+     * 注意:'count(id)'并不会转义成'count(`id`)'，而还是原来的'count(id)'
      * @param string $name 字段名
      * @return string 字段名
      */
@@ -36,14 +48,15 @@ class QueryBuilder
     }
     
     /**
-     * 给复杂的表名,字段加上"`",并且编译别名和子查询,请以数组形式传入字段名和表名
-     * 如,
-     * e.g. ['lying.name'] => ['`lying`.`name`']
-     * e.g. ['lying.name n'] => ['`lying`.`name` AS `n`']
-     * e.g. ['lying.name as n'] => ['`lying`.`name` AS `n`']
-     * e.g. ['n'=>'lying.name'] => ['`lying`.`name` AS `n`']
-     * e.g. ['n'=>$query] => ['(select ...) AS `n`'],其中$query为Query实例
-     * @param array $tables 一个存字段名或者表名的数组
+     * 给复杂的表名，字段加上"`"，并且编译别名和子查询，请以数组形式传入字段名和表名
+     * ```
+     * ['lying.name'] => ['`lying`.`name`']
+     * ['lying.name n'] => ['`lying`.`name` AS `n`']
+     * ['lying.name as n'] => ['`lying`.`name` AS `n`']
+     * ['n'=>'lying.name'] => ['`lying`.`name` AS `n`']
+     * ['n'=>$query] => ['(select ...) AS `n`'],其中$query为Query实例
+     * ```
+     * @param array $columns 一个存字段名或者表名的数组
      * @param array $container 参数容器
      * @return array 返回编译后的表名数组,数组键名和传入时一样
      */

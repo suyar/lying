@@ -3,10 +3,18 @@ namespace lying\base;
 
 use lying\service\Hook;
 
+/**
+ * 注册全局错误/异常
+ *
+ * @author carolkey <me@suyaqi.cn>
+ * @since 2.0
+ * @link https://carolkey.github.io/
+ * @license MIT
+ */
 class Exception
 {
     /**
-     * 注册错误,异常处理函数
+     * 注册错误，异常处理函数
      */
     public static function register()
     {
@@ -17,17 +25,18 @@ class Exception
     
     /**
      * 注册异常处理函数
-     * @param \Exception|\Error $exception 未捕获的异常
+     * @param \Exception|\Error $exception 未被捕获的异常
      */
     public static function exceptionHandler($exception)
     {
-        Hook::trigger('APP_ERR', [$exception]);
+        $msg = [
+            'message' => $exception->getMessage(),
+            'file' => self::trimPath($exception->getFile()),
+            'line' => $exception->getLine()
+        ];
+        Hook::trigger(Hook::APP_ERROR, [$msg]);
         self::showHandler(
-            [
-                'message' => $exception->getMessage(),
-                'file' => self::trimPath($exception->getFile()),
-                'line' => $exception->getLine()
-            ],
+            $msg,
             self::trimPath(explode("\n", $exception->getTraceAsString())),
             $exception->getCode()
         );
@@ -55,12 +64,13 @@ class Exception
     public static function shutdownHandler()
     {
         if (null !== $err = error_get_last()) {
-            Hook::trigger('APP_ERR', [$err]);
-            self::showHandler([
+            $msg = [
                 'message' => $err['message'],
                 'file' => self::trimPath($err['file']),
                 'line' => $err['line']
-            ], [], $err['type']);
+            ];
+            Hook::trigger(Hook::APP_ERROR, [$msg]);
+            self::showHandler($msg, [], $err['type']);
         }
     }
     

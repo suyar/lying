@@ -1,15 +1,23 @@
 <?php
 namespace lying\logger;
 
+/**
+ * 文件日志类
+ *
+ * @author carolkey <me@suyaqi.cn>
+ * @since 2.0
+ * @link https://carolkey.github.io/
+ * @license MIT
+ */
 class FileLog extends Logger
 {
     /**
-     * @var string 日志存储的路径
+     * @var string 日志存储的路径，默认runtime/log
      */
     protected $path;
     
     /**
-     * @var string 日志文件名
+     * @var string 日志文件名，默认default
      */
     protected $file = 'default';
     
@@ -55,13 +63,13 @@ class FileLog extends Logger
      */
     public function flush()
     {
-        if ($this->logContainer) {
+        if ($this->container) {
             if (is_file($this->file) && filesize($this->file) >= $this->maxSize * 1024) {
                 $this->cycleFile();
             }
             clearstatcache();
-            file_put_contents($this->file, $this->logContainer, FILE_APPEND|LOCK_EX);
-            $this->logContainer = [];
+            file_put_contents($this->file, $this->container, FILE_APPEND|LOCK_EX);
+            $this->container = [];
         }
     }
     

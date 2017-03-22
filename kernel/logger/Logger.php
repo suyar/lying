@@ -3,28 +3,36 @@ namespace lying\logger;
 
 use lying\service\Service;
 
+/**
+ * 日志服务基类，所有的日志类都应该继承此类
+ *
+ * @author carolkey <me@suyaqi.cn>
+ * @since 2.0
+ * @link https://carolkey.github.io/
+ * @license MIT
+ */
 abstract class Logger extends Service
 {
     /**
      * @var array 存储日志的容器
      */
-    protected $logContainer = [];
+    protected $container = [];
     
     /**
      * @var array 日志等级
      */
     protected static $levels = [
-        LOG_DEBUG=>'debug',
-        LOG_INFO=>'info',
-        LOG_NOTICE=>'notice',
-        LOG_WARNING=>'warning',
-        LOG_ERR=>'error',
+        5 => 'debug',
+        4 => 'info',
+        3 => 'notice',
+        2 => 'warning',
+        1 => 'error',
     ];
     
     /**
-     * @var integer 要记录的日志等级
+     * @var integer 要开始记录的日志等级
      */
-    protected $level = LOG_NOTICE;
+    protected $level = 3;
     
     /**
      * @var integer 最大存储条数,默认500
@@ -42,7 +50,7 @@ abstract class Logger extends Service
     /**
      * 格式化数据
      * @param mixed $data 要格式化的数据
-     * @param number $level 数组的第几层
+     * @param integer $level 数组的第几层
      * @return string 返回格式化后的字符串
      */
     protected static function formatData($data, $level = 1)
@@ -72,11 +80,11 @@ abstract class Logger extends Service
     }
     
     /**
-     * 写日志
-     * @param mixed $msg 日志内容
-     * @param string $level 日志等级
+     * 打印LOG
+     * @param mixed $data 日志内容
+     * @param integer $level 日志等级，默认5，DEBUG
      */
-    public function log($data, $level = LOG_DEBUG)
+    public function log($data, $level = 5)
     {
         if ($level <= $this->level) {
             $trace = current(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1));
@@ -89,8 +97,8 @@ abstract class Logger extends Service
                 'line' => $trace['line'],
                 'data' => self::formatData($data),
             ];
-            $this->logContainer[] = $this->buildTrace($trace);
-            if (count($this->logContainer) >= $this->maxItem) {
+            $this->container[] = $this->buildTrace($trace);
+            if (count($this->container) >= $this->maxItem) {
                 $this->flush();
             }
         }

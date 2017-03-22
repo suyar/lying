@@ -1,6 +1,14 @@
 <?php
 namespace lying\db;
 
+/**
+ * 活动记录查询基类
+ *
+ * @author carolkey <me@suyaqi.cn>
+ * @since 2.0
+ * @link https://carolkey.github.io/
+ * @license MIT
+ */
 class ActiveRecordQuery extends Query
 {
     /**

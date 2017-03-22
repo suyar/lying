@@ -1,12 +1,12 @@
 <?php
 return [
-    'APP_END' => [
+    \lying\service\Hook::APP_READY => [
         function () {},
     ],
-    'APP_READY' => [
+    \lying\service\Hook::APP_END => [
         function () {},
     ],
-    'APP_ERR' => [
+    \lying\service\Hook::APP_ERROR => [
         function ($err) {},
     ],
     \lying\base\Controller::EVENT_BEFORE_ACTION => [

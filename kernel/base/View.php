@@ -1,6 +1,14 @@
 <?php
 namespace lying\base;
 
+/**
+ * 负责渲染视图文件
+ *
+ * @author carolkey <me@suyaqi.cn>
+ * @since 2.0
+ * @link https://carolkey.github.io/
+ * @license MIT
+ */
 class View
 {
     /**
@@ -38,7 +46,7 @@ class View
     /**
      * 查找视图文件的路径
      * @param string $view 视图文件名称
-     * @throws \Exception
+     * @throws \Exception 视图文件不存在抛出异常
      * @return string 返回视图文件的绝对路径
      */
     private function findViewPath($view)
@@ -47,13 +55,13 @@ class View
         list($m, $c, $a) = \Lying::$maker->router()->router();
         switch (count($path)) {
             case 1:
-                $file = DIR_MODULE . '/' . $m . '/view/' . $c . '/' . $view . '.php';
+                $file = DIR_MODULE . "/$m/view/$c/$view.php";
                 break;
             case 2:
-                $file = DIR_MODULE . '/' . $m . '/view/' . $view . '.php';
+                $file = DIR_MODULE . "/$m/view/$view.php";
                 break;
             case 3:
-                $file = DIR_MODULE . '/' . $path[0] . '/view/' . $path[1] . '/' . $path[2] . '.php';
+                $file = DIR_MODULE . "/$path[0]/view/$path[1]/$path[2].php";
                 break;
             default:
                 throw new \Exception("Unknown view path: $view", 500);

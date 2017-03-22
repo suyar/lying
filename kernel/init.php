@@ -18,9 +18,9 @@ Lying::boot();
 require DIR_LYING . '/function.php';
 
 register_shutdown_function(function() {
-    \lying\service\Hook::trigger('APP_END');
+    \lying\service\Hook::trigger(\lying\service\Hook::APP_END);
 });
 
 \lying\service\Hook::init();
 
-\lying\service\Hook::trigger('APP_READY');
+\lying\service\Hook::trigger(\lying\service\Hook::APP_READY);
