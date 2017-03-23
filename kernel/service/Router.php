@@ -61,7 +61,7 @@ class Router
      */
     private function resolve($path)
     {
-        //去掉index.php,不区分大小写
+        //去掉index.php，不区分大小写
         $path = trim(preg_replace('/^\/index\.php/i', '', $path, 1), '/');
 
         //检查后缀名
@@ -72,7 +72,7 @@ class Router
             }
         }
         
-        //对每个元素进行url解码,包括键值
+        //对每个元素进行url解码，包括键名
         $tmpArr = array_map(function($val) {
             return urldecode($val);
         }, explode('/', $path));
@@ -83,10 +83,9 @@ class Router
         //路由匹配
         foreach ($this->config('rule', []) as $pattern => $rule) {
             $patternArr = explode('/', $pattern);
-            //path个数不匹配,匹配下一个
+            //path个数不匹配，匹配下一个
             if (count($tmpArr) < count($patternArr)) continue;
             //参数映射
-            $route = array_shift($rule);
             $params = [];
             $match = true;
             foreach ($patternArr as $i => $r) {
@@ -105,12 +104,12 @@ class Router
             }
             //匹配到就不进行下一条匹配
             if ($match) {
-                $tmpArr = array_merge(explode('/', $route), $params, array_splice($tmpArr, count($patternArr)));
+                $tmpArr = array_merge(explode('/', $rule[0]), $params, array_splice($tmpArr, count($patternArr)));
                 $m = array_shift($tmpArr);
                 break;
             }
         }
-        
+
         //设置控制器，方法
         $c = ($c = array_shift($tmpArr)) ? $c : $this->config('controller', 'index');
         $a = ($a = array_shift($tmpArr)) ? $a : $this->config('action', 'index');
@@ -169,7 +168,7 @@ class Router
      * @param string $path 要生成的相对路径
      * 如果路径post，则生成当前模块，当前控制器下的Post方法
      * 如果路径post/index，则生成当前模块，控制器为Post下的index方法
-     * 如果路径admin/post/index，则生成模块为admin，控制器为Post下的index方法（如果设置了模块绑定，则解析到模块admin所绑定的域名下去）
+     * 如果路径admin/post/index，则生成模块为admin，控制器为Post下的index方法
      * @param array $params 要生成的参数，一个关联数组，如果有路由规则，参数中必须包含rule中的参数才能反解析
      * @param boolean $normal 是否把参数设置成?a=1&b=2
      * @return string 返回生成的url
@@ -189,23 +188,10 @@ class Router
             default:
                 $route = $this->router;
         }
-
-        //根据模块查找对应配置
-        $conf = $this->config;
-        $host = \Lying::$maker->request()->host();
-
-        foreach (\Lying::$maker->config()->read('router') as $h => $c) {
-            if (isset($c['module']) && $c['module'] === $route[0]) {
-                $conf = $c;
-                $host = $h === 'default' ? $host : $h;
-                unset($route[0]);
-                break;
-            }
-        }
         $route = implode('/', $route);
 
         //路由反解析
-        foreach (isset($conf['rule']) ? $conf['rule'] : [] as $r => $v) {
+        foreach ($this->config('rule', []) as $r => $v) {
             if ($route === $v[0] && false !== preg_match_all('/:([^\/]+)/', $r, $matchs)) {
                 foreach ($matchs[1] as $m) {
                     //寻找参数并且匹配参数正则,不匹配就继续寻找下一条规则
@@ -217,8 +203,14 @@ class Router
                 //反解析的参数都存在
                 $params = array_diff_key($params, array_flip($matchs[1]));
                 $route = $r;
+                $match = true;
                 break;
             }
+        }
+
+        //如果没有匹配到并且绑定了模块，去除模块名
+        if (!isset($match)) {
+            $route = preg_replace('/^' . $this->config('module') . '\//', '', $route);
         }
 
         //过滤一些奇怪的值
@@ -232,14 +224,14 @@ class Router
                 }
             }
         }
-        $p1 = http_build_query($p1, '', '&', PHP_QUERY_RFC3986);
-        $p2 = str_replace(['=', '&'], '/', http_build_query($p2, '', '&', PHP_QUERY_RFC3986));
+        $p1 = http_build_query($p1, '', '&');
+        $p2 = str_replace(['=', '&'], '/', http_build_query($p2, '', '&'));
 
         //URL拼接
-        $url = \Lying::$maker->request()->scheme() . '://' . $host;
-        $url .= (isset($conf['pathinfo']) && $conf['pathinfo'] ? '/index.php/' : '/') . $route;
+        $url = \Lying::$maker->request()->scheme() . '://' . \Lying::$maker->request()->host();
+        $url .= ($this->config('pathinfo') ? '/index.php/' : '/') . $route;
         $url .= empty($p2) ? '' : "/$p2";
-        $url .= isset($conf['suffix']) && $conf['suffix'] ? $conf['suffix'] : '';
+        $url .= $this->config('suffix', '/');
         $url .= empty($p1) ? '' : "?$p1";
         return $url;
     }

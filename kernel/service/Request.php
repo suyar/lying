@@ -109,7 +109,7 @@ class Request
     }
     
     /**
-     * 当前请求头中User-Agent:项的内容,如果存在的话
+     * 当前请求头中User-Agent:项的内容，如果存在的话
      * 该字符串表明了访问该页面的用户代理的信息
      * @return string|null
      */

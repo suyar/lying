@@ -35,7 +35,8 @@ class Cookie extends Service implements \ArrayAccess
      * @param boolean $httponly COOKIE只能通过http请求访问，JS将不能访问
      * @return boolean 成功返回true,失败返回false
      */
-    public function set($name, $value, $expire = 0, $path = '/', $domain = '', $secure = false, $httponly = false) {
+    public function set($name, $value, $expire = 0, $path = '/', $domain = '', $secure = false, $httponly = false)
+    {
         $value = \Lying::$maker->secure()->xorEncrypt($value, $this->key);
         return setcookie($name, $value, $expire, $path, $domain, $secure, $httponly);
     }
@@ -46,7 +47,8 @@ class Cookie extends Service implements \ArrayAccess
      * @param string $default 默认值
      * @return string|null 返回COOKIE的值，不存在返回null
      */
-    public function get($name, $default = null) {
+    public function get($name, $default = null)
+    {
         if (isset($_COOKIE[$name])) {
             $res = \Lying::$maker->secure()->xorDecrypt($_COOKIE[$name], $this->key);
             if (false !== $res) {
@@ -72,7 +74,8 @@ class Cookie extends Service implements \ArrayAccess
      * @param string $path COOKIE路径
      * @return boolean 成功返回true，失败返回false
      */
-    public function remove($name, $path = '/') {
+    public function remove($name, $path = '/')
+    {
         return $this->exists($name) ? setcookie($name, '', time() - 86400, $path) : false;
     }
     

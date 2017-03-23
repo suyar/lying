@@ -82,7 +82,7 @@ abstract class Logger extends Service
     /**
      * 打印LOG
      * @param mixed $data 日志内容
-     * @param integer $level 日志等级，默认5，DEBUG
+     * @param integer $level 日志等级，默认5
      */
     public function log($data, $level = 5)
     {

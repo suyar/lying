@@ -80,7 +80,7 @@ class Controller extends Service
     final public function redirect($url, $params = [])
     {
         if (preg_match('/^https?:\/\/\S+\.\S+/', $url)) {
-            $query = http_build_query($params, '', '&', PHP_QUERY_RFC3986);
+            $query = http_build_query($params, '', '&');
             $url .= empty($query) ? '' : (strpos($url, '?') === false ? "?$query" : "&$query");
         } else {
             $url = \Lying::$maker->router()->createUrl($url, $params);
