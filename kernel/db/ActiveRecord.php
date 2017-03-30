@@ -204,8 +204,8 @@ class ActiveRecord extends Service
             }
             self::populate($this);
         }
-        $this->trigger(self::EVENT_AFTER_INSERT, $res);
-        Hook::trigger(self::EVENT_AFTER_INSERT, $res);
+        $this->trigger(self::EVENT_AFTER_INSERT, [$res]);
+        Hook::trigger(self::EVENT_AFTER_INSERT, [$res]);
         return $res;
     }
     
@@ -239,8 +239,8 @@ class ActiveRecord extends Service
         if (false !== $res) {
             self::populate($this);
         }
-        $this->trigger(self::EVENT_AFTER_UPDATE, $res);
-        Hook::trigger(self::EVENT_AFTER_UPDATE, $res);
+        $this->trigger(self::EVENT_AFTER_UPDATE, [$res]);
+        Hook::trigger(self::EVENT_AFTER_UPDATE, [$res]);
         return $res;
     }
     
@@ -260,8 +260,8 @@ class ActiveRecord extends Service
         if (false !== $res) {
             $this->oldAttr = null;
         }
-        $this->trigger(self::EVENT_AFTER_DELETE, $res);
-        Hook::trigger(self::EVENT_AFTER_DELETE, $res);
+        $this->trigger(self::EVENT_AFTER_DELETE, [$res]);
+        Hook::trigger(self::EVENT_AFTER_DELETE, [$res]);
         return $res;
     }
     
