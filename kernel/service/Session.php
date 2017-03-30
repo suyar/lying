@@ -9,7 +9,7 @@ namespace lying\service;
  * @link https://carolkey.github.io/
  * @license MIT
  */
-class Session implements \ArrayAccess
+class Session extends Service implements \ArrayAccess
 {
     /**
      * 组件初始化的时候启用SESSION
