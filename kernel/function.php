@@ -18,7 +18,7 @@ function get($key = null, $default = null)
  */
 function post($key = null, $default = null)
 {
-    return $key === null ? (isset($_POST[$key]) ? $_POST[$key] : $default) : $_POST;
+    return $key === null ? $_POST : (isset($_POST[$key]) ? $_POST[$key] : $default);
 }
 
 /**
