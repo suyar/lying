@@ -30,4 +30,5 @@ return [
     'lying\service\Router' => DIR_LYING . '/service/Router.php',
     'lying\service\Secure' => DIR_LYING . '/service/Secure.php',
     'lying\service\Service' => DIR_LYING . '/service/Service.php',
+    'lying\service\Session' => DIR_LYING . '/service/Session.php',
 ];

@@ -17,6 +17,7 @@ use lying\logger\Logger;
  * @method Router router()
  * @method Request request()
  * @method Secure secure()
+ * @method Session session()
  *
  * @author carolkey <me@suyaqi.cn>
  * @since 2.0
