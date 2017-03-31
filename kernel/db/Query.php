@@ -320,9 +320,10 @@ class Query extends QueryBuilder
      * @param string $table 要插入的表名
      * @param array $datas 要插入的数据，(name => value)形式的数组
      * 当然value可以是子查询,Query的实例，但是查询的表不能和插入的表是同一个
+     * @param boolean $replace 是否用REPLACE INTO
      * @return integer|boolean 返回受影响的行数，有可能是0行，失败返回false
      */
-    public function insert($table, $datas)
+    public function insert($table, $datas, $replace = false)
     {
         foreach ($datas as $col => $data) {
             $cols[] = $this->quoteColumn($col);
@@ -334,7 +335,7 @@ class Query extends QueryBuilder
             }
         }
         $table = $this->quoteColumn($table);
-        $statement = "INSERT INTO $table (" . implode(', ', $cols) . ') VALUES (' . implode(', ', $palceholders) . ')';
+        $statement = ($replace ? 'REPLACE INTO' : 'INSERT INTO') . " $table (" . implode(', ', $cols) . ') VALUES (' . implode(', ', $palceholders) . ')';
         return $this->execute($statement, $params) ? $this->sth->rowCount() : false;
     }
     
@@ -348,9 +349,10 @@ class Query extends QueryBuilder
      *     ['user2', 0],
      *     ['user3', 1],
      * ])
+     * @param boolean $replace 是否用REPLACE INTO
      * @return integer|boolean 返回受影响的行数,有可能是0行,失败返回false
      */
-    public function batchInsert($table, $columns, $datas)
+    public function batchInsert($table, $columns, $datas, $replace = false)
     {
         $params = [];
         foreach ($datas as $row) {
@@ -360,7 +362,7 @@ class Query extends QueryBuilder
         $columns = array_map(function($col) {
             return $this->quoteColumn($col);
         }, $columns);
-        $statement = "INSERT INTO $table (" . implode(', ', $columns) . ') VALUES ' . implode(', ', $v);
+        $statement = ($replace ? 'REPLACE INTO' : 'INSERT INTO') . " $table (" . implode(', ', $columns) . ') VALUES ' . implode(', ', $v);
         return $this->execute($statement, $params) ? $this->sth->rowCount() : false;
     }
     
