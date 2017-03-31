@@ -27,6 +27,11 @@ class Controller extends Service
      * @var string 布局文件
      */
     protected $layout = false;
+
+    /**
+     * @var array 布局文件参数，此参数会和render()函数里的$subparams合并
+     */
+    protected $subparams = [];
     
     /**
      * @var array 设置不被访问的方法，用正则匹配，此属性必须设置为public
@@ -65,7 +70,7 @@ class Controller extends Service
      */
     final public function render($view, $params= [], $layout = false, $subparams = [])
     {
-        return (new View())->render($view, $params, $layout ? $layout : $this->layout, $subparams);
+        return (new View())->render($view, $params, $layout ? $layout : $this->layout, array_merge($this->subparams, $subparams));
     }
     
     /**
