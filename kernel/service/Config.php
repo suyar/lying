@@ -2,11 +2,11 @@
 namespace lying\service;
 
 /**
- * 配置读取组件
+ * 配置组件
  *
  * @author carolkey <me@suyaqi.cn>
  * @since 2.0
- * @link https://carolkey.github.io/
+ * @link https://github.com/carolkey/lying
  * @license MIT
  */
 class Config
@@ -28,7 +28,7 @@ class Config
         if (isset($this->config[$name])) {
             return $key === null ? $this->config[$name] : $this->config[$name][$key];
         } else {
-            $this->config[$name] = require DIR_CONF . "/$name.php";
+            $this->config[$name] = require DIR_CONF . DIRECTORY_SEPARATOR . "$name.php";
             return $key === null ? $this->config[$name] : $this->config[$name][$key];
         }
     }

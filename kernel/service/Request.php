@@ -19,7 +19,7 @@ class Request
     {
         return isset($_SERVER['GATEWAY_INTERFACE']) ? $_SERVER['GATEWAY_INTERFACE'] : null;
     }
-    
+
     /**
      * 当前运行脚本所在的服务器的IP地址
      * @return string|null
@@ -47,7 +47,7 @@ class Request
     {
         return isset($_SERVER['SERVER_SOFTWARE']) ? $_SERVER['SERVER_SOFTWARE'] : null;
     }
-    
+
     /**
      * 请求页面时通信协议的名称和版本；例如："HTTP/1.0"
      * @return string|null
@@ -56,7 +56,7 @@ class Request
     {
         return isset($_SERVER['SERVER_PROTOCOL']) ? $_SERVER['SERVER_PROTOCOL'] : null;
     }
-    
+
     /**
      * 访问页面使用的请求方法；例如，GET，POST，HEAD，PUT，PATCH，DELETE
      * 如果请求方法为HEAD，PHP脚本将在发送Header头信息之后终止(这意味着在产生任何输出后，不再有输出缓冲)
@@ -89,7 +89,7 @@ class Request
     {
         return isset($_SERVER['QUERY_STRING']) ? $_SERVER['QUERY_STRING'] : null;
     }
-    
+
     /**
      * 当前运行脚本所在的文档根目录，在服务器配置文件中定义
      * @return string|null
@@ -98,7 +98,7 @@ class Request
     {
         return isset($_SERVER['DOCUMENT_ROOT']) ? $_SERVER['DOCUMENT_ROOT'] : null;
     }
-    
+
     /**
      * 当前请求头中Host:项的内容，如果存在的话
      * @return string|null
@@ -117,7 +117,7 @@ class Request
     {
         return isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : null;
     }
-    
+
     /**
      * 返回当前请求的协议"https"或"http"
      * @return string
@@ -154,7 +154,7 @@ class Request
     {
         return isset($_SERVER['SCRIPT_FILENAME']) ? $_SERVER['SCRIPT_FILENAME'] : null;
     }
-    
+
     /**
      * Web服务器使用的端口
      * 如果使用SSL安全连接，则这个值为用户设置的HTTP端口
@@ -173,7 +173,7 @@ class Request
     {
         return isset($_SERVER['SCRIPT_NAME']) ? $_SERVER['SCRIPT_NAME'] : null;
     }
-    
+
     /**
      * URI用来指定要访问的页面；例如："/index.html"
      * @return string|null

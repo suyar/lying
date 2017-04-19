@@ -1,5 +1,17 @@
 <?php
 return [
+    'router' => [
+        'class' => 'lying\service\Router',
+        'module' => 'index',
+        'controller' => 'index',
+        'action' => 'index',
+        'suffix' => '.html',
+        'pathinfo' => false,
+        'rule' => [
+            'admin/name/:id' => ['index/index/index/', 'id' => '/\d{5}/'],
+        ],
+    ],
+
     //数据库服务
     'db' => [
         'class' => 'lying\db\Connection',
