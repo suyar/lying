@@ -2,11 +2,11 @@
 namespace lying\db;
 
 /**
- * 查询构造器类
+ * 查询构造器
  *
  * @author carolkey <me@suyaqi.cn>
  * @since 2.0
- * @link https://carolkey.github.io/
+ * @link https://github.com/carolkey/lying
  * @license MIT
  */
 class Query extends QueryBuilder
@@ -253,7 +253,7 @@ class Query extends QueryBuilder
      */
     public function execute($statement, $params = [])
     {
-        $this->sth = $this->connection->prepare($statement);
+        $this->sth = $this->connection->pdo()->prepare($statement);
         return $this->sth->execute($params);
     }
     
@@ -266,7 +266,7 @@ class Query extends QueryBuilder
      */
     public function RawSql($statement, $params = [])
     {
-        $this->sth = $this->connection->prepare($statement);
+        $this->sth = $this->connection->pdo()->prepare($statement);
         return $this->execute($statement, $params) ? $this->sth : false;
     }
     

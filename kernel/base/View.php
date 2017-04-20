@@ -6,7 +6,7 @@ namespace lying\base;
  *
  * @author carolkey <me@suyaqi.cn>
  * @since 2.0
- * @link https://carolkey.github.io/
+ * @link https://github.com/carolkey/lying
  * @license MIT
  */
 class View
@@ -19,7 +19,7 @@ class View
      * @param array $subparams 布局文件参数
      * @return string 返回渲染后的HTML
      */
-    public function render($view, $params, $layout = false, $subparams = [])
+    public function render($view, $params = [], $layout = false, $subparams = [])
     {
         $content = $this->renderFile($this->findViewPath($view), $params);
         return $layout === false ? $content : $this->renderFile(
@@ -38,7 +38,7 @@ class View
     {
         ob_start();
         ob_implicit_flush(false);
-        extract($params);
+        empty($params) || extract($params);
         require $file;
         return ob_get_clean();
     }
@@ -52,16 +52,33 @@ class View
     private function findViewPath($view)
     {
         $path = explode('/', trim($view, '/'));
-        list($m, $c, $a) = \Lying::$maker->router()->router();
+        list($m, $c, ) = \Lying::$maker->router()->router();
         switch (count($path)) {
             case 1:
-                $file = DIR_MODULE . "/$m/view/$c/$view.php";
+                $file = implode('', [
+                    DIR_MODULE,
+                    DIRECTORY_SEPARATOR . $m,
+                    DIRECTORY_SEPARATOR . 'view',
+                    DIRECTORY_SEPARATOR . $c,
+                    DIRECTORY_SEPARATOR . "$view.php"
+                ]);
                 break;
             case 2:
-                $file = DIR_MODULE . "/$m/view/$view.php";
+                $file = implode('', [
+                    DIR_MODULE,
+                    DIRECTORY_SEPARATOR . $m,
+                    DIRECTORY_SEPARATOR . 'view',
+                    DIRECTORY_SEPARATOR . "$view.php"
+                ]);
                 break;
             case 3:
-                $file = DIR_MODULE . "/$path[0]/view/$path[1]/$path[2].php";
+                $file = implode('', [
+                    DIR_MODULE,
+                    DIRECTORY_SEPARATOR . $path[0],
+                    DIRECTORY_SEPARATOR . 'view',
+                    DIRECTORY_SEPARATOR . $path[1],
+                    DIRECTORY_SEPARATOR . $path[2] . '.php'
+                ]);
                 break;
             default:
                 throw new \Exception("Unknown view path: $view", 500);

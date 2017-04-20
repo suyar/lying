@@ -1,15 +1,17 @@
 <?php
 namespace lying\cache;
 
+use lying\service\Service;
+
 /**
  * Memcached缓存类
  *
  * @author carolkey <me@suyaqi.cn>
  * @since 2.0
- * @link https://carolkey.github.io/
+ * @link https://github.com/carolkey/lying
  * @license MIT
  */
-class MemCached extends Cache
+class MemCached extends Service implements Cache
 {
     /**
      * Memcached服务器连接列表

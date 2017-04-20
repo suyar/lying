@@ -8,7 +8,7 @@ use lying\service\Service;
  *
  * @author carolkey <me@suyaqi.cn>
  * @since 2.0
- * @link https://carolkey.github.io/
+ * @link https://github.com/carolkey/lying
  * @license MIT
  */
 class Controller extends Service
@@ -70,7 +70,12 @@ class Controller extends Service
      */
     final public function render($view, $params= [], $layout = false, $subparams = [])
     {
-        return (new View())->render($view, $params, $layout ? $layout : $this->layout, array_merge($this->subparams, $subparams));
+        return (new View())->render(
+            $view,
+            $params,
+            $layout ? $layout : $this->layout,
+            array_merge($this->subparams, $subparams)
+        );
     }
     
     /**
@@ -93,9 +98,11 @@ class Controller extends Service
         
         while (ob_get_level() !== 0) ob_end_clean();
         http_response_code(302);
-        if (\Lying::$maker->request()->isPjax()) {
+        $ajax = isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest';
+        $pjax = $ajax && !empty($_SERVER['HTTP_X_PJAX']);
+        if ($pjax) {
             header("X-Pjax-Url: $url");
-        } else if (\Lying::$maker->request()->isAjax()) {
+        } else if ($ajax) {
             header("X-Redirect: $url");
         } else {
             header("Location: $url");

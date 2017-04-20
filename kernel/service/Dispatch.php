@@ -6,7 +6,7 @@ namespace lying\service;
  *
  * @author carolkey <me@suyaqi.cn>
  * @since 2.0
- * @link https://carolkey.github.io/
+ * @link https://github.com/carolkey/lying
  * @license MIT
  */
 class Dispatch
@@ -15,7 +15,7 @@ class Dispatch
      * 程序执行入口
      * @throws \Exception 页面不存在抛出404错误
      */
-    public function runAction()
+    public function run()
     {
         list($m, $c, $a) = \Lying::$maker->router()->parse();
         $class = "module\\$m\\controller\\$c";
@@ -24,11 +24,9 @@ class Dispatch
             $method = new \ReflectionMethod($instance, $a);
             if ($method->isPublic() && $this->checkAccess($instance->deny, $a)) {
                 $instance->trigger($instance::EVENT_BEFORE_ACTION, [$a]);
-                Hook::trigger($instance::EVENT_BEFORE_ACTION, [$a]);
                 $response = call_user_func_array([$instance, $a], $this->parseArgs($method->getParameters()));
                 $instance->trigger($instance::EVENT_AFTER_ACTION, [$a, $response]);
-                Hook::trigger($instance::EVENT_AFTER_ACTION, [$a, $response]);
-                echo($response instanceof $class ? '' : $response);
+                echo($response);
             } else {
                 throw new \Exception('Page not found.', 404);
             }

@@ -1,15 +1,17 @@
 <?php
 namespace lying\cache;
 
+use lying\service\Service;
+
 /**
  * Apc缓存类
  *
  * @author carolkey <me@suyaqi.cn>
  * @since 2.0
- * @link https://carolkey.github.io/
+ * @link https://github.com/carolkey/lying
  * @license MIT
  */
-class ApcCache extends Cache
+class ApcCache extends Service implements Cache
 {
     /**
      * @var boolean 是否使用Apcu

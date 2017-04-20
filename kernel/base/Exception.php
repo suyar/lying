@@ -8,7 +8,7 @@ use lying\service\Hook;
  *
  * @author carolkey <me@suyaqi.cn>
  * @since 2.0
- * @link https://carolkey.github.io/
+ * @link https://github.com/carolkey/lying
  * @license MIT
  */
 class Exception
@@ -48,6 +48,7 @@ class Exception
      * @param string $errstr 错误的信息
      * @param string $errfile 发生错误的文件名
      * @param integer $errline 错误发生的行号
+     * @return null|boolean 返回true不抛出异常
      * @throws \ErrorException 抛出一个错误异常
      */
     public static function errorHandler($errno, $errstr, $errfile, $errline)
@@ -95,7 +96,7 @@ class Exception
         while (ob_get_level() !== 0) ob_end_clean();
         http_response_code($code === 404 ? 404 : 500);
         
-        $path = DIR_LYING . '/view/';
+        $path = DIR_LYING . DIRECTORY_SEPARATOR . 'view' . DIRECTORY_SEPARATOR;
         $file = file_exists($file = $path . $code . '.php') ? $file : $path . 'trace.php';
         
         ob_start();

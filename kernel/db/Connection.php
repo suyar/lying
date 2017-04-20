@@ -8,7 +8,7 @@ use lying\service\Service;
  *
  * @author carolkey <me@suyaqi.cn>
  * @since 2.0
- * @link https://carolkey.github.io/
+ * @link https://github.com/carolkey/lying
  * @license MIT
  */
 class Connection extends Service
@@ -40,7 +40,7 @@ class Connection extends Service
      */
     public function pdo()
     {
-        if (!($this->dbh instanceof \PDO)) {
+        if ($this->dbh === null) {
             $this->dbh = new \PDO($this->dsn, $this->user, $this->pass, [
                 \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
                 \PDO::ATTR_EMULATE_PREPARES => false,
@@ -48,16 +48,6 @@ class Connection extends Service
             ]);
         }
         return $this->dbh;
-    }
-    
-    /**
-     * 预处理sql语句
-     * @param string $statement 准备要执行的语句
-     * @return \PDOStatement
-     */
-    public function prepare($statement)
-    {
-        return $this->pdo()->prepare($statement);
     }
     
     /**

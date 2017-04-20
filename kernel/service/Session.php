@@ -6,22 +6,22 @@ namespace lying\service;
  *
  * @author carolkey <me@suyaqi.cn>
  * @since 2.0
- * @link https://carolkey.github.io/
+ * @link https://github.com/carolkey/lying
  * @license MIT
  */
-class Session extends Service implements \ArrayAccess
+class Session
 {
     /**
      * 组件初始化的时候启用SESSION
      */
-    protected function init()
+    public function __construct()
     {
         $this->start();
     }
 
     /**
      * SESSION是否启用
-     * @return bool
+     * @return boolean 已启用返回true，未启用返回false
      */
     public function isActive()
     {
@@ -30,7 +30,7 @@ class Session extends Service implements \ArrayAccess
 
     /**
      * 启用SESSION
-     * @return bool
+     * @return boolean 成功返回true，失败返回false
      */
     public function start()
     {
@@ -39,8 +39,8 @@ class Session extends Service implements \ArrayAccess
 
     /**
      * 设置SESSION
-     * @param string $name
-     * @param mixed $value
+     * @param string $name SESSION键名
+     * @param mixed $value SESSION值
      */
     public function set($name, $value)
     {
@@ -49,18 +49,18 @@ class Session extends Service implements \ArrayAccess
 
     /**
      * 获取SESSION
-     * @param string $name
-     * @return mixed
+     * @param string $name SESSION键名
+     * @return mixed SESSION值，失败返回false
      */
     public function get($name)
     {
-        return $this->exists($name) ? $_SESSION[$name] : null;
+        return $this->exists($name) ? $_SESSION[$name] : false;
     }
 
     /**
      * SESSION是否存在
-     * @param string $name
-     * @return bool
+     * @param string $name SESSION键名
+     * @return boolean 存在返回true，失败返回false
      */
     public function exists($name)
     {
@@ -70,11 +70,11 @@ class Session extends Service implements \ArrayAccess
     /**
      * 移除SESSION
      * @param string $name 放空移除整个SESSION数组
-     * @return bool
+     * @return boolean 成功返回true，失败返回false
      */
     public function remove($name = null)
     {
-        if (empty($name)) {
+        if ($name === null) {
             $_SESSION = [];
             return true;
         } elseif ($this->exists($name)) {
@@ -85,48 +85,13 @@ class Session extends Service implements \ArrayAccess
     }
 
     /**
-     * 销毁SESSION,销毁后要重新start
-     * @return bool
+     * 销毁SESSION，销毁后要重新start
+     * @return boolean 成功返回true，失败返回false
      */
     public function destroy()
     {
-        setcookie(session_name(), '', time() - 86400);
+        setcookie(session_name(), '', time() - 31536000);
         $this->remove();
         return session_destroy();
-    }
-    
-    /**
-     * @param string $offset
-     * @param mixed $value
-     */
-    public function offsetSet($offset, $value)
-    {
-        $this->set($offset, $value);
-    }
-    
-    /**
-     * @param string $offset
-     * @return boolean
-     */
-    public function offsetExists($offset)
-    {
-        return $this->exists($offset);
-    }
-    
-    /**
-     * @param string $offset
-     */
-    public function offsetUnset($offset)
-    {
-        $this->remove($offset);
-    }
-    
-    /**
-     * @param string $offset
-     * @return mixed
-     */
-    public function offsetGet($offset)
-    {
-        return $this->get($offset);
     }
 }

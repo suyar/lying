@@ -1,15 +1,17 @@
 <?php
 namespace lying\cache;
 
+use lying\service\Service;
+
 /**
  * 文件缓存类
  *
  * @author carolkey <me@suyaqi.cn>
  * @since 2.0
- * @link https://carolkey.github.io/
+ * @link https://github.com/carolkey/lying
  * @license MIT
  */
-class FileCache extends Cache
+class FileCache extends Service implements Cache
 {
     /**
      * @var string 缓存文件存放的目录，默认为runtime/cache
@@ -26,7 +28,7 @@ class FileCache extends Cache
      */
     protected function init()
     {
-        $this->dir = $this->dir ? $this->dir : DIR_RUNTIME . '/cache';
+        $this->dir = $this->dir ? $this->dir : DIR_RUNTIME . DIRECTORY_SEPARATOR . 'cache';
         !is_dir($this->dir) && mkdir($this->dir, 0777, true);
     }
     
@@ -37,7 +39,7 @@ class FileCache extends Cache
      */
     private function cacheFile($key)
     {
-        return $this->dir . '/' . md5($key) . '.bin';
+        return $this->dir . DIRECTORY_SEPARATOR . md5($key) . '.bin';
     }
     
     /**
@@ -47,7 +49,7 @@ class FileCache extends Cache
     private function gc($all = false)
     {
         if ($all || mt_rand(0, 100) > $this->gc) {
-            foreach (glob($this->dir . '/*.bin') as $file) {
+            foreach (glob($this->dir . DIRECTORY_SEPARATOR . '*.bin') as $file) {
                 if ($all) {
                     @unlink($file);
                 } elseif (@filemtime($file) < time()) {

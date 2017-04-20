@@ -3,7 +3,6 @@ namespace lying\service;
 
 use lying\cache\Cache;
 use lying\db\Connection;
-use lying\logger\Logger;
 
 /**
  * 工厂类，用于实例化服务类
@@ -13,15 +12,13 @@ use lying\logger\Logger;
  * @method Cookie cookie()
  * @method Connection db(string $id = 'db')
  * @method Dispatch dispatch()
- * @method Logger logger(string $id = 'logger')
+ * @method Logger logger()
  * @method Router router()
- * @method Request request()
- * @method Secure secure()
  * @method Session session()
  *
  * @author carolkey <me@suyaqi.cn>
  * @since 2.0
- * @link https://carolkey.github.io/
+ * @link https://github.com/carolkey/lying
  * @license MIT
  */
 class Maker
@@ -36,12 +33,8 @@ class Maker
      */
     private static $service = [
         'config' => 'lying\service\Config',
-        'cookie' => 'lying\service\Cookie',
         'dispatch' => 'lying\service\Dispatch',
-        'request' => 'lying\service\Request',
         'router' => 'lying\service\Router',
-        'secure' => 'lying\service\Secure',
-        'session' => 'lying\service\Session',
     ];
     
     /**
@@ -50,7 +43,7 @@ class Maker
      */
     public function __construct($service)
     {
-        self::$service = array_merge(self::$service, $service);
+        self::$service = self::$service + $service;
     }
 
     /**

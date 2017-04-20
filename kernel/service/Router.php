@@ -27,11 +27,6 @@ class Router extends Service
     protected $action = 'index';
 
     /**
-     * @var string 后缀
-     */
-    protected $suffix = false;
-
-    /**
      * @var boolean 是否使用pathinfo
      */
     protected $pathinfo = false;
@@ -54,60 +49,36 @@ class Router extends Service
     {
         //解析URL
         $parse = parse_url($_SERVER['REQUEST_URI']);
-        //解析原生GET；这里是为了去除转发规则中$_GET本身中无用的参数
+        //解析原生GET，这里是为了去除转发规则中$_GET本身中无用的参数
         parse_str(isset($parse['query']) ? $parse['query'] : '', $_GET);
-        //解析路径
-        return $this->resolve($parse['path']);
-    }
-
-    /**
-     * 分割PATH，路由匹配
-     * @param string $path 请求的路径，不包括查询字符串
-     * @throws \Exception 路由不匹配抛出404错误
-     * @return array 返回[module, controller, action]
-     */
-    private function resolve($path)
-    {
         //去掉index.php，不区分大小写
-        $path = trim(preg_replace('/^\/index\.php/i', '', $path, 1), '/');
-
-        //检查后缀名
-        if (!empty($path) && $this->suffix) {
-            $path = rtrim(preg_replace('/\\' . $this->suffix . '$/i', '', $path, 1, $validate), '/');
-            if ($validate === 0) { throw new \Exception('Page not found.', 404); }
-        }
-
+        $path = trim(preg_replace('/^\/index\.php/i', '', $parse['path'], 1), '/');
         //分割后对每个元素进行url解码，包括键名
         $pathArray = array_map(function ($val) {
             return urldecode($val);
         }, explode('/', $path));
-
         //路由匹配
         foreach ($this->rule as $pattern => $rule) {
             $patternArr = explode('/', $pattern);
+            $patternNum = count($patternArr);
             //path个数不匹配，匹配下一个
-            if (count($pathArray) < count($patternArr)) continue;
+            if (count($pathArray) < $patternNum) continue;
             //参数映射
             $params = [];
-            $match = true;
             foreach ($patternArr as $i => $r) {
                 if (strncmp($r, ':', 1) === 0 && ($key = ltrim($r, ':'))) {
                     if (isset($rule[$key]) && preg_match($rule[$key], $pathArray[$i]) === 0) {
-                        $match = false;
-                        break;
+                        continue 2;
                     } else {
                         array_push($params, $key, $pathArray[$i]);
                     }
                 } elseif ($pathArray[$i] !== $r) {
-                    $match = false;
-                    break;
+                    continue 2;
                 }
             }
             //匹配到就不进行下一条匹配
-            if ($match) {
-                $pathArray = array_merge(explode('/', $rule[0]), $params, array_splice($pathArray, count($patternArr)));
-                break;
-            }
+            $pathArray = array_merge(explode('/', $rule[0]), $params, array_splice($pathArray, $patternNum));
+            break;
         }
 
         //获取模块、控制器、方法
@@ -117,10 +88,10 @@ class Router extends Service
 
         //存下当前的路由，全部小写，没有转换成驼峰
         $this->router = [strtolower($m), strtolower($c), strtolower($a)];
-        
+
         //解析多余的参数到GET
         $this->parseGet($pathArray);
-        
+
         //转换为驼峰，返回当前请求的模块、控制器、方法
         return [
             $this->hump($this->router[0]),
@@ -128,7 +99,7 @@ class Router extends Service
             $this->hump($this->router[2])
         ];
     }
-    
+
     /**
      * 把横线分割的小写字母转换为驼峰
      * @param string $val 要转换的字符串
@@ -169,14 +140,15 @@ class Router extends Service
      * @param string $path 要生成的相对路径
      * 如果路径post，则生成当前模块，当前控制器下的post方法
      * 如果路径post/index，则生成当前模块，控制器为post下的index方法
-     * 如果路径admin/post/index，则生成模块为admin，控制器为Post下的index方法
+     * 如果路径admin/post/index，则生成模块为admin，控制器为post下的index方法
      * @param array $params 要生成的参数，一个关联数组，如果有路由规则，参数中必须包含rule中的参数才能反解析
      * @param boolean $normal 是否把参数设置成?a=1&b=2
      * @return string 返回生成的url
      */
     public function createUrl($path, $params = [], $normal = false)
     {
-        $route = explode('/', trim($path, '/'));
+        $route = trim($path, "/ ");
+        $route = empty($route) ? [] : explode('/', $route);
         switch (count($route)) {
             case 1:
                 $route = [$this->router[0], $this->router[1], $route[0]];
@@ -223,12 +195,11 @@ class Router extends Service
         $p2 = str_replace(['=', '&'], '/', http_build_query($p2, '', '&'));
 
         //URL拼接
-        $schema = (isset($_SERVER['HTTPS']) && (strcasecmp($_SERVER['HTTPS'], 'on') === 0) ? 'https://' : 'http://');
+        $schema = isset($_SERVER['HTTPS']) && (strcasecmp($_SERVER['HTTPS'], 'on') === 0) ? 'https://' : 'http://';
         $host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : $_SERVER['SERVER_NAME'];
         $url = $schema . $host;
-        $url .= ($this->pathinfo ? '/index.php/' : '/') . $route;
-        $url .= empty($p2) ? '' : "/$p2";
-        $url .= $this->suffix ? $this->suffix : '/';
+        $url .= ($this->pathinfo ? '/index.php/' : '/') . $route . '/';
+        $url .= empty($p2) ? '' : "$p2/";
         $url .= empty($p1) ? '' : "?$p1";
         return $url;
     }

@@ -27,11 +27,6 @@ class Hook
     const APP_ERROR = 'appError';
 
     /**
-     * @var bool 是否初始化过，防止用户重新载入
-     */
-    private static $isInit = false;
-
-    /**
      * @var array 钩子函数容器
      */
     private static $events = [];
@@ -41,9 +36,8 @@ class Hook
      */
     public static function init()
     {
-        if (!self::$isInit) {
+        if (empty(self::$events)) {
             self::$events = \Lying::$maker->config()->read('hook');
-            self::$isInit = true;
         }
     }
 
@@ -77,7 +71,7 @@ class Hook
      * 移除钩子函数
      * @param string $id 钩子ID
      * @param callable|null $callback 要移除钩子触发函数
-     * @return boolean 成功返回true,失败返回false
+     * @return boolean 成功返回true，失败返回false
      */
     public static function unhook($id, callable $callback = null)
     {
