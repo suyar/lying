@@ -4,10 +4,10 @@ return [
 
     ],
     'psr-4' => [
-        'lying' => DIR_LYING,
+        'lying' => DIR_KERNEL,
         'module' => DIR_MODULE,
     ],
     'psr-0' => [
-        ROOT,
+        DIR_ROOT,
     ],
 ];

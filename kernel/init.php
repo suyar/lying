@@ -1,28 +1,20 @@
 <?php
 header('Content-Type:text/html; charset=UTF-8');
 
-date_default_timezone_set('Asia/Shanghai');
+define('DIR_ROOT', realpath(__DIR__ . '/../'));
 
-define('DIR_LYING', __DIR__);
+define('DIR_KERNEL', __DIR__);
 
-define('ROOT', realpath(DIR_LYING . '/../'));
+define('DIR_CONFIG', DIR_ROOT . DIRECTORY_SEPARATOR . 'config');
 
-define('DIR_CONF', ROOT . DIRECTORY_SEPARATOR . 'config');
+define('DIR_MODULE', DIR_ROOT . DIRECTORY_SEPARATOR . 'module');
 
-define('DIR_MODULE', ROOT . DIRECTORY_SEPARATOR . 'module');
+define('DIR_RUNTIME', DIR_ROOT . DIRECTORY_SEPARATOR . 'runtime');
 
-define('DIR_RUNTIME', ROOT . DIRECTORY_SEPARATOR . 'runtime');
+define('DIR_WEB', dirname($_SERVER['SCRIPT_FILENAME']));
 
-require DIR_LYING . DIRECTORY_SEPARATOR . 'Lying.php';
+require __DIR__ . '/Lying.php';
 
-Lying::boot();
+Lying::boot(require DIR_CONFIG . '/web.php');
 
-require DIR_LYING . DIRECTORY_SEPARATOR . 'function.php';
-
-register_shutdown_function(function() {
-    \lying\service\Hook::trigger(\lying\service\Hook::APP_END);
-});
-
-\lying\service\Hook::init();
-
-\lying\service\Hook::trigger(\lying\service\Hook::APP_READY);
+require __DIR__ . '/function.php';

@@ -14,12 +14,12 @@ class ActiveRecordQuery extends Query
     /**
      * @var string 类名
      */
-    private $classMode;
+    private $class;
     
     /**
      * @var boolean 是否返回数组
      */
-    private $isArray = false;
+    private $array = false;
     
     /**
      * 初始化连接
@@ -28,8 +28,8 @@ class ActiveRecordQuery extends Query
      */
     public function __construct(Connection $connection, $class = null)
     {
-        $this->connection = $connection;
-        $this->classMode = $class;
+        parent::__construct($connection);
+        $this->class = $class;
     }
     
     /**
@@ -38,7 +38,7 @@ class ActiveRecordQuery extends Query
      */
     public function asArray()
     {
-        $this->isArray = true;
+        $this->array = true;
         return $this;
     }
     
@@ -46,26 +46,26 @@ class ActiveRecordQuery extends Query
      * 返回查询的对象的实例
      * @param boolean $obj 在这边没作用
      * @param string $class 在这边没作用
-     * @return ActiveRecord|boolean|array
+     * @return boolean|array|\stdClass|\lying\db\ActiveRecord
      */
     public function one($obj = false, $class = null)
     {
-        $row = $this->isArray ? parent::one() : parent::one(true, $this->classMode);
-        return $row instanceof ActiveRecord ? $row::populate($row) : $row;
+        $row = $this->array ? parent::one() : parent::one(true, $this->class);
+        return $row instanceof ActiveRecord ? $row->reload() : $row;
     }
     
     /**
      * 返回查询的对象的实例数组
      * @param boolean $obj 在这边没作用
      * @param string $class 在这边没作用
-     * @return ActiveRecord[]|boolean|array
+     * @return boolean|array|\stdClass[]|\lying\db\ActiveRecord[]
      */
     public function all($obj = false, $class = null)
     {
-        $rows = $this->isArray ? parent::all() : parent::all(true, $this->classMode);
-        if (!$this->isArray && is_array($rows)) {
+        $rows = $this->array ? parent::all() : parent::all(true, $this->class);
+        if (!$this->array && is_array($rows)) {
             foreach ($rows as $key => $row) {
-                $rows[$key] = $row::populate($row);
+                $rows[$key] = $row->reload();
             }
         }
         return $rows;

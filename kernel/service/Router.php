@@ -90,13 +90,17 @@ class Router extends Service
         $this->router = [strtolower($m), strtolower($c), strtolower($a)];
 
         //解析多余的参数到GET
-        $this->parseGet($pathArray);
+        while ($pathArray) {
+            $key = array_shift($pathArray);
+            $value = array_shift($pathArray);
+            $_GET[$key] = $value === null ? '' : $value;
+        }
 
         //转换为驼峰，返回当前请求的模块、控制器、方法
         return [
-            $this->hump($this->router[0]),
-            $this->hump($this->router[1], true),
-            $this->hump($this->router[2])
+            $this->str2hump($this->router[0]),
+            $this->str2hump($this->router[1], true),
+            $this->str2hump($this->router[2])
         ];
     }
 
@@ -106,41 +110,30 @@ class Router extends Service
      * @param boolean $ucfirst 首字母是否大写
      * @return string 返回转换后的字符串
      */
-    private function hump($val, $ucfirst = false)
+    private function str2hump($val, $ucfirst = false)
     {
         $val = str_replace(' ', '', ucwords(str_replace('-', ' ', $val)));
         return $ucfirst ? $val : lcfirst($val);
     }
-    
-    /**
-     * 多余的path参数用来解析成GET变量
-     * @param array $params path中的参数数组
-     */
-    private function parseGet($params)
-    {
-        while ($params) {
-            $key = array_shift($params);
-            $value = array_shift($params);
-            $_GET[$key] = $value === null ? '' : $value;
-        }
-    }
-    
+
     /**
      * 返回此次请求的路由
      * @param boolean $string 是否以字符串的形式返回
      * @return array|string 如user-name/index/index
      */
-    public function router($string = false)
+    public function path($string = false)
     {
         return $string ? implode('/', $this->router) : $this->router;
     }
     
     /**
      * url生成
-     * @param string $path 要生成的相对路径
-     * 如果路径post，则生成当前模块，当前控制器下的post方法
+     * ```php
+     * 如果路径post，则生成当前模块、当前控制器下的post方法
      * 如果路径post/index，则生成当前模块，控制器为post下的index方法
-     * 如果路径admin/post/index，则生成模块为admin，控制器为post下的index方法
+     * 如果路径admin/post/index，则生成模块为admin、控制器为post下的index方法
+     * ```
+     * @param string $path 要生成的相对路径
      * @param array $params 要生成的参数，一个关联数组，如果有路由规则，参数中必须包含rule中的参数才能反解析
      * @param boolean $normal 是否把参数设置成?a=1&b=2
      * @return string 返回生成的url

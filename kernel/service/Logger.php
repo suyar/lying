@@ -17,9 +17,9 @@ class Logger extends Service
     protected $path;
 
     /**
-     * @var string 日志文件名，默认app
+     * @var string 日志文件名
      */
-    protected $file = 'app';
+    protected $file = 'lying';
 
     /**
      * @var integer 单个日志文件的最大值(kb)
@@ -62,9 +62,9 @@ class Logger extends Service
      */
     protected function init()
     {
-        $this->path = $this->path ? $this->path : DIR_RUNTIME . DIRECTORY_SEPARATOR . 'log';
+        if (empty($this->path)) $this->path = DIR_RUNTIME . '/log';
         !is_dir($this->path) && mkdir($this->path, 0777, true);
-        $this->file = $this->path . DIRECTORY_SEPARATOR . $this->file . '.log';
+        $this->file = $this->path . '/' . $this->file . '.log';
         register_shutdown_function([$this, 'flush']);
     }
     

@@ -1,24 +1,20 @@
 <?php
 /**
- * 获取GET参数
- * @param string $key GET参数，放空为获取所有GET参数
- * @param string $default 默认值
- * @return string|null|array 成功返回键值，键不存在返回null，没有传入key返回GET数组
+ * 获取GET/POST参数
+ * @param string $key 要获取的键，值为empty时为返回整个GET/POST数组
+ * @param boolean $post 是否为POST
+ * @param boolean $raw 是否获取原生POST数据
+ * @return mixed 获取的数据，失败返回false
  */
-function get($key = null, $default = null)
+function req($key = null, $post = false, $raw = false)
 {
-    return $key === null ? $_GET : (isset($_GET[$key]) ? $_GET[$key] : $default);
-}
-
-/**
- * 获取POST参数
- * @param string $key POST参数,放空为获取所有POST参数
- * @param string $default 默认值
- * @return string|null|array 成功返回键值，键不存在返回null，没有传入key返回POST数组
- */
-function post($key = null, $default = null)
-{
-    return $key === null ? $_POST : (isset($_POST[$key]) ? $_POST[$key] : $default);
+    if ($post) {
+        return $raw ? file_get_contents('php://input') : (
+            empty($key) ? $_POST : (isset($_POST[$key]) ? $_POST[$key] : false)
+        );
+    } else {
+        return empty($key) ? $_GET : (isset($_GET[$key]) ? $_GET[$key] : false);
+    }
 }
 
 /**
@@ -45,9 +41,9 @@ function url($path, $params = [], $normal = false)
  */
 function lock($name, $type)
 {
-    if (is_dir(ROOT . DIRECTORY_SEPARATOR . 'runtime' . DIRECTORY_SEPARATOR . 'lock') ||
-        mkdir(ROOT . DIRECTORY_SEPARATOR . 'runtime' . DIRECTORY_SEPARATOR . 'lock', 0777, true)) {
-        if (false !== $fp = fopen(ROOT . DIRECTORY_SEPARATOR . 'runtime' . DIRECTORY_SEPARATOR . 'lock' . DIRECTORY_SEPARATOR . $name, 'w')) {
+    if (is_dir(DIR_ROOT . DIRECTORY_SEPARATOR . 'runtime' . DIRECTORY_SEPARATOR . 'lock') ||
+        mkdir(DIR_ROOT . DIRECTORY_SEPARATOR . 'runtime' . DIRECTORY_SEPARATOR . 'lock', 0777, true)) {
+        if (false !== $fp = fopen(DIR_ROOT . DIRECTORY_SEPARATOR . 'runtime' . DIRECTORY_SEPARATOR . 'lock' . DIRECTORY_SEPARATOR . $name, 'w')) {
             if (flock($fp, $type)) {
                 return $fp;
             } else {

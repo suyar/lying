@@ -55,7 +55,7 @@ class Dispatch
     }
     
     /**
-     * 返回方法所带的GET参数
+     * 返回方法所带的GET参数数组
      * @param array $params 一个\ReflectionParameter的数组
      * @return array 返回要带入执行方法的GET参数
      */

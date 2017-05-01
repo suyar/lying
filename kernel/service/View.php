@@ -1,5 +1,5 @@
 <?php
-namespace lying\base;
+namespace lying\service;
 
 /**
  * 负责渲染视图文件
@@ -22,7 +22,7 @@ class View
     public function render($view, $params = [], $layout = false, $subparams = [])
     {
         $content = $this->renderFile($this->findViewPath($view), $params);
-        return $layout === false ? $content : $this->renderFile(
+        return empty($layout) ? $content : $this->renderFile(
             $this->findViewPath($layout),
             array_merge($subparams, ['container'=>$content])
         );
@@ -51,34 +51,18 @@ class View
      */
     private function findViewPath($view)
     {
-        $path = explode('/', trim($view, '/'));
-        list($m, $c, ) = \Lying::$maker->router()->router();
-        switch (count($path)) {
+        $view = trim($view, '/');
+        $viewArr = explode('/', $view);
+        list($m, $c, ) = \Lying::$maker->router()->path();
+        switch (count($viewArr)) {
             case 1:
-                $file = implode('', [
-                    DIR_MODULE,
-                    DIRECTORY_SEPARATOR . $m,
-                    DIRECTORY_SEPARATOR . 'view',
-                    DIRECTORY_SEPARATOR . $c,
-                    DIRECTORY_SEPARATOR . "$view.php"
-                ]);
+                $file = DIR_MODULE . "/$m/view/$c/$view.php";
                 break;
             case 2:
-                $file = implode('', [
-                    DIR_MODULE,
-                    DIRECTORY_SEPARATOR . $m,
-                    DIRECTORY_SEPARATOR . 'view',
-                    DIRECTORY_SEPARATOR . "$view.php"
-                ]);
+                $file = DIR_MODULE . "/$m/view/$view.php";
                 break;
             case 3:
-                $file = implode('', [
-                    DIR_MODULE,
-                    DIRECTORY_SEPARATOR . $path[0],
-                    DIRECTORY_SEPARATOR . 'view',
-                    DIRECTORY_SEPARATOR . $path[1],
-                    DIRECTORY_SEPARATOR . $path[2] . '.php'
-                ]);
+                $file = DIR_MODULE . "$viewArr[0]/view/$viewArr[1]/$viewArr[2].php";
                 break;
             default:
                 throw new \Exception("Unknown view path: $view", 500);

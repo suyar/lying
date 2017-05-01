@@ -8,10 +8,10 @@ use lying\db\Connection;
  * 工厂类，用于实例化服务类
  *
  * @method Cache cache(string $id = 'cache')
- * @method Config config()
  * @method Cookie cookie()
  * @method Connection db(string $id = 'db')
  * @method Dispatch dispatch()
+ * @method Exception exception()
  * @method Logger logger()
  * @method Router router()
  * @method Session session()
@@ -29,16 +29,16 @@ class Maker
     private static $instances = [];
     
     /**
-     * @var array 所有注册的服务
+     * @var array 注册的服务
      */
     private static $service = [
-        'config' => 'lying\service\Config',
         'dispatch' => 'lying\service\Dispatch',
+        'exception' => 'lying\service\Exception',
         'router' => 'lying\service\Router',
     ];
     
     /**
-     * 按需注册服务，服务类可以一样，服务id不能重复
+     * 按需注册服务，服务类可以一样，服务ID不能重复
      * @param array $service 服务配置数组
      */
     public function __construct($service)

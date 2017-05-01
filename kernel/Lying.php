@@ -11,34 +11,56 @@
 class Lying
 {
     /**
-     * @var array 自动加载配置
+     * @var array 全局配置数组
      */
-    private static $extend = [];
-    
+    private static $config;
+
     /**
      * @var \lying\service\Maker 工厂实例
      */
     public static $maker;
-    
+
     /**
      * 初始化启动参数
+     * @param array $config 全局配置数组
      */
-    public static function boot()
+    public static function boot($config)
     {
-        self::$extend = require DIR_CONF . DIRECTORY_SEPARATOR . 'loader.php';
+        self::$config = $config;
 
         spl_autoload_register([self::class, 'autoload']);
 
-        \lying\base\Exception::register();
+        self::$maker = new \lying\service\Maker(self::config('service'));
 
-        self::$maker = new \lying\service\Maker(require DIR_CONF . DIRECTORY_SEPARATOR . 'service.php');
+        self::$maker->exception()->register();
+
+        date_default_timezone_set(self::config('timezone', 'Asia/Shanghai'));
+    }
+
+    /**
+     * 获取配置
+     * @param string $key 配置键名，支持'user.name'形式的键名
+     * @param mixed $default 配置不存在时的默认值
+     * @return mixed 成功返回配置值，配置不存在返回null
+     */
+    public static function config($key, $default = null)
+    {
+        $config = self::$config;
+        foreach (explode('.', $key) as $k) {
+            if (isset($config[$k])) {
+                $config = $config[$k];
+            } else {
+                return $default;
+            }
+        }
+        return $config;
     }
     
     /**
      * 自动加载
      * @param string $className 完整类名
      */
-    private static function autoload($className)
+    public static function autoload($className)
     {
         if (($classFile = self::classMapLoader($className)) ||
             ($classFile = self::psr4Loader($className)) ||
@@ -54,10 +76,7 @@ class Lying
      */
     private static function classMapLoader($className)
     {
-        if (isset(self::$extend['classMap'][$className]) && file_exists(self::$extend['classMap'][$className])) {
-            return self::$extend['classMap'][$className];
-        }
-        return false;
+        return file_exists($file = self::config("loader.classMap.$className")) ? $file : false;
     }
     
     /**
@@ -70,17 +89,17 @@ class Lying
         $prefix = $className;
         while (false !== $pos = strrpos($prefix, '\\')) {
             $prefix = substr($prefix, 0, $pos);
-            if (isset(self::$extend['psr-4'][$prefix])) {
+            if ($filePre = self::config("loader.psr-4.$prefix")) {
                 $relativeClass = str_replace('\\', DIRECTORY_SEPARATOR, substr($className, $pos));
-                if (is_array(self::$extend['psr-4'][$prefix])) {
-                    foreach (self::$extend['psr-4'][$prefix] as $path) {
+                if (is_array($filePre)) {
+                    foreach ($filePre as $path) {
                         $file = $path . $relativeClass . '.php';
                         if (file_exists($file)) {
                             return $file;
                         }
                     }
                 } else {
-                    $file = self::$extend['psr-4'][$prefix] . $relativeClass . '.php';
+                    $file = $filePre . $relativeClass . '.php';
                     if (file_exists($file)) {
                         return $file;
                     }
@@ -104,7 +123,7 @@ class Lying
             $class = str_replace(['_', '\\'], DIRECTORY_SEPARATOR, substr($className, $pos));
             $file = $namespace . $class . '.php';
         }
-        foreach (self::$extend['psr-0'] as $baseDir) {
+        foreach (self::config('loader.psr-0') as $baseDir) {
             $absoluteFile = $baseDir . DIRECTORY_SEPARATOR . $file;
             if (file_exists($absoluteFile)) {
                 return $absoluteFile;

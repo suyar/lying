@@ -50,11 +50,11 @@ class Session
     /**
      * 获取SESSION
      * @param string $name SESSION键名
-     * @return mixed SESSION值，失败返回false
+     * @return mixed SESSION值，失败返回null
      */
     public function get($name)
     {
-        return $this->exists($name) ? $_SESSION[$name] : false;
+        return $this->exists($name) ? $_SESSION[$name] : null;
     }
 
     /**

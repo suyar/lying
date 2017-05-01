@@ -34,15 +34,14 @@ FEATURES
 * 基于Service Locator的设计，懒加载、配置和逻辑代码分离，扩展方便。
 * 统一功能接口，功能相同的服务类在配置文件即可自由无缝切换，不影响逻辑代码。
 * PDO实现的QueryBuilder + ActiveRecord支持，暂时只支持mysql和mariadb。
-* ApcCache/DbCache/Memcached/FileCache多种缓存实现。
-* DbLog/FileLog日志实现。
+* ApcCache/Memcached/FileCache多种缓存实现。
+* FileLog日志实现。
 * Apache，Nginx，IIS，虚拟主机简易部署。
 * 支持pathinfo模式和rewrite模式的路由，路由支持正反向解析（虽然弄的不太好）。
-* 模块<->域名绑定，让你快速实现前后台分离。
 * cookie，加密，请求，钩子等类的封装。
 * 工厂`\Lying::$maker`简便使用服务类。
 * 基于layout的PHP原生模板，渲染更快。
-* `get()`、`post()`、`lock()`等一些辅助函数帮助你更快快速开发。
+* 一些辅助函数帮助你更快快速开发。
 * And so on...
 
 LICENCE

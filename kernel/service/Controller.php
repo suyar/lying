@@ -1,7 +1,5 @@
 <?php
-namespace lying\base;
-
-use lying\service\Service;
+namespace lying\service;
 
 /**
  * 控制器基类，所有通过CGI访问的控制器都要继承此类
@@ -79,7 +77,7 @@ class Controller extends Service
     }
     
     /**
-     * 重定向到某个URL
+     * 重定向
      * @param string $url
      * redirect('get', ['id' => 100])；跳转到当前模块当前控制器下get方法
      * redirect('admin/post', ['id' => 100])；跳转到当前模块admin控制器post方法

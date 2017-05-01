@@ -1,7 +1,6 @@
 <?php
 namespace lying\db;
 
-use lying\service\Hook;
 use lying\service\Service;
 
 /**
@@ -55,13 +54,8 @@ class ActiveRecord extends Service
     private $oldAttr;
     
     /**
-     * @var array 表结构
-     */
-    private static $schema = [];
-    
-    /**
-     * 设置数据库连接
-     * @return \lying\db\Connection
+     * 设置默认数据库连接
+     * @return Connection
      */
     public static function db()
     {
@@ -70,33 +64,16 @@ class ActiveRecord extends Service
     
     /**
      * 设置模型对应的表名
+     * ```php
      * User 对应表 user
      * UserName 对应表 user_name
+     * ```
      * @return string 返回表名
      */
     public static function table()
     {
         $tmp = explode('\\', get_called_class());
         return strtolower(preg_replace('/((?<=[a-z])(?=[A-Z]))/', '_', array_pop($tmp)));
-    }
-    
-    /**
-     * 返回表的结构
-     * @return array 表的结构
-     */
-    private static function schema()
-    {
-        $table = static::table();
-        if (!isset(self::$schema[$table])) {
-            $struct = self::db()->pdo()->query("DESC $table")->fetchAll();
-            foreach ($struct as $column) {
-                self::$schema[$table]['fields'][] = $column['Field'];
-                if ($column['Key'] === 'PRI') {
-                    self::$schema[$table]['keys'][] = $column['Field'];
-                }
-            }
-        }
-        return  self::$schema[$table];
     }
 
     /**
@@ -105,8 +82,17 @@ class ActiveRecord extends Service
      */
     private static function pk()
     {
-        $schema = self::schema();
-        return isset($schema['keys']) && !empty($schema['keys']) ? $schema['keys'] : false;
+        $schema = static::db()->schema(static::table());
+        return isset($schema['keys']) ? $schema['keys'] : false;
+    }
+
+    /**
+     * 返回表中所有字段
+     * @return array
+     */
+    private static function fields()
+    {
+        return static::db()->schema(static::table())['fields'];
     }
     
     /**
@@ -116,13 +102,13 @@ class ActiveRecord extends Service
      */
     public function __set($name, $value)
     {
-        if (in_array($name, self::schema()['fields'])) {
+        if (in_array($name, self::fields())) {
             $this->attr[$name] = $value;
         }
     }
     
     /**
-     * 取属性值
+     * 获取属性值
      * @param string $name 属性名
      * @return mixed 不存在返回null
      */
@@ -142,7 +128,7 @@ class ActiveRecord extends Service
     }
     
     /**
-     * 释放给定的属性
+     * 移除指定的属性
      * @param string $name 属性名
      */
     public function __unset($name)
@@ -154,7 +140,7 @@ class ActiveRecord extends Service
     
     /**
      * 查找数据
-     * @return \lying\db\ActiveRecordQuery
+     * @return ActiveRecordQuery
      */
     public static function find()
     {
@@ -163,8 +149,8 @@ class ActiveRecord extends Service
     
     /**
      * 查找一条记录
-     * @param mixed $condition 如果为数组，则为查找条件；否则的话为查找第一个主键
-     * @return ActiveRecord|boolean 返回查询结果或者false
+     * @param mixed $condition 如果为数组，则为查找条件，否则的话为查找第一个主键
+     * @return ActiveRecord|boolean 返回查询结果，失败返回false
      * @throws \Exception 主键不存在抛出异常
      */
     public static function findOne($condition)
@@ -173,7 +159,7 @@ class ActiveRecord extends Service
             if (false === $pks = self::pk()) {
                 throw new \Exception(get_called_class() . ' does not have a primary key.');
             } else {
-                $condition = [reset($pks) => $condition];
+                $condition = [reset($pks) => (string)$condition];
             }
         }
         return self::find()->where($condition)->limit(1)->one();
@@ -196,26 +182,27 @@ class ActiveRecord extends Service
     public function insert()
     {
         $this->trigger(self::EVENT_BEFORE_INSERT);
-        Hook::trigger(self::EVENT_BEFORE_INSERT);
         $res = self::db()->createQuery()->insert(static::table(), $this->attr);
         if (false !== $res && (false !== $keys = self::pk())) {
             foreach ($keys as $key) {
                 $this->attr[$key] = self::db()->lastInsertId($key);
             }
-            self::populate($this);
+            $this->reload();
         }
         $this->trigger(self::EVENT_AFTER_INSERT, [$res]);
-        Hook::trigger(self::EVENT_AFTER_INSERT, [$res]);
         return $res;
     }
-    
+
     /**
-     * 返回旧数据的条件(主键键值对)
-     * @param array $pks 主键数组
+     * 返回旧数据的条件(主键键值对)，用于更新数据
      * @return array 条件数组
+     * @throws \Exception 主键不存在抛出异常
      */
-    public function oldCondition($pks)
+    private function oldCondition()
     {
+        if (false === $pks = self::pk()) {
+            throw new \Exception(get_called_class() . ' does not have a primary key.');
+        }
         $values = [];
         foreach ($pks as $pk) {
             $values[$pk] = isset($this->oldAttr[$pk]) ? $this->oldAttr[$pk] : null;
@@ -225,43 +212,31 @@ class ActiveRecord extends Service
     
     /**
      * 更新当前数据
-     * @return number|boolean 成功返回更新的行数，失败返回false
-     * @throws \Exception 主键不存在抛出异常
+     * @return integer|boolean 成功返回更新的行数，失败返回false
      */
     public function update()
     {
         $this->trigger(self::EVENT_BEFORE_UPDATE);
-        Hook::trigger(self::EVENT_BEFORE_UPDATE);
-        if (false === $pks = self::pk()) {
-            throw new \Exception(get_called_class() . ' does not have a primary key.');
-        }
-        $res = self::db()->createQuery()->update(static::table(), $this->attr, $this->oldCondition($pks));
+        $res = self::db()->createQuery()->update(static::table(), $this->attr, $this->oldCondition());
         if (false !== $res) {
-            self::populate($this);
+            $this->reload();
         }
         $this->trigger(self::EVENT_AFTER_UPDATE, [$res]);
-        Hook::trigger(self::EVENT_AFTER_UPDATE, [$res]);
         return $res;
     }
     
     /**
      * 删除本条数据
      * @return integer|boolean 成功返回删除的行数，失败返回false
-     * @throws \Exception 主键不存在抛出异常
      */
     public function delete()
     {
         $this->trigger(self::EVENT_BEFORE_DELETE);
-        Hook::trigger(self::EVENT_BEFORE_DELETE);
-        if (false === $pks = self::pk()) {
-            throw new \Exception(get_called_class() . ' does not have a primary key.');
-        }
-        $res = self::db()->createQuery()->delete(static::table(), $this->oldCondition($pks));
+        $res = self::db()->createQuery()->delete(static::table(), $this->oldCondition());
         if (false !== $res) {
             $this->oldAttr = null;
         }
         $this->trigger(self::EVENT_AFTER_DELETE, [$res]);
-        Hook::trigger(self::EVENT_AFTER_DELETE, [$res]);
         return $res;
     }
     
@@ -285,12 +260,11 @@ class ActiveRecord extends Service
     
     /**
      * 把新数据赋值给旧数据
-     * @param ActiveRecord $record 要设置的对象
-     * @return \lying\db\ActiveRecord
+     * @return ActiveRecord
      */
-    public static function populate(ActiveRecord $record)
+    public function reload()
     {
-        $record->oldAttr = $record->attr;
-        return $record;
+        $this->oldAttr = $this->attr;
+        return $this;
     }
 }

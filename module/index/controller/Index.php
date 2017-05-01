@@ -1,7 +1,9 @@
 <?php
 namespace module\index\controller;
 
-use lying\base\Controller;
+use lying\db\ActiveRecord;
+use lying\service\Controller;
+use module\index\model\User;
 
 class Index extends Controller
 {

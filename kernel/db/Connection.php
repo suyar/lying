@@ -33,6 +33,16 @@ class Connection extends Service
      * @var \PDO PDO实例
      */
     private $dbh;
+
+    /**
+     * @var array 数据库中所有的表
+     */
+    private $tables;
+
+    /**
+     * @var array 数据库表的结构
+     */
+    private $schema;
     
     /**
      * 获取数据库实例
@@ -60,6 +70,25 @@ class Connection extends Service
     }
 
     /**
+     * 返回指定的表结构
+     * @param string $table 表名
+     * @return array
+     */
+    public function schema($table)
+    {
+        if (!isset($this->schema[$table])) {
+            $struct = $this->pdo()->query("DESC `$table`")->fetchAll();
+            foreach ($struct as $column) {
+                $this->schema[$table]['fields'][] = $column['Field'];
+                if ($column['Key'] === 'PRI') {
+                    $this->schema[$table]['keys'][] = $column['Field'];
+                }
+            }
+        }
+        return $this->schema[$table];
+    }
+
+    /**
      * 返回最后插入行的ID，或者是一个序列对象最后的值
      * @param string $name 应该返回ID的那个序列对象的名称
      * @return string 返回ID
@@ -73,7 +102,7 @@ class Connection extends Service
      * 启动一个事务
      * @return boolean 成功时返回true，或者在失败时返回false
      */
-    public function beginTransaction()
+    public function begin()
     {
         return $this->pdo()->beginTransaction();
     }

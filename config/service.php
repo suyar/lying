@@ -29,7 +29,7 @@ return [
     'logger' => [
         'class' => 'lying\service\Logger',
         'path' => DIR_RUNTIME . '/log', //存储日志文件的文件，默认'runtime/log'
-        'file' => 'app', //文件名，默认'app'
+        'file' => 'lying', //文件名，默认'lying'
         'maxItem' => 500, //当日志条数大于这个的时候，输出到文件，默认500条
         'maxSize' => 1024, //单个日志文件的大小(kb)，默认10240kb
         'maxFile' => 5, //备份日志文件的个数，默认5个
