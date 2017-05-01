@@ -38,7 +38,6 @@ FEATURES
 * FileLog日志实现。
 * Apache，Nginx，IIS，虚拟主机简易部署。
 * 支持pathinfo模式和rewrite模式的路由，路由支持正反向解析（虽然弄的不太好）。
-* cookie，加密，请求，钩子等类的封装。
 * 工厂`\Lying::$maker`简便使用服务类。
 * 基于layout的PHP原生模板，渲染更快。
 * 一些辅助函数帮助你更快快速开发。
