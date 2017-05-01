@@ -21,10 +21,22 @@ class Lying
     public static $maker;
 
     /**
+     * 启动框架
+     * @param $config 配置数组
+     */
+    public static function run($config)
+    {
+        if (self::$maker === null) {
+            self::boot($config);
+            self::$maker->dispatch()->run();
+        }
+    }
+
+    /**
      * 初始化启动参数
      * @param array $config 全局配置数组
      */
-    public static function boot($config)
+    private static function boot($config)
     {
         self::$config = $config;
 
@@ -60,7 +72,7 @@ class Lying
      * 自动加载
      * @param string $className 完整类名
      */
-    public static function autoload($className)
+    private static function autoload($className)
     {
         if (($classFile = self::classMapLoader($className)) ||
             ($classFile = self::psr4Loader($className)) ||

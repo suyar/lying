@@ -15,6 +15,4 @@ define('DIR_WEB', dirname($_SERVER['SCRIPT_FILENAME']));
 
 require __DIR__ . '/Lying.php';
 
-Lying::boot(require DIR_CONFIG . '/web.php');
-
 require __DIR__ . '/function.php';

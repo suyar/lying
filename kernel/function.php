@@ -41,9 +41,9 @@ function url($path, $params = [], $normal = false)
  */
 function lock($name, $type)
 {
-    if (is_dir(DIR_ROOT . DIRECTORY_SEPARATOR . 'runtime' . DIRECTORY_SEPARATOR . 'lock') ||
-        mkdir(DIR_ROOT . DIRECTORY_SEPARATOR . 'runtime' . DIRECTORY_SEPARATOR . 'lock', 0777, true)) {
-        if (false !== $fp = fopen(DIR_ROOT . DIRECTORY_SEPARATOR . 'runtime' . DIRECTORY_SEPARATOR . 'lock' . DIRECTORY_SEPARATOR . $name, 'w')) {
+    if (is_dir(DIR_ROOT . '/runtime/' . 'lock') ||
+        mkdir(DIR_ROOT . '/runtime/' . 'lock', 0777, true)) {
+        if (false !== $fp = fopen(DIR_ROOT . "/runtime//lock/$name", 'w')) {
             if (flock($fp, $type)) {
                 return $fp;
             } else {
