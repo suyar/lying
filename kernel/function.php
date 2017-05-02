@@ -43,7 +43,7 @@ function lock($name, $type)
 {
     if (is_dir(DIR_ROOT . '/runtime/' . 'lock') ||
         mkdir(DIR_ROOT . '/runtime/' . 'lock', 0777, true)) {
-        if (false !== $fp = fopen(DIR_ROOT . "/runtime//lock/$name", 'w')) {
+        if (false !== $fp = fopen(DIR_ROOT . '/runtime/lock/' . md5($name), 'w')) {
             if (flock($fp, $type)) {
                 return $fp;
             } else {
