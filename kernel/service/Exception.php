@@ -66,7 +66,7 @@ class Exception
         if (error_reporting() & $errno) {
             throw new \ErrorException($errstr, $errno, $errno, $errfile, $errline);
         }
-        return false;
+        return true;
     }
     
     /**

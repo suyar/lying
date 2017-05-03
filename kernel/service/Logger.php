@@ -76,9 +76,7 @@ class Logger extends Service
      */
     private function formatData($data, $level = 1)
     {
-        if (is_string($data)) {
-            return "'$data'";
-        } elseif (is_int($data) || is_float($data)) {
+        if (is_string($data) || is_int($data) || is_float($data)) {
             return $data;
         } elseif (is_array($data)) {
             $tmp = '[' . PHP_EOL;

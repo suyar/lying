@@ -28,7 +28,7 @@ class FileCache extends Service implements Cache
      */
     protected function init()
     {
-        $this->dir = $this->dir ? $this->dir : DIR_RUNTIME . DIRECTORY_SEPARATOR . 'cache';
+        $this->dir = $this->dir ? $this->dir : DIR_RUNTIME . '/cache';
         !is_dir($this->dir) && mkdir($this->dir, 0777, true);
     }
     
@@ -39,7 +39,7 @@ class FileCache extends Service implements Cache
      */
     private function cacheFile($key)
     {
-        return $this->dir . DIRECTORY_SEPARATOR . md5($key) . '.bin';
+        return $this->dir . '/' . md5($key) . '.bin';
     }
     
     /**
@@ -49,7 +49,7 @@ class FileCache extends Service implements Cache
     private function gc($all = false)
     {
         if ($all || mt_rand(0, 100) > $this->gc) {
-            foreach (glob($this->dir . DIRECTORY_SEPARATOR . '*.bin') as $file) {
+            foreach (glob($this->dir . '/*.bin') as $file) {
                 if ($all) {
                     @unlink($file);
                 } elseif (@filemtime($file) < time()) {
