@@ -32,7 +32,7 @@ cd nginx-1.10.3
 ./configure --prefix=/usr/local/nginx --with-pcre --with-zlib --with-http_ssl_module
 make && make install
 4.控制命令
-/usr/local/nginx/bin
+/usr/local/nginx/sbin
 ./nginx 启动
 ./nginx -s stop 立即终止
 ./nginx -s quit 平滑终止
@@ -53,7 +53,7 @@ cd php-7.1.1
 ./configure --prefix=/usr/local/php --with-bz2 --with-zlib --with-mcrypt --with-openssl --enable-mbstring --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --enable-calendar --enable-exif --with-gd --with-jpeg-dir --with-png-dir --enable-gd-native-ttf --enable-bcmath --with-curl --enable-ftp --enable-sockets --enable-libxml --enable-fpm
 make && make install
 4.控制命令<用于以php-fpm方式运行时>
-cd /usr/local/php/bin
+cd /usr/local/php/sbin
 ./php-fpm 启动
 kill -QUIT pid 平滑终止
 kill -INT|TERM pid 立即终止
