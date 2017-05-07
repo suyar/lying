@@ -41,16 +41,16 @@ make && make install
 
 [安装PHP7.1.1]
 1.安装依赖
-yum install gcc libxml2 libxml2-devel bzip2 bzip2-devel zlib zlib-devel libmcrypt libmcrypt-devel openssl openssl-devel libjpeg-turbo libjpeg-turbo-devel libpng libpng-devel libcurl libcurl-devel
+yum install gcc libxml2 libxml2-devel bzip2 bzip2-devel zlib zlib-devel libmcrypt libmcrypt-devel openssl openssl-devel libjpeg-turbo libjpeg-turbo-devel libpng libpng-devel libcurl libcurl-devel freetype freetype-devel
 2.下载安装包
 wget http://hk2.php.net/distributions/php-7.1.1.tar.gz
 3.安装
 tar -zxf php-7.1.1.tar.gz
 cd php-7.1.1
 <note:下面的一句是配置为apache模块运行>
-./configure --prefix=/usr/local/php --with-apxs2=/usr/local/httpd/bin/apxs --with-bz2 --with-zlib --with-mcrypt --with-openssl --enable-mbstring --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --enable-calendar --enable-exif --with-gd --with-jpeg-dir --with-png-dir --enable-gd-native-ttf --enable-bcmath --with-curl --enable-ftp --enable-sockets --enable-libxml
+./configure --prefix=/usr/local/php --with-apxs2=/usr/local/httpd/bin/apxs --with-bz2 --with-zlib --with-mcrypt --with-openssl --enable-mbstring --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --enable-calendar --enable-exif --with-gd --with-jpeg-dir --with-png-dir --enable-gd-native-ttf --with-freetype-dir --enable-bcmath --with-curl --enable-ftp --enable-sockets --enable-libxml
 <note:下面的一句配置是以php-fpm方式运行>
-./configure --prefix=/usr/local/php --with-bz2 --with-zlib --with-mcrypt --with-openssl --enable-mbstring --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --enable-calendar --enable-exif --with-gd --with-jpeg-dir --with-png-dir --enable-gd-native-ttf --enable-bcmath --with-curl --enable-ftp --enable-sockets --enable-libxml --enable-fpm
+./configure --prefix=/usr/local/php --with-bz2 --with-zlib --with-mcrypt --with-openssl --enable-mbstring --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --enable-calendar --enable-exif --with-gd --with-jpeg-dir --with-png-dir --enable-gd-native-ttf --with-freetype-dir --enable-bcmath --with-curl --enable-ftp --enable-sockets --enable-libxml --enable-fpm
 make && make install
 4.控制命令<用于以php-fpm方式运行时>
 cd /usr/local/php/sbin
