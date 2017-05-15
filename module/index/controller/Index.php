@@ -9,6 +9,7 @@ class Index extends Controller
     
     public function index()
     {
+        var_dump(\Lying::$maker->request()->uri());
         return $this->render('index');
     }
 }

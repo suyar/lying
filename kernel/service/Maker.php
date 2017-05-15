@@ -13,6 +13,7 @@ use lying\db\Connection;
  * @method Dispatch dispatch()
  * @method Exception exception()
  * @method Logger logger()
+ * @method Request request()
  * @method Router router()
  * @method Session session()
  *
@@ -34,6 +35,7 @@ class Maker
     private static $service = [
         'dispatch' => 'lying\service\Dispatch',
         'exception' => 'lying\service\Exception',
+        'request' => 'lying\service\Request',
         'router' => 'lying\service\Router',
     ];
     
