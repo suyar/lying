@@ -6,9 +6,20 @@ return [
         'module' => 'index',
         'controller' => 'index',
         'action' => 'index',
-        'pathinfo' => false,
+        'suffix' => '.html',
         'rule' => [
             'admin/name/:id' => ['index/index/index', 'id' => '/\d{5}/'],
+        ],
+        'host' => [
+            'api.lying.com' => [
+                'module' => 'api',
+                'controller' => 'index',
+                'action' => 'index',
+                'suffix' => '.js',
+                'rule' => [
+
+                ],
+            ],
         ],
     ],
     //cookie服务

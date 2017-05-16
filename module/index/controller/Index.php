@@ -9,7 +9,8 @@ class Index extends Controller
     
     public function index()
     {
-        var_dump(\Lying::$maker->request()->uri());
+        $info = parse_url(\Lying::$maker->request()->uri());
+        var_dump($info);
         return $this->render('index');
     }
 }

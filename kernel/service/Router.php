@@ -12,6 +12,16 @@ namespace lying\service;
 class Router extends Service
 {
     /**
+     * @var boolean 是否PATHINFO
+     */
+    private $pathinfo;
+
+    /**
+     * @var array 存当前路由[module, controller, action]
+     */
+    private $router;
+
+    /**
      * @var string 默认模块
      */
     protected $module = 'index';
@@ -27,19 +37,9 @@ class Router extends Service
     protected $action = 'index';
 
     /**
-     * @var boolean 是否使用pathinfo
-     */
-    protected $pathinfo = false;
-
-    /**
      * @var array 路由规则
      */
     protected $rule = [];
-
-    /**
-     * @var array 存当前路由[module, controller, action]
-     */
-    private $router;
 
     /**
      * 解析路由
@@ -48,10 +48,13 @@ class Router extends Service
     public function parse()
     {
         //解析URL
-        $parse = parse_url($_SERVER['REQUEST_URI']);
+        $parse = parse_url(\Lying::$maker->request()->uri());
+        var_dump($_GET);
         //解析原生GET，这里是为了去除转发规则中$_GET本身中无用的参数
         parse_str(isset($parse['query']) ? $parse['query'] : '', $_GET);
         //去掉index.php，不区分大小写
+        $path = preg_replace('/^\/index\.php/i', '', $parse['path'], 1, $this->pathinfo);
+
         $path = trim(preg_replace('/^\/index\.php/i', '', $parse['path'], 1), '/');
         //分割后对每个元素进行url解码，包括键名
         $pathArray = array_map(function ($val) {
