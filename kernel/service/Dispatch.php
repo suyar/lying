@@ -17,7 +17,7 @@ class Dispatch
      */
     public function run()
     {
-        list($m, $c, $a) = \Lying::$maker->router()->parse();
+        list($m, $c, $a) = \Lying::$maker->router()->resolve();
         $class = "module\\$m\\controller\\$c";
         if (class_exists($class) && method_exists($class, $a)) {
             $instance = new $class();

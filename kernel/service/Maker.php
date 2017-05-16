@@ -36,7 +36,6 @@ class Maker
         'dispatch' => 'lying\service\Dispatch',
         'exception' => 'lying\service\Exception',
         'request' => 'lying\service\Request',
-        'router' => 'lying\service\Router',
     ];
     
     /**
