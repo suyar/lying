@@ -130,7 +130,7 @@ class Router extends Service
             $pathNum = count($pathArray);
             foreach ($this->rule as $pattern => $rule) {
                 //是否绝对匹配
-                preg_replace('/\$$/', '', $pattern, 1, $absolute);
+                $pattern = preg_replace('/\$$/', '', $pattern, 1, $absolute);
                 $patternArr = explode('/', $pattern);
                 $patternNum = count($patternArr);
                 //个数不匹配,匹配下一个
@@ -199,7 +199,7 @@ class Router extends Service
     /**
      * URL生成
      * ```php
-     * 路径[/index/blog/info],生成[/index/blog/info],使用此形式的时候请注意参数匹配
+     * 路径[/index/blog/info],生成[/index/blog/info],使用此形式的时候请注意参数匹配,并且不会路由反解析
      * 路径[post],生成[当前模块/当前控制器/post]
      * 路径[post/index],生成[当前模块/post/index]
      * 路径[admin/post/index],生成[admin/post/index],注意:此用法在模块绑定中并不适用
@@ -212,46 +212,61 @@ class Router extends Service
     public function createUrl($path, $params = [], $normal = false)
     {
         if (strncmp($path, '/', 1) === 0) {
-            $route = $path;
+            $route = rtrim($path, '/');
+        } elseif ($path = trim($path, '/')) {
+            $routeArr = explode('/', $path);
+            switch (count($routeArr)) {
+                case 1:
+                    $route = implode('/', $this->binding ? [
+                        $this->controller(), $routeArr[0]
+                    ] : [
+                        $this->module(), $this->controller(), $routeArr[0]
+                    ]);
+                    break;
+                case 2:
+                    $route = implode('/', $this->binding ? [
+                        $routeArr[0], $routeArr[1]
+                    ] : [
+                        $this->module(), $routeArr[0], $routeArr[1]
+                    ]);
+                    break;
+                case 3:
+                    $route = implode('/', $this->binding ? [
+                        $this->controller(), $this->action()
+                    ] : $routeArr);
+                    break;
+                default:
+                    $route = implode('/', $this->router);
+            }
         } else {
-            $route = trim($path, '/');
-            $route = empty($route) ? [] : explode('/', $route);
+            $route = implode('/', $this->binding ? [
+                $this->controller(), $this->action()
+            ] : $this->router);
         }
-
-
-
-        $route = trim($path, '/');
-        $route = empty($route) ? [] : explode('/', $route);
-        switch (count($route)) {
-            case 1:
-                $route = [$this->router[0], $this->router[1], $route[0]];
-                break;
-            case 2:
-                $route = [$this->router[0], $route[0], $route[1]];
-                break;
-            case 3:
-                break;
-            default:
-                $route = $this->router;
-        }
-        $route = implode('/', $route);
-
         //路由反解析
         foreach ($this->rule as $r => $v) {
             if ($route === $v[0] && false !== preg_match_all('/:([^\/]+)/', $r, $matchs)) {
-                foreach ($matchs[1] as $m) {
-                    //寻找参数并且匹配参数正则,不匹配就继续寻找下一条规则
-                    if (!isset($params[$m]) || isset($v[$m]) && !preg_match($v[$m], $params[$m])) {
+                $replace = [];
+                foreach ($matchs[1] as $k) {
+                    if (!isset($params[$k]) || isset($v[$k]) && !preg_match($v[$k], $params[$k])) {
                         continue 2;
                     }
-                    $r = str_replace(":$m", urlencode($params[$m]), $r);
+                    $replace[] = urlencode($params[$k]);
                 }
-                //反解析的参数都存在
+                $r = preg_replace('/\$$/', '', $r, 1, $absolute);
                 $params = array_diff_key($params, array_flip($matchs[1]));
-                $route = $r;
+                $keys = array_map(function ($val) {
+                    return ":$val";
+                }, $matchs[1]);
+                $route = str_replace($keys, $replace, $r);
                 break;
             }
         }
+
+        if ($normal || isset($absolute)) {
+            $query = http_build_query($params, '', '&');
+        }
+
 
         //过滤一些奇怪的值
         $p1 = $p2 = [];
