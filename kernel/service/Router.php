@@ -84,7 +84,7 @@ class Router extends Service
         //解析原生GET,这里是为了去除转发规则中$_GET本身中无用的参数
         parse_str(isset($parse['query']) ? $parse['query'] : '', $_GET);
         //去掉index.php
-        $path = preg_replace('/^\/index\.php/i', '', $parse['path'], 1, $this->pathinfo);
+        $path = trim(preg_replace('/^\/index\.php/i', '', $parse['path'], 1, $this->pathinfo), '/');
         //匹配后缀名
         if (!empty($path) && !empty($this->suffix)) {
             $path = rtrim(preg_replace('/\\' . $this->suffix . '$/i', '', $path, 1, $validate), '/');
@@ -93,37 +93,11 @@ class Router extends Service
             }
         }
         //分割后对每个元素进行URL解码
-        $pathArray = array_map(function ($val) {
+        $pathArray = empty($path) ? [] : array_map(function ($val) {
             return urldecode($val);
-        }, explode('/', trim($path, '/')));
+        }, explode('/', $path));
         //路由匹配
-        $pathNum = count($pathArray);
-        foreach ($this->rule as $pattern => $rule) {
-            //是否绝对匹配
-            preg_replace('/\$$/', '', $pattern, 1, $absolute);
-            $patternArr = explode('/', $pattern);
-            $patternNum = count($patternArr);
-            //个数不匹配,匹配下一个
-            if ($absolute && $pathNum !== $patternNum || !$absolute && $pathNum < $patternNum) {
-                continue;
-            }
-            //参数映射
-            $params = [];
-            foreach ($patternArr as $i => $r) {
-                if (strncmp($r, ':', 1) === 0 && ($key = ltrim($r, ':'))) {
-                    if (isset($rule[$key]) && !preg_match($rule[$key], $pathArray[$i])) {
-                        continue 2;
-                    } else {
-                        array_push($params, $key, $pathArray[$i]);
-                    }
-                } elseif ($pathArray[$i] !== $r) {
-                    continue 2;
-                }
-            }
-            //匹配到就不进行下一条匹配
-            $pathArray = array_merge(explode('/', $rule[0]), $params, array_splice($pathArray, $patternNum));
-            break;
-        }
+        $this->resolveRule($pathArray);
         //获取模块/控制器/方法
         $m = $this->binding ? $this->module : (($module = array_shift($pathArray)) ? $module : $this->module);
         $c = ($controller = array_shift($pathArray)) ? $controller : $this->controller;
@@ -147,15 +121,52 @@ class Router extends Service
     }
 
     /**
+     * 解析路由规则
+     * @param array $pathArray
+     */
+    private function resolveRule(&$pathArray)
+    {
+        if ($pathArray) {
+            $pathNum = count($pathArray);
+            foreach ($this->rule as $pattern => $rule) {
+                //是否绝对匹配
+                preg_replace('/\$$/', '', $pattern, 1, $absolute);
+                $patternArr = explode('/', $pattern);
+                $patternNum = count($patternArr);
+                //个数不匹配,匹配下一个
+                if ($absolute && $pathNum !== $patternNum || !$absolute && $pathNum < $patternNum) {
+                    continue;
+                }
+                //参数映射
+                $params = [];
+                foreach ($patternArr as $i => $r) {
+                    if (strncmp($r, ':', 1) === 0 && ($key = ltrim($r, ':'))) {
+                        if (isset($rule[$key]) && !preg_match($rule[$key], $pathArray[$i])) {
+                            continue 2;
+                        } else {
+                            array_push($params, $key, $pathArray[$i]);
+                        }
+                    } elseif ($pathArray[$i] !== $r) {
+                        continue 2;
+                    }
+                }
+                //匹配到就不进行下一条匹配
+                $pathArray = array_merge(explode('/', $rule[0]), $params, array_splice($pathArray, $patternNum));
+                break;
+            }
+        }
+    }
+
+    /**
      * 把横线分割的小写字母转换为驼峰
-     * @param string $val 要转换的字符串
+     * @param string $str 要转换的字符串
      * @param boolean $ucfirst 首字母是否大写
      * @return string 返回转换后的字符串
      */
-    private function str2hump($val, $ucfirst = false)
+    private function str2hump($str, $ucfirst = false)
     {
-        $val = str_replace(' ', '', ucwords(str_replace('-', ' ', $val)));
-        return $ucfirst ? $val : lcfirst($val);
+        $str = str_replace(' ', '', ucwords(str_replace('-', ' ', $str)));
+        return $ucfirst ? $str : lcfirst($str);
     }
 
     /**
@@ -188,9 +199,10 @@ class Router extends Service
     /**
      * URL生成
      * ```php
-     * 如果路径post,则生成[当前模块/当前控制器/post]
-     * 如果路径post/index,则生成[当前模块/post/index]
-     * 如果路径admin/post/index,则生成[admin/post/index]
+     * 路径[/index/blog/info],生成[/index/blog/info],使用此形式的时候请注意参数匹配
+     * 路径[post],生成[当前模块/当前控制器/post]
+     * 路径[post/index],生成[当前模块/post/index]
+     * 路径[admin/post/index],生成[admin/post/index],注意:此用法在模块绑定中并不适用
      * ```
      * @param string $path 要生成的相对路径
      * @param array $params 要生成的参数,一个关联数组,如果有路由规则,参数中必须包含rule中的参数才能反解析
@@ -199,6 +211,15 @@ class Router extends Service
      */
     public function createUrl($path, $params = [], $normal = false)
     {
+        if (strncmp($path, '/', 1) === 0) {
+            $route = $path;
+        } else {
+            $route = trim($path, '/');
+            $route = empty($route) ? [] : explode('/', $route);
+        }
+
+
+
         $route = trim($path, '/');
         $route = empty($route) ? [] : explode('/', $route);
         switch (count($route)) {

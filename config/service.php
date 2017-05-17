@@ -8,7 +8,7 @@ return [
         'action' => 'index',
         'suffix' => '.html',
         'rule' => [
-            'admin/name/:id' => ['index/index/index', 'id' => '/\d{5}/'],
+            'blog/:id' => ['admin/blog/get', 'id' => '/\d{5}/'],
         ],
         'host' => [
             'api.lying.com' => [
@@ -17,7 +17,7 @@ return [
                 'action' => 'index',
                 'suffix' => '.js',
                 'rule' => [
-
+                    'user/:id$' => ['user/get', 'id' => '/\d+/'],
                 ],
             ],
         ],
