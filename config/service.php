@@ -13,13 +13,13 @@ return [
         ],
         'host' => [
             'api.lying.com' => [
-                'module' => 'api',
+                'module' => 'index',
                 'controller' => 'index',
                 'action' => 'index',
                 'pathinfo' => false,
                 'suffix' => '.js',
                 'rule' => [
-                    'user/:id$' => ['user/get', 'id' => '/\d+/'],
+                    'user/:id$' => ['index/user', 'id' => '/\d+/'],
                 ],
             ],
         ],

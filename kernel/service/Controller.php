@@ -30,6 +30,11 @@ class Controller extends Service
      * @var array 布局文件参数，此参数会和render()函数里的$subparams合并
      */
     protected $subparams = [];
+
+    /**
+     * @var Request 请求类
+     */
+    protected $request;
     
     /**
      * @var array 设置不被访问的方法，用正则匹配，此属性必须设置为public
@@ -41,10 +46,11 @@ class Controller extends Service
      */
     protected function init()
     {
+        $this->request = \Lying::$maker->request();
         $this->hook(self::EVENT_BEFORE_ACTION, [$this, 'beforeAction']);
         $this->hook(self::EVENT_AFTER_ACTION, [$this, 'afterAction']);
     }
-    
+
     /**
      * 在执行action之前执行
      * @param string $action 执行的方法名称

@@ -62,7 +62,7 @@ class Dispatch
     private function parseArgs($params)
     {
         foreach ($params as $param) {
-            if (($arg = get($param->name)) !== null) {
+            if (($arg = \Lying::$maker->request()->get($param->name)) !== null) {
                 $args[] = $arg;
             }
         }

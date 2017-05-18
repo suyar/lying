@@ -1,15 +1,17 @@
 <?php
 /**
  * @author carolkey <me@suyaqi.cn>
- * @since 2.0
  * @link https://github.com/carolkey/lying
+ * @copyright 2017 Lying Framework
  * @license MIT
  */
+
 namespace lying\service;
 
 /**
  * Class Router
  * @package lying\service
+ * @since 2.0
  */
 class Router extends Service
 {
@@ -39,7 +41,7 @@ class Router extends Service
     protected $action = 'index';
 
     /**
-     * @var boolean 是否PATHINFO,如果没设置则自动判断
+     * @var boolean 是否PATHINFO
      */
     protected $pathinfo = false;
 
@@ -66,14 +68,14 @@ class Router extends Service
         $host = \Lying::$maker->request()->host();
         if (isset($this->host[$host])) {
             $this->binding = true;
-            foreach ($this->host as $name => $value) {
+            foreach ($this->host[$host] as $name => $value) {
                 $this->$name = $value;
             }
         }
     }
 
     /**
-     * 解析路由
+     * 路由解析
      * @return array 返回路由数组[module, controller, action]
      * @throws \Exception 当后缀名不匹配的时候抛出404异常
      */
@@ -121,8 +123,8 @@ class Router extends Service
     }
 
     /**
-     * 解析路由规则
-     * @param array $pathArray
+     * 路由规则解析
+     * @param array $pathArray 路由数组
      */
     private function resolveRule(&$pathArray)
     {

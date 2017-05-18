@@ -1,13 +1,17 @@
 <?php
+/**
+ * @author carolkey <me@suyaqi.cn>
+ * @link https://github.com/carolkey/lying
+ * @copyright 2017 Lying Framework
+ * @license MIT
+ */
+
 namespace lying\service;
 
 /**
- * 请求组件
- *
- * @author carolkey <me@suyaqi.cn>
+ * Class Request
+ * @package lying\service
  * @since 2.0
- * @link https://github.com/carolkey/lying
- * @license MIT
  */
 class Request
 {
