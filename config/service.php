@@ -6,6 +6,7 @@ return [
         'module' => 'index',
         'controller' => 'index',
         'action' => 'index',
+        'pathinfo' => false,
         'suffix' => '.html',
         'rule' => [
             'blog/:id' => ['admin/blog/get', 'id' => '/\d{5}/'],
@@ -15,6 +16,7 @@ return [
                 'module' => 'api',
                 'controller' => 'index',
                 'action' => 'index',
+                'pathinfo' => false,
                 'suffix' => '.js',
                 'rule' => [
                     'user/:id$' => ['user/get', 'id' => '/\d+/'],

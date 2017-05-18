@@ -19,11 +19,6 @@ class Router extends Service
     private $binding;
 
     /**
-     * @var boolean 是否PATHINFO
-     */
-    private $pathinfo;
-
-    /**
      * @var array 存当前路由[module, controller, action]
      */
     private $router;
@@ -42,6 +37,11 @@ class Router extends Service
      * @var string 默认方法
      */
     protected $action = 'index';
+
+    /**
+     * @var boolean 是否PATHINFO,如果没设置则自动判断
+     */
+    protected $pathinfo = false;
 
     /**
      * @var string 后缀
@@ -84,9 +84,9 @@ class Router extends Service
         //解析原生GET,这里是为了去除转发规则中$_GET本身中无用的参数
         parse_str(isset($parse['query']) ? $parse['query'] : '', $_GET);
         //去掉index.php
-        $path = trim(preg_replace('/^\/index\.php/i', '', $parse['path'], 1, $this->pathinfo), '/');
+        $path = trim(preg_replace('/^\/index\.php/i', '', $parse['path'], 1), '/');
         //匹配后缀名
-        if (!empty($path) && !empty($this->suffix)) {
+        if ($path && $this->suffix) {
             $path = rtrim(preg_replace('/\\' . $this->suffix . '$/i', '', $path, 1, $validate), '/');
             if ($validate === 0) {
                 throw new \Exception('Not Found (#404)', 404);
@@ -129,7 +129,7 @@ class Router extends Service
         if ($pathArray) {
             $pathNum = count($pathArray);
             foreach ($this->rule as $pattern => $rule) {
-                //是否绝对匹配
+                //是完全匹配
                 $pattern = preg_replace('/\$$/', '', $pattern, 1, $absolute);
                 $patternArr = explode('/', $pattern);
                 $patternNum = count($patternArr);
@@ -203,6 +203,9 @@ class Router extends Service
      * 路径[post],生成[当前模块/当前控制器/post]
      * 路径[post/index],生成[当前模块/post/index]
      * 路径[admin/post/index],生成[admin/post/index],注意:此用法在模块绑定中并不适用
+     * 携带在PATH中的GET参数类型只能是['string', 'integer', 'double', 'boolean'],否则被忽略
+     * 注意:boolean会被转换成0和1,值为空字符串也会被忽略
+     * 如果需要携带其他类型的参数,请设置为normal形式的查询字符串
      * ```
      * @param string $path 要生成的相对路径
      * @param array $params 要生成的参数,一个关联数组,如果有路由规则,参数中必须包含rule中的参数才能反解析
@@ -262,33 +265,24 @@ class Router extends Service
                 break;
             }
         }
-
-        if ($normal || isset($absolute)) {
+        //拼接URL
+        $url = ($this->pathinfo ? '/index.php/' : '/') . $route;
+        //如果为完全匹配,多余的参数形式就用[?a=1&b=2]
+        if ($normal || isset($absolute) && $absolute) {
             $query = http_build_query($params, '', '&');
-        }
-
-
-        //过滤一些奇怪的值
-        $p1 = $p2 = [];
-        foreach ($params as $key => $val) {
-            if (in_array(gettype($val), ['string', 'integer', 'double', 'boolean', 'array'])) {
-                if ($normal || $val === '' || is_array($val)) {
-                    $p1[$key] = $val;
-                } else {
-                    $p2[$key] = $val;
+            $url .= $this->suffix ? $this->suffix : '';
+            $url .= $query ? "?$query" : '';
+        } else {
+            $p = [];
+            foreach ($params as $name => $value) {
+                if (in_array(gettype($value), ['string', 'integer', 'double', 'boolean']) && $value !== '') {
+                    $p[$name] = $value;
                 }
             }
+            $query = str_replace(['=', '&'], '/', http_build_query($p, '', '&'));
+            $url .= $query ? "/$query" : '';
+            $url .= $this->suffix ? $this->suffix : '';
         }
-        $p1 = http_build_query($p1, '', '&');
-        $p2 = str_replace(['=', '&'], '/', http_build_query($p2, '', '&'));
-
-        //URL拼接
-        $schema = isset($_SERVER['HTTPS']) && (strcasecmp($_SERVER['HTTPS'], 'on') === 0) ? 'https://' : 'http://';
-        $host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : $_SERVER['SERVER_NAME'];
-        $url = $schema . $host;
-        $url .= ($this->pathinfo ? '/index.php/' : '/') . $route . '/';
-        $url .= empty($p2) ? '' : "$p2/";
-        $url .= empty($p1) ? '' : "?$p1";
         return $url;
     }
 }
