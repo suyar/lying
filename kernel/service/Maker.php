@@ -59,7 +59,9 @@ class Maker
             return self::$instances[$id];
         } elseif (isset(self::$service[$id])) {
             if (is_array(self::$service[$id])) {
-                $class = array_shift(self::$service[$id]);
+                $class = self::$service[$id]['class'];
+                unset(self::$service[$id]['class']);
+                //$class = array_shift(self::$service[$id]);
                 self::$instances[$id] = new $class(self::$service[$id]);
             } else {
                 self::$instances[$id] = new self::$service[$id]();

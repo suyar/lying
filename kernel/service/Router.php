@@ -2,7 +2,7 @@
 /**
  * @author carolkey <me@suyaqi.cn>
  * @link https://github.com/carolkey/lying
- * @copyright 2017 Lying Framework
+ * @copyright 2017 Lying
  * @license MIT
  */
 
@@ -250,15 +250,16 @@ class Router extends Service
         }
         //路由反解析
         foreach ($this->rule as $r => $v) {
+            $r = preg_replace('/\$$/', '', $r, 1, $absolute);
             if ($route === $v[0] && false !== preg_match_all('/:([^\/]+)/', $r, $matchs)) {
                 $replace = [];
                 foreach ($matchs[1] as $k) {
                     if (!isset($params[$k]) || isset($v[$k]) && !preg_match($v[$k], $params[$k])) {
+                        $absolute = false;
                         continue 2;
                     }
                     $replace[] = urlencode($params[$k]);
                 }
-                $r = preg_replace('/\$$/', '', $r, 1, $absolute);
                 $params = array_diff_key($params, array_flip($matchs[1]));
                 $keys = array_map(function ($val) {
                     return ":$val";
@@ -266,6 +267,7 @@ class Router extends Service
                 $route = str_replace($keys, $replace, $r);
                 break;
             }
+            $absolute = false;
         }
         //拼接URL
         $url = ($this->pathinfo ? '/index.php/' : '/') . $route;

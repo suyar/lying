@@ -1,55 +1,147 @@
 <?php
+/**
+ * @author carolkey <me@suyaqi.cn>
+ * @link https://github.com/carolkey/lying
+ * @copyright 2017 Lying
+ * @license MIT
+ */
+
 namespace lying\service;
 
 /**
- * COOKIE组件
- *
- * @author carolkey <me@suyaqi.cn>
+ * Class Cookie
+ * @package lying\service
  * @since 2.0
- * @link https://github.com/carolkey/lying
- * @license MIT
  */
 class Cookie extends Service
 {
     /**
      * @var string COOKIE加密密钥
      */
-    protected $key = 'lying';
+    protected $key;
+
+    /**
+     * @var integer 密钥长度
+     */
+    private $keyLen;
+
+    /**
+     * @var integer COOKIE过期时间
+     */
+    private $expire = 0;
+
+    /**
+     * @var string COOKIE路径
+     */
+    private $path = '';
+
+    /**
+     * @var string COOKIE域名
+     */
+    private $domain = '';
+
+    /**
+     * @var boolean 是否仅用HTTPS传输COOKIE
+     */
+    private $secure = false;
+
+    /**
+     * @var boolean COOKIE只能通过HTTP请求访问,JS将不能访问
+     */
+    private $httpOnly = false;
+
+    /**
+     * 初始化密钥
+     */
+    public function init()
+    {
+        $this->key = strtoupper(sha1($this->key . 'Lying'));
+        $this->keyLen = strlen($this->key);
+    }
+
+    /**
+     * 设置过期时间
+     * @param integer $expire 过期时间戳
+     * @return $this
+     */
+    public function setExpire($expire)
+    {
+        $this->expire = $expire;
+        return $this;
+    }
+
+    /**
+     * 设置COOKIE路径
+     * @param string $path COOKIE路径
+     * @return $this
+     */
+    public function setPath($path)
+    {
+        $this->path = $path;
+        return $this;
+    }
+
+    /**
+     * 设置COOKIE域名
+     * @param string $domain COOKIE域名
+     * @return $this
+     */
+    public function setDomain($domain)
+    {
+        $this->domain = $domain;
+        return $this;
+    }
+
+    /**
+     * 设置仅用HTTPS传输COOKIE
+     * @return $this
+     */
+    public function setSecure()
+    {
+        $this->secure = true;
+        return $this;
+    }
+
+    /**
+     * 设置COOKIE只能通过http请求访问,JS将不能访问
+     * @return $this
+     */
+    public function setHttpOnly()
+    {
+        $this->httpOnly = true;
+        return $this;
+    }
+
+    /**
+     * 重置COOKIE设置条件
+     */
+    private function reset()
+    {
+        $this->expire = 0;
+        $this->path = '';
+        $this->domain = '';
+        $this->secure = false;
+        $this->httpOnly = false;
+    }
 
     /**
      * 设置COOKIE
      * @param string $name COOKIE名称
      * @param mixed $value COOKIE的值
-     * @param integer $expire 过期时间戳
-     * @param string $path COOKIE路径
-     * @param string $domain COOKIE域名
-     * @param boolean $secure 是否用HTTPS传输COOKIE
-     * @param boolean $httponly COOKIE只能通过http请求访问，JS将不能访问
-     * @return boolean 成功返回true，失败返回false
+     * @return boolean 成功返回true,失败返回false
      */
-    public function set($name, $value, $expire = 0, $path = '/', $domain = '', $secure = false, $httponly = false)
+    public function set($name, $value)
     {
-        $value = $this->encrypt($value, $this->key);
-        return setcookie($name, $value, $expire, $path, $domain, $secure, $httponly);
+        $value = $this->encrypt(serialize($value), $this->expire);
+        $result = setcookie($name, $value, $this->expire, $this->path, $this->domain, $this->secure, $this->httpOnly);
+        $this->reset();
+        return $result;
     }
-    
-    /**
-     * 获取COOKIE
-     * @param string $name COOKIE名称
-     * @return string|boolean 返回COOKIE的值，失败或不存在返回false
-     */
-    public function get($name)
-    {
-        if ($this->exists($name)) {
-            return $this->decrypt($_COOKIE[$name], $this->key);
-        }
-        return false;
-    }
-    
+
     /**
      * 检查COOKIE是否设置
      * @param string $name COOKIE名称
-     * @return boolean COOKIE存在设置返回true，否则返回false
+     * @return boolean COOKIE存在返回true,否则返回false
      */
     public function exists($name)
     {
@@ -57,51 +149,60 @@ class Cookie extends Service
     }
     
     /**
+     * 获取COOKIE
+     * @param string $name COOKIE名称
+     * @return mixed 返回COOKIE的值,失败或不存在返回false
+     */
+    public function get($name)
+    {
+        return $this->exists($name) ? unserialize($this->decrypt($_COOKIE[$name])) : false;
+    }
+
+    /**
      * 删除COOKIE
      * @param string $name COOKIE名称
-     * @param string $path COOKIE路径
-     * @param string $domain COOKIE域名
-     * @return boolean 成功返回true，失败返回false
+     * @return boolean 成功返回true,失败返回false
      */
-    public function remove($name, $path = '/', $domain = '')
+    public function remove($name)
     {
-        return $this->exists($name) ? setcookie($name, '', time() - 31536000, $path, $domain) : false;
+        return $this->setExpire(time() - (365 * 24 * 60 * 60))->set($name, '');
     }
 
     /**
      * 加密
      * @param string $str 要加密的字符串
-     * @param string $key 密钥
+     * @param integer $expire 有效时间戳
      * @return string 加密后的字符串
      */
-    private function encrypt($str, $key)
+    private function encrypt($str, $expire = 0)
     {
-        $key = strtoupper(sha1($key));
-        $str .= hash_hmac('sha256', $str, $key, true);
-        $strLen = strlen($str);
-        $result = '';
-        for ($i = 0; $i < $strLen; $i++) {
-            $result .= chr(ord($str[$i]) ^ ord($key[$i % 40]));
+        $str .= hash_hmac('sha256', $str, $this->key, true) . sprintf('%010d',$expire);
+        for ($i = 0, $result = '', $strLen = strlen($str); $i < $strLen; $i++) {
+            $result .= chr(ord($str[$i]) ^ ord($this->key[$i % $this->keyLen]));
         }
         return base64_encode($result);
     }
 
     /**
-     * 解密；注意，这里可能返回空的字符串，请用false === $result判断返回值
+     * 解密
      * @param string $str 要解密的字符串
-     * @param string $key 密钥
-     * @return string|boolean 成功返回解密后的字符串，失败返回false
+     * @return string|boolean 成功返回解密后的字符串
      */
-    private function decrypt($str, $key)
+    private function decrypt($str)
     {
-        $key = strtoupper(sha1($key));
         $str = base64_decode($str);
-        $strLen = strlen($str);
-        $result = '';
-        for ($i = 0; $i < $strLen; $i++) {
-            $result .= chr(ord($str[$i]) ^ ord($key[$i % 40]));
+        for ($i = 0, $result = '', $strLen = strlen($str); $i < $strLen; $i++) {
+            $result .= chr(ord($str[$i]) ^ ord($this->key[$i % $this->keyLen]));
         }
-        $str = substr($result, 0, -32);
-        return strcmp(substr($result, -32), hash_hmac('sha256', $str, $key, true)) === 0 ? $str : false;
+        $expire = substr($result, -10);
+        if ($expire === '0000000000' || $expire >= time()) {
+            $result = substr($result, 0, -10);
+            $content = substr($result, 0, -32);
+            $hash = substr($result, -32);
+            if (strcmp(hash_hmac('sha256', $content, $this->key, true), $hash) === 0) {
+                return $content;
+            }
+        }
+        return false;
     }
 }

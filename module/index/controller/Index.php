@@ -9,16 +9,13 @@ class Index extends Controller
     
     public function index()
     {
-        //var_dump(http_build_query(['name'=>false]));
-        var_dump(\Lying::$maker->router()->createUrl('admin/blog/get', [
-            'id'=>12345,
-            'name'=>'su',
-        ]));
-        //return $this->render('index');
+
     }
 
     public function user($id)
     {
-        var_dump($id);
+
+
+
     }
 }

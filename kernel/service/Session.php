@@ -1,27 +1,31 @@
 <?php
+/**
+ * @author carolkey <me@suyaqi.cn>
+ * @link https://github.com/carolkey/lying
+ * @copyright 2017 Lying
+ * @license MIT
+ */
+
 namespace lying\service;
 
 /**
- * SESSION组件
- *
- * @author carolkey <me@suyaqi.cn>
+ * Class Session
+ * @package lying\service
  * @since 2.0
- * @link https://github.com/carolkey/lying
- * @license MIT
  */
 class Session
 {
     /**
-     * 组件初始化的时候启用SESSION
+     * 初始化SESSION
      */
-    public function __construct()
+    protected function init()
     {
         $this->start();
     }
 
     /**
      * SESSION是否启用
-     * @return boolean 已启用返回true，未启用返回false
+     * @return boolean 已启用返回true,未启用返回false
      */
     public function isActive()
     {
@@ -30,7 +34,7 @@ class Session
 
     /**
      * 启用SESSION
-     * @return boolean 成功返回true，失败返回false
+     * @return boolean 成功返回true,失败返回false
      */
     public function start()
     {
@@ -50,7 +54,7 @@ class Session
     /**
      * 获取SESSION
      * @param string $name SESSION键名
-     * @return mixed SESSION值，失败返回null
+     * @return mixed SESSION值,失败返回null
      */
     public function get($name)
     {
@@ -60,7 +64,7 @@ class Session
     /**
      * SESSION是否存在
      * @param string $name SESSION键名
-     * @return boolean 存在返回true，失败返回false
+     * @return boolean 存在返回true,失败返回false
      */
     public function exists($name)
     {
@@ -70,7 +74,7 @@ class Session
     /**
      * 移除SESSION
      * @param string $name 放空移除整个SESSION数组
-     * @return boolean 成功返回true，失败返回false
+     * @return boolean 成功返回true,失败返回false
      */
     public function remove($name = null)
     {
@@ -85,12 +89,13 @@ class Session
     }
 
     /**
-     * 销毁SESSION，销毁后要重新start
-     * @return boolean 成功返回true，失败返回false
+     * 销毁SESSION,销毁后要重新start才能再次使用
+     * @return boolean 成功返回true,失败返回false
      */
     public function destroy()
     {
-        setcookie(session_name(), '', time() - 31536000);
+        $params = session_get_cookie_params();
+        setcookie(session_name(), '', time() - 31536000, $params["path"], $params["domain"], $params["secure"], $params["httponly"]);
         $this->remove();
         return session_destroy();
     }
