@@ -32,11 +32,7 @@ class Maker
     /**
      * @var array 注册的服务
      */
-    private static $service = [
-        'dispatch' => 'lying\service\Dispatch',
-        'exception' => 'lying\service\Exception',
-        'request' => 'lying\service\Request',
-    ];
+    private static $service = [];
     
     /**
      * 按需注册服务，服务类可以一样，服务ID不能重复

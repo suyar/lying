@@ -1,5 +1,11 @@
 <?php
 return [
+    'dispatch' => [
+        'calss' => 'lying\service\Dispatch',
+        'moduleNamespace' => 'module',
+    ],
+    'exception' => 'lying\service\Exception',
+    'request' => 'lying\service\Request',
     //路由服务
     'router' => [
         'class' => 'lying\service\Router',

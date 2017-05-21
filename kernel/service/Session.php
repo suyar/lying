@@ -94,9 +94,6 @@ class Session
      */
     public function destroy()
     {
-        $params = session_get_cookie_params();
-        setcookie(session_name(), '', time() - 31536000, $params["path"], $params["domain"], $params["secure"], $params["httponly"]);
-        $this->remove();
         return session_destroy();
     }
 }

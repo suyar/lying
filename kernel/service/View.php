@@ -1,13 +1,17 @@
 <?php
+/**
+ * @author carolkey <me@suyaqi.cn>
+ * @link https://github.com/carolkey/lying
+ * @copyright 2017 Lying
+ * @license MIT
+ */
+
 namespace lying\service;
 
 /**
- * 负责渲染视图文件
- *
- * @author carolkey <me@suyaqi.cn>
+ * Class View
+ * @package lying\service
  * @since 2.0
- * @link https://github.com/carolkey/lying
- * @license MIT
  */
 class View
 {
@@ -51,21 +55,24 @@ class View
      */
     private function findViewPath($view)
     {
-        $view = trim($view, '/');
-        $viewArr = explode('/', $view);
-        list($m, $c, ) = \Lying::$maker->router()->path();
-        switch (count($viewArr)) {
-            case 1:
-                $file = DIR_MODULE . "/$m/view/$c/$view.php";
-                break;
-            case 2:
-                $file = DIR_MODULE . "/$m/view/$view.php";
-                break;
-            case 3:
-                $file = DIR_MODULE . "$viewArr[0]/view/$viewArr[1]/$viewArr[2].php";
-                break;
-            default:
-                throw new \Exception("Unknown view path: $view", 500);
+        $router = \Lying::$maker->router();
+        $file = DIR_MODULE . '/';
+        if (strncmp($view, '/', 1) === 0) {
+            $file .= $router->module() . '/view' . rtrim($view, '/');
+        } else {
+            $view = trim($view, '/');
+            $viewArr = explode('/', $view);
+            switch (count($viewArr)) {
+                case 1:
+                    $file .= $router->module() . '/view/' . $router->controller() . "/$view.php";
+                    break;
+                case 2:
+                    $file .= $router->module() . "/view/$view.php";
+                    break;
+                case 3:
+                    $file .= "$viewArr[0]/view/$viewArr[1]/$viewArr[2].php";
+                    break;
+            }
         }
         if (file_exists($file)) {
             return $file;

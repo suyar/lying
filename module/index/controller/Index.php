@@ -9,7 +9,9 @@ class Index extends Controller
     
     public function index()
     {
-
+        $a = [1,2,3];
+        var_dump((string)$a);exit;
+        return $this->render('index');
     }
 
     public function user($id)

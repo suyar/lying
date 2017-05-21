@@ -1,13 +1,17 @@
 <?php
+/**
+ * @author carolkey <me@suyaqi.cn>
+ * @link https://github.com/carolkey/lying
+ * @copyright 2017 Lying
+ * @license MIT
+ */
+
 namespace lying\service;
 
 /**
- * 注册全局错误/异常处理函数
- *
- * @author carolkey <me@suyaqi.cn>
+ * Class Exception
+ * @package lying\service
  * @since 2.0
- * @link https://github.com/carolkey/lying
- * @license MIT
  */
 class Exception
 {
@@ -21,7 +25,6 @@ class Exception
      */
     public function register()
     {
-        //ini_set('display_errors', 'Off');
         set_exception_handler([$this, 'exceptionHandler']);
         set_error_handler([$this, 'errorHandler']);
         register_shutdown_function([$this, 'shutdownHandler']);

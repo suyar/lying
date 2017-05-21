@@ -1,16 +1,25 @@
 <?php
+/**
+ * @author carolkey <me@suyaqi.cn>
+ * @link https://github.com/carolkey/lying
+ * @copyright 2017 Lying
+ * @license MIT
+ */
+
 namespace lying\service;
 
 /**
- * 调度器组件
- *
- * @author carolkey <me@suyaqi.cn>
+ * Class Dispatch
+ * @package lying\service
  * @since 2.0
- * @link https://github.com/carolkey/lying
- * @license MIT
  */
-class Dispatch
+class Dispatch extends Service
 {
+    /**
+     * @var string 模块的命名空间
+     */
+    protected $moduleNamespace = 'module';
+
     /**
      * 程序执行入口
      * @throws \Exception 页面不存在抛出404错误
@@ -18,7 +27,7 @@ class Dispatch
     public function run()
     {
         list($m, $c, $a) = \Lying::$maker->router()->resolve();
-        $class = "module\\$m\\controller\\$c";
+        $class = "$this->moduleNamespace\\$m\\controller\\$c";
         if (class_exists($class) && method_exists($class, $a)) {
             $instance = new $class();
             $method = new \ReflectionMethod($instance, $a);
@@ -26,20 +35,18 @@ class Dispatch
                 $instance->trigger($instance::EVENT_BEFORE_ACTION, [$a]);
                 $response = call_user_func_array([$instance, $a], $this->parseArgs($method->getParameters()));
                 $instance->trigger($instance::EVENT_AFTER_ACTION, [$a, $response]);
-                echo($response);
-            } else {
-                throw new \Exception('Page not found.', 404);
+                echo $response;
+                exit(0);
             }
-        } else {
-            throw new \Exception('Page not found.', 404);
         }
+        throw new \Exception('Not Found (#404)', 404);
     }
     
     /**
-     * 匹配到的方法将不能被访问，默认init|beforeAction|afterAction不能被访问
+     * 匹配到的方法将不能被访问,默认init|beforeAction|afterAction不能被访问
      * @param array $pregs 一个存放正则表达式的数组
      * @param string $action 方法名称
-     * @return boolean 返回true允许访问，false禁止访问
+     * @return boolean 返回true允许访问,false禁止访问
      */
     private function checkAccess($pregs, $action)
     {
@@ -61,11 +68,12 @@ class Dispatch
      */
     private function parseArgs($params)
     {
+        $args = [];
         foreach ($params as $param) {
             if (($arg = \Lying::$maker->request()->get($param->name)) !== null) {
                 $args[] = $arg;
             }
         }
-        return isset($args) ? $args : [];
+        return $args;
     }
 }

@@ -1,18 +1,22 @@
 <?php
+/**
+ * @author carolkey <me@suyaqi.cn>
+ * @link https://github.com/carolkey/lying
+ * @copyright 2017 Lying
+ * @license MIT
+ */
+
 namespace lying\service;
 
 /**
- * 日志服务类
- *
- * @author carolkey <me@suyaqi.cn>
+ * Class Logger
+ * @package lying\service
  * @since 2.0
- * @link https://github.com/carolkey/lying
- * @license MIT
  */
 class Logger extends Service
 {
     /**
-     * @var string 日志存储的路径，默认runtime/log
+     * @var string 日志存储的路径
      */
     protected $path;
 
@@ -62,7 +66,7 @@ class Logger extends Service
      */
     protected function init()
     {
-        if (empty($this->path)) $this->path = DIR_RUNTIME . '/log';
+        empty($this->path) && ($this->path = DIR_RUNTIME . '/log');
         !is_dir($this->path) && mkdir($this->path, 0777, true);
         $this->file = $this->path . '/' . $this->file . '.log';
         register_shutdown_function([$this, 'flush']);
