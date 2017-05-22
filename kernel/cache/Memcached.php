@@ -1,15 +1,19 @@
 <?php
+/**
+ * @author carolkey <me@suyaqi.cn>
+ * @link https://github.com/carolkey/lying
+ * @copyright 2017 Lying
+ * @license MIT
+ */
+
 namespace lying\cache;
 
 use lying\service\Service;
 
 /**
- * Memcached缓存类
- *
- * @author carolkey <me@suyaqi.cn>
+ * Class MemCached
+ * @package lying\cache
  * @since 2.0
- * @link https://github.com/carolkey/lying
- * @license MIT
  */
 class MemCached extends Service implements Cache
 {
@@ -33,7 +37,7 @@ class MemCached extends Service implements Cache
     protected $password;
     
     /**
-     * @var \Memcached Memcache的实例
+     * @var \Memcached Memcached的实例
      */
     private $instance;
     
@@ -47,8 +51,8 @@ class MemCached extends Service implements Cache
     
     /**
      * 添加缓存服务器
-     * @param \Memcached $instance
-     * @return boolean 成功时返回true，或者在失败时返回false
+     * @param \Memcached $instance Memcached实例
+     * @return boolean 成功时返回true,或者在失败时返回false
      */
     private function addServers(\Memcached $instance)
     {
@@ -85,11 +89,11 @@ class MemCached extends Service implements Cache
     }
 
     /**
-     * 添加一个缓存，如果缓存已经存在，此次设置的值不会覆盖原来的值，并返回false
+     * 添加一个缓存,如果缓存已经存在,此次设置的值不会覆盖原来的值,并返回false
      * @param string $key 缓存的键
      * @param mixed $value 缓存的数据
-     * @param integer $ttl 缓存生存时间，默认为0
-     * @return boolean 成功返回true，失败返回false
+     * @param integer $ttl 缓存生存时间,默认为0
+     * @return boolean 成功返回true,失败返回false
      */
     public function add($key, $value, $ttl = 0)
     {
@@ -97,10 +101,10 @@ class MemCached extends Service implements Cache
     }
 
     /**
-     * 添加一组缓存，如果缓存已经存在，此次设置的值不会覆盖原来的值
-     * @param array $data 一个关联数组，如['name'=>'lying']
-     * @param integer $ttl 缓存生存时间，默认为0
-     * @return array 返回设置失败的数组，如['name', 'sex']，否则返回空数组
+     * 添加一组缓存,如果缓存已经存在,此次设置的值不会覆盖原来的值
+     * @param array $data 一个关联数组,如['name'=>'lying']
+     * @param integer $ttl 缓存生存时间,默认为0
+     * @return array 返回设置失败的数组,如['name', 'sex'],否则返回空数组
      */
     public function madd($data, $ttl = 0)
     {
@@ -114,11 +118,11 @@ class MemCached extends Service implements Cache
     }
 
     /**
-     * 添加一个缓存，如果缓存已经存在，此次缓存会覆盖原来的值并且重新设置生存时间
+     * 添加一个缓存,如果缓存已经存在,此次缓存会覆盖原来的值并且重新设置生存时间
      * @param string $key 缓存的键
      * @param mixed $value 缓存的数据
-     * @param integer $ttl 缓存生存时间，默认为0
-     * @return boolean 成功返回true，失败返回false
+     * @param integer $ttl 缓存生存时间,默认为0
+     * @return boolean 成功返回true,失败返回false
      */
     public function set($key, $value, $ttl = 0)
     {
@@ -126,10 +130,10 @@ class MemCached extends Service implements Cache
     }
 
     /**
-     * 添加一组缓存，如果缓存已经存在，此次缓存会覆盖原来的值并且重新设置生存时间
-     * @param array $data 一个关联数组，如['name' => 'lying']
-     * @param integer $ttl 缓存生存时间，默认为0
-     * @return array 返回设置失败的数组，如['name', 'sex']，否则返回空数组
+     * 添加一组缓存,如果缓存已经存在,此次缓存会覆盖原来的值并且重新设置生存时间
+     * @param array $data 一个关联数组,如['name' => 'lying']
+     * @param integer $ttl 缓存生存时间,默认为0
+     * @return array 返回设置失败的数组,如['name', 'sex'],否则返回空数组
      */
     public function mset($data, $ttl = 0)
     {
@@ -140,7 +144,7 @@ class MemCached extends Service implements Cache
     /**
      * 从缓存中提取存储的变量
      * @param string $key 缓存的键
-     * @return boolean 成功返回值，失败返回false
+     * @return boolean 成功返回值,失败返回false
      */
     public function get($key)
     {
@@ -150,7 +154,7 @@ class MemCached extends Service implements Cache
     /**
      * 从缓存中提取一组存储的变量
      * @param array $keys 缓存的键数组
-     * @return array 返回查找到的数据数组，没找到则返回空数组
+     * @return array 返回查找到的数据数组,没找到则返回空数组
      */
     public function mget($keys)
     {
@@ -161,7 +165,7 @@ class MemCached extends Service implements Cache
     /**
      * 检查缓存是否存在
      * @param string $key 要查找的缓存键
-     * @return boolean 如果键存在，则返回true，否则返回false
+     * @return boolean 如果键存在,则返回true,否则返回false
      */
     public function exist($key)
     {
@@ -172,7 +176,7 @@ class MemCached extends Service implements Cache
     /**
      * 从缓存中删除存储的变量
      * @param string $key 从缓存中删除存储的变量
-     * @return boolean 成功返回true，失败返回false
+     * @return boolean 成功返回true,失败返回false
      */
     public function del($key)
     {
@@ -181,7 +185,7 @@ class MemCached extends Service implements Cache
 
     /**
      * 清除所有缓存
-     * @return boolean 成功返回true，失败返回false
+     * @return boolean 成功返回true,失败返回false
      */
     public function flush()
     {

@@ -1,13 +1,17 @@
 <?php
+/**
+ * @author carolkey <me@suyaqi.cn>
+ * @link https://github.com/carolkey/lying
+ * @copyright 2017 Lying
+ * @license MIT
+ */
+
 namespace lying\service;
 
 /**
- * 服务组件基类
- *
- * @author carolkey <me@suyaqi.cn>
+ * Class Service
+ * @package lying\service
  * @since 2.0
- * @link https://github.com/carolkey/lying
- * @license MIT
  */
 class Service
 {
@@ -17,8 +21,8 @@ class Service
     private $events = [];
     
     /**
-     * 初始化子类的公有、受保护成员变量
-     * @param array $params 参数，一个关联数组
+     * 初始化子类的公有/受保护成员变量
+     * @param array $params 参数,一个关联数组
      */
     final public function __construct($params = [])
     {
@@ -44,9 +48,9 @@ class Service
     }
     
     /**
-     * 触发一个事件，如果事件返回false的话就不再继续执行后面绑定的事件了
+     * 触发一个事件,如果事件返回false的话就不再继续执行后面绑定的事件了
      * @param string $id 事件的ID
-     * @param array $data 传到绑定的方法的参数，按照参数的顺序提供一个索引数组
+     * @param array $data 传到绑定的方法的参数,按照参数的顺序提供一个索引数组
      */
     final public function trigger($id, $data = [])
     {
@@ -63,7 +67,7 @@ class Service
      * 移除事件
      * @param string $id 事件的ID
      * @param callable|null $callback 要移除的事件函数
-     * @return boolean 成功返回true，失败返回false
+     * @return boolean 成功返回true,失败返回false
      */
     final public function unhook($id, callable $callback = null)
     {

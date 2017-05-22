@@ -67,8 +67,8 @@ class Logger extends Service
     protected function init()
     {
         empty($this->path) && ($this->path = DIR_RUNTIME . '/log');
-        !is_dir($this->path) && mkdir($this->path, 0777, true);
-        $this->file = $this->path . '/' . $this->file . '.log';
+        !is_dir($this->path) && @mkdir($this->path, 0777, true);
+        $this->file = "$this->path/$this->file.log";
         register_shutdown_function([$this, 'flush']);
     }
     
@@ -103,11 +103,11 @@ class Logger extends Service
     }
     
     /**
-     * 打印LOG
+     * 打印
      * @param mixed $data 日志内容
-     * @param integer $level 日志等级，默认5
+     * @param integer $level 日志等级,默认5
      */
-    public function log($data, $level = 5)
+    public function record($data, $level = 5)
     {
         if ($level <= $this->level) {
             $trace = current(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1));
@@ -139,7 +139,7 @@ class Logger extends Service
                 $this->cycleFile();
             }
             clearstatcache();
-            file_put_contents($this->file, $this->container, FILE_APPEND|LOCK_EX);
+            @file_put_contents($this->file, $this->container, FILE_APPEND|LOCK_EX);
             $this->container = [];
         }
     }
@@ -153,10 +153,10 @@ class Logger extends Service
             $backfile = $this->file . ($i === 0 ? '' : ('.bak' . $i));
             if (is_file($backfile)) {
                 if ($i === $this->maxFile - 1) {
-                    unlink($backfile);
+                    @unlink($backfile);
                     continue;
                 }
-                rename($backfile, $this->file . '.bak' . ($i + 1));
+                @rename($backfile, $this->file . '.bak' . ($i + 1));
             }
         }
     }

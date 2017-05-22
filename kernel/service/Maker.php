@@ -1,11 +1,20 @@
 <?php
+/**
+ * @author carolkey <me@suyaqi.cn>
+ * @link https://github.com/carolkey/lying
+ * @copyright 2017 Lying
+ * @license MIT
+ */
+
 namespace lying\service;
 
 use lying\cache\Cache;
 use lying\db\Connection;
 
 /**
- * 工厂类，用于实例化服务类
+ * Class Maker
+ * @package lying\service
+ * @since 2.0
  *
  * @method Cache cache(string $id = 'cache')
  * @method Cookie cookie()
@@ -16,11 +25,6 @@ use lying\db\Connection;
  * @method Request request()
  * @method Router router()
  * @method Session session()
- *
- * @author carolkey <me@suyaqi.cn>
- * @since 2.0
- * @link https://github.com/carolkey/lying
- * @license MIT
  */
 class Maker
 {
@@ -35,12 +39,12 @@ class Maker
     private static $service = [];
     
     /**
-     * 按需注册服务，服务类可以一样，服务ID不能重复
+     * 按需注册服务,服务类可以一样,服务ID不能重复
      * @param array $service 服务配置数组
      */
     public function __construct($service)
     {
-        self::$service = self::$service + $service;
+        self::$service = $service;
     }
 
     /**
@@ -57,7 +61,6 @@ class Maker
             if (is_array(self::$service[$id])) {
                 $class = self::$service[$id]['class'];
                 unset(self::$service[$id]['class']);
-                //$class = array_shift(self::$service[$id]);
                 self::$instances[$id] = new $class(self::$service[$id]);
             } else {
                 self::$instances[$id] = new self::$service[$id]();
