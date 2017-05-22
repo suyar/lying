@@ -1,13 +1,17 @@
 <?php
+/**
+ * @author carolkey <me@suyaqi.cn>
+ * @link https://github.com/carolkey/lying
+ * @copyright 2017 Lying
+ * @license MIT
+ */
+
 namespace lying\db;
 
 /**
- * 活动记录查询基类
- *
- * @author carolkey <me@suyaqi.cn>
+ * Class ActiveRecordQuery
+ * @package lying\db
  * @since 2.0
- * @link https://github.com/carolkey/lying
- * @license MIT
  */
 class ActiveRecordQuery extends Query
 {
@@ -19,7 +23,7 @@ class ActiveRecordQuery extends Query
     /**
      * @var boolean 是否返回数组
      */
-    private $array = false;
+    private $array;
     
     /**
      * 初始化连接

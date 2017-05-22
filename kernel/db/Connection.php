@@ -1,15 +1,19 @@
 <?php
+/**
+ * @author carolkey <me@suyaqi.cn>
+ * @link https://github.com/carolkey/lying
+ * @copyright 2017 Lying
+ * @license MIT
+ */
+
 namespace lying\db;
 
 use lying\service\Service;
 
 /**
- * 数据库连接实例
- *
- * @author carolkey <me@suyaqi.cn>
+ * Class Connection
+ * @package lying\db
  * @since 2.0
- * @link https://github.com/carolkey/lying
- * @license MIT
  */
 class Connection extends Service
 {
@@ -28,6 +32,16 @@ class Connection extends Service
      * @var string 数据库密码
      */
     protected $pass;
+
+    /**
+     * @var array 主库列表
+     */
+    protected $master = [];
+
+    /**
+     * @var array 从库列表
+     */
+    protected $slave = [];
     
     /**
      * @var \PDO PDO实例
@@ -35,14 +49,19 @@ class Connection extends Service
     private $dbh;
 
     /**
-     * @var array 数据库中所有的表
-     */
-    private $tables;
-
-    /**
      * @var array 数据库表的结构
      */
     private $schema;
+
+    /**
+     * @var Connection 主库实例
+     */
+    private $_master;
+
+    /**
+     * @var Connection 从库实例
+     */
+    private $_slave;
     
     /**
      * 获取数据库实例
@@ -58,6 +77,40 @@ class Connection extends Service
             ]);
         }
         return $this->dbh;
+    }
+
+    /**
+     * 获取主库PDO实例
+     * @return \PDO
+     */
+    public function masterPdo()
+    {
+        if ($this->_master instanceof self) {
+            return $this->_master->pdo();
+        } elseif ($this->master) {
+            shuffle($this->master);
+            $this->_master = new self(array_shift($this->master));
+        } else {
+            $this->_master = $this;
+        }
+        return $this->_master->pdo();
+    }
+
+    /**
+     * 获取从库PDO实例
+     * @return \PDO
+     */
+    public function slavePdo()
+    {
+        if ($this->_slave instanceof self) {
+            return $this->_slave->pdo();
+        } elseif ($this->slave) {
+            shuffle($this->slave);
+            $this->_slave = new self(array_shift($this->slave));
+        } else {
+            $this->_slave = $this;
+        }
+        return $this->_slave->pdo();
     }
     
     /**
@@ -89,7 +142,7 @@ class Connection extends Service
     }
 
     /**
-     * 返回最后插入行的ID，或者是一个序列对象最后的值
+     * 返回最后插入行的ID,或者是一个序列对象最后的值
      * @param string $name 应该返回ID的那个序列对象的名称
      * @return string 返回ID
      */
@@ -100,7 +153,7 @@ class Connection extends Service
     
     /**
      * 启动一个事务
-     * @return boolean 成功时返回true，或者在失败时返回false
+     * @return boolean 成功时返回true,或者在失败时返回false
      */
     public function begin()
     {
@@ -109,7 +162,7 @@ class Connection extends Service
     
     /**
      * 提交一个事务
-     * @return boolean 成功时返回true，或者在失败时返回false
+     * @return boolean 成功时返回true,或者在失败时返回false
      */
     public function commit()
     {
@@ -118,7 +171,7 @@ class Connection extends Service
     
     /**
      * 回滚一个事务
-     * @return boolean 成功时返回true，或者在失败时返回false
+     * @return boolean 成功时返回true,或者在失败时返回false
      */
     public function rollBack()
     {

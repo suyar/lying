@@ -1,12 +1,14 @@
 <?php
+/**
+ * @author carolkey <me@suyaqi.cn>
+ * @link https://github.com/carolkey/lying
+ * @copyright 2017 Lying
+ * @license MIT
+ */
 
 /**
- * 框架基类，用来做各种初始化和自动加载
- *
- * @author carolkey <me@suyaqi.cn>
+ * Class Lying
  * @since 2.0
- * @link https://github.com/carolkey/lying
- * @license MIT
  */
 class Lying
 {
@@ -22,7 +24,7 @@ class Lying
 
     /**
      * 启动框架
-     * @param $config 配置数组
+     * @param array $config 配置数组
      */
     public static function run($config)
     {
@@ -51,9 +53,9 @@ class Lying
 
     /**
      * 获取配置
-     * @param string $key 配置键名，支持'user.name'形式的键名
+     * @param string $key 配置键名,支持'user.name'形式的键名
      * @param mixed $default 配置不存在时的默认值
-     * @return mixed 成功返回配置值，配置不存在返回null
+     * @return mixed 成功返回配置值,配置不存在返回null
      */
     public static function config($key, $default = null)
     {
@@ -84,7 +86,7 @@ class Lying
     /**
      * classMap加载
      * @param string $className 类名
-     * @return string|boolean 成功返回文件绝对路径，失败返回false
+     * @return string|boolean 成功返回文件绝对路径,失败返回false
      */
     private static function classMapLoader($className)
     {
@@ -92,9 +94,9 @@ class Lying
     }
     
     /**
-     * PSR-4自动加载，参考 http://www.php-fig.org/psr/psr-4/
+     * PSR-4自动加载,参考 http://www.php-fig.org/psr/psr-4/
      * @param string $className 类名
-     * @return string|boolean 成功返回文件绝对路径，失败返回false
+     * @return string|boolean 成功返回文件绝对路径,失败返回false
      */
     private static function psr4Loader($className)
     {
@@ -122,9 +124,9 @@ class Lying
     }
     
     /**
-     * PSR-0自动加载，参考 http://www.php-fig.org/psr/psr-0/
+     * PSR-0自动加载,参考 http://www.php-fig.org/psr/psr-0/
      * @param string $className 类名
-     * @return string|boolean 成功返回文件绝对路径，失败返回false
+     * @return string|boolean 成功返回文件绝对路径,失败返回false
      */
     private static function psr0Loader($className)
     {

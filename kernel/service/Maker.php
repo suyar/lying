@@ -21,6 +21,7 @@ use lying\db\Connection;
  * @method Connection db(string $id = 'db')
  * @method Dispatch dispatch()
  * @method Exception exception()
+ * @method Lock lock()
  * @method Logger logger()
  * @method Request request()
  * @method Router router()
@@ -72,7 +73,7 @@ class Maker
     }
 
     /**
-     * 魔术方法，返回方法对应的服务类
+     * 魔术方法,返回方法对应的服务类
      * @param string $name 方法名
      * @param array $arguments 方法参数
      * @return Service 返回方法对应的服务类

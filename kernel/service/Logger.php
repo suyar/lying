@@ -18,7 +18,7 @@ class Logger extends Service
     /**
      * @var string 日志存储的路径
      */
-    protected $path;
+    protected $dir;
 
     /**
      * @var string 日志文件名
@@ -66,9 +66,9 @@ class Logger extends Service
      */
     protected function init()
     {
-        empty($this->path) && ($this->path = DIR_RUNTIME . '/log');
-        !is_dir($this->path) && @mkdir($this->path, 0777, true);
-        $this->file = "$this->path/$this->file.log";
+        empty($this->dir) && ($this->dir = DIR_RUNTIME . '/log');
+        !is_dir($this->dir) && @mkdir($this->dir, 0777, true);
+        $this->file = "$this->dir/$this->file.log";
         register_shutdown_function([$this, 'flush']);
     }
     

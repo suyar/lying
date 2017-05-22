@@ -1,13 +1,17 @@
 <?php
+/**
+ * @author carolkey <me@suyaqi.cn>
+ * @link https://github.com/carolkey/lying
+ * @copyright 2017 Lying
+ * @license MIT
+ */
+
 namespace lying\db;
 
 /**
- * 查询构造器
- *
- * @author carolkey <me@suyaqi.cn>
+ * Class Query
+ * @package lying\db
  * @since 2.0
- * @link https://github.com/carolkey/lying
- * @license MIT
  */
 class Query
 {
@@ -95,11 +99,11 @@ class Query
      * ```php
      * select('id, lying.sex, count(id) as count')
      * select(['id', 'lying.sex', 'count'=>'count(id)', 'q'=>$query])
-     * 其中$query为Query实例，必须指定子查询的别名，只有$columns为数组的时候才支持子查询
-     * 注意：当你使用到包含逗号的数据库表达式的时候，你必须使用数组的格式，以避免自动的错误的引号添加
+     * 其中$query为Query实例,必须指定子查询的别名,只有$columns为数组的时候才支持子查询
+     * 注意:当你使用到包含逗号的数据库表达式的时候,你必须使用数组的格式,以避免自动的错误的引号添加
      * select(["CONCAT(first_name, ' ', last_name) AS full_name", 'email']);
      * ```
-     * @param string|array $columns 要查询的字段，当没有设置要查询的字段的时候，默认为'*'
+     * @param string|array $columns 要查询的字段,当没有设置要查询的字段的时候,默认为'*'
      * @return $this
      */
     public function select($columns)
@@ -123,7 +127,7 @@ class Query
      * ```php
      * from('user, lying.admin as ad')
      * from(['user', 'ad'=>'lying.admin', 'q'=>$query])
-     * 其中$query为Query实例，必须指定子查询的别名，只有$tables为数组的时候才支持子查询
+     * 其中$query为Query实例,必须指定子查询的别名,只有$tables为数组的时候才支持子查询
      * ```
      * @param string|array $tables 要查询的表
      * @return $this
@@ -135,11 +139,11 @@ class Query
     }
 
     /**
-     * 设置表连接，可多次调用
-     * @param string $type 连接类型,可以为'left join'，'right join'，'inner join'
-     * @param string|array $table 要连接的表，子查询用数组形式表示，键为别名，值为Query实例
-     * @param string|array $on 条件，如果要使用'字段1 = 字段2'的形式，请用字符串带入，用数组的话'字段2'将被解析为绑定参数
-     * @param array $params 绑定的参数，应为key=>value形式
+     * 设置表连接,可多次调用
+     * @param string $type 连接类型,可以为'left join','right join','inner join'
+     * @param string|array $table 要连接的表,子查询用数组形式表示,键为别名,值为Query实例
+     * @param string|array $on 条件,如果要使用'字段1 = 字段2'的形式,请用字符串带入,用数组的话'字段2'将被解析为绑定参数
+     * @param array $params 绑定的参数,应为key=>value形式
      * @return $this
      */
     public function join($type, $table, $on = null, $params = [])
@@ -151,13 +155,13 @@ class Query
     /**
      * 设置查询条件
      * ```php
-     * 如果要使用'字段1 = 字段2'的形式，请用字符串带入，用数组的话'字段2'将被解析为绑定参数
+     * 如果要使用'字段1 = 字段2'的形式,请用字符串带入,用数组的话'字段2'将被解析为绑定参数
      * where("user.id = admin.id and name = :name", [':name'=>'lying']);
      * where(['id'=>1, 'name'=>'lying']);
      * where(['id'=>[1, 2, 3]], ['or', 'name'=>'lying', 'sex'=>1]);
      * ```
      * @param string|array $condition 要查询的条件
-     * @param array $params 当$condition为字符串时，绑定参数的数组
+     * @param array $params 当$condition为字符串时,绑定参数的数组
      * @return $this
      */
     public function where($condition, $params = [])
@@ -229,7 +233,7 @@ class Query
      * limit(10);
      * limit(5, 20);
      * ```
-     * @param integer $offset 偏移的条数，如果只提供此参数，则等同于limit(0, $offset)
+     * @param integer $offset 偏移的条数,如果只提供此参数,则等同于limit(0, $offset)
      * @param integer $limit 限制的条数
      * @return $this
      */
@@ -242,7 +246,7 @@ class Query
     /**
      * 设置联合查询,可多次使用
      * @param Query $query 子查询
-     * @param boolean $all 是否使用UNION ALL，默认false
+     * @param boolean $all 是否使用UNION ALL,默认false
      * @return $this
      */
     public function union(Query $query, $all = false)
@@ -269,7 +273,7 @@ class Query
      * ```php
      * 'lying.name' => '`lying`.`name`'
      * ```
-     * 注意:'count(id)'并不会转义成'count(`id`)'，而还是原来的'count(id)'
+     * 注意:'count(id)'并不会转义成'count(`id`)',而还是原来的'count(id)'
      * @param string $name 字段名
      * @return string 字段名
      */
@@ -288,7 +292,7 @@ class Query
     }
 
     /**
-     * 给复杂的表名，字段加上"`"，并且编译别名和子查询，请以数组形式传入字段名和表名
+     * 给复杂的表名,字段加上"`",并且编译别名和子查询,请以数组形式传入字段名和表名
      * ```php
      * ['lying.name'] => ['`lying`.`name`']
      * ['lying.name n'] => ['`lying`.`name` AS `n`']
@@ -298,7 +302,7 @@ class Query
      * ```
      * @param array $columns 一个存字段名或者表名的数组
      * @param array $container 参数容器
-     * @return array 返回编译后的表名数组，数组键名和传入时一样
+     * @return array 返回编译后的表名数组,数组键名和传入时一样
      */
     private function quoteColumns($columns, &$container)
     {
@@ -320,7 +324,7 @@ class Query
     /**
      * 编译条件
      * @param string|array $condition 条件字符串或者数组
-     * @param array $params 当$condition为字符串时，绑定参数的数组
+     * @param array $params 当$condition为字符串时,绑定参数的数组
      * @param array $container 参数容器
      * @return string 返回编译后的条件字符串
      */
@@ -409,7 +413,7 @@ class Query
     }
 
     /**
-     * 绑定参数，编译占位符
+     * 绑定参数,编译占位符
      * @param string|array $params 绑定的参数
      * @param array $container 参数容器
      * @return string|array 返回编译后的占位符字符串或者数组
@@ -582,14 +586,26 @@ class Query
     }
 
     /**
-     * 执行一条sql语句
-     * @param string $statement sql语句
+     * 判断是否为读取数据
+     * @param string $statement
+     * @return boolean
+     */
+    private function isRead($statement)
+    {
+        $pattern = '/^\s*(SELECT|SHOW|DESCRIBE|DESC|EXPLAIN)\b/i';
+        return preg_match($pattern, $statement) > 0;
+    }
+
+    /**
+     * 执行一条SQL语句
+     * @param string $statement SQL语句
      * @param array $params 绑定的参数
-     * @return boolean 成功返回true，失败返回false
+     * @return boolean 成功返回true,失败返回false
      */
     private function execute($statement, $params = [])
     {
-        $this->sth = $this->conn->pdo()->prepare($statement);
+        $pdo = $this->isRead($statement) ? $this->conn->slavePdo() : $this->conn->masterPdo();
+        $this->sth = $pdo->prepare($statement);
         return $this->sth->execute($params);
     }
 
@@ -597,7 +613,7 @@ class Query
      * 查询数据
      * @param string $method 查询的方法
      * @param array $args 要带入的参数列表
-     * @return boolean|array 查询的数据，失败返回false
+     * @return boolean|array 查询的数据,失败返回false
      */
     private function fetch($method, $args = [])
     {
@@ -610,7 +626,7 @@ class Query
     /**
      * 返回结果集中的一条记录
      * @param boolean $obj 是否返回对象(默认返回关联数组)
-     * @param string $class 要实例化的对象，不写默认为匿名对象
+     * @param string $class 要实例化的对象,不写默认为匿名对象
      * @return boolean|array|\stdClass|\lying\db\ActiveRecord
      */
     public function one($obj = false, $class = null)
@@ -621,7 +637,7 @@ class Query
     /**
      * 返回所有查询结果的数组
      * @param boolean $obj 是否返回对象(默认返回关联数组)
-     * @param string $class 要实例化的对象，不写默认为匿名对象
+     * @param string $class 要实例化的对象,不写默认为匿名对象
      * @return boolean|array|\stdClass[]|\lying\db\ActiveRecord[]
      */
     public function all($obj = false, $class = null)
@@ -630,7 +646,7 @@ class Query
     }
 
     /**
-     * 从结果集中的下一行返回单独的一列，查询结果为标量
+     * 从结果集中的下一行返回单独的一列,查询结果为标量
      * @return mixed 返回查询结果
      */
     public function column()
@@ -639,7 +655,7 @@ class Query
     }
 
     /**
-     * 执行原生SQL，返回的是语句执行后的\PDOStatement对象，直接调用fetch，fetchAll，rowCount等函数即可
+     * 执行原生SQL,返回的是语句执行后的\PDOStatement对象,直接调用fetch,fetchAll,rowCount等函数即可
      * ```php
      * db()->createQuery()->raw('select * from user')->fetchAll(\PDO::FETCH_ASSOC);
      * ```
@@ -649,17 +665,18 @@ class Query
      */
     public function raw($statement, $params = [])
     {
-        $this->sth = $this->conn->pdo()->prepare($statement);
+        $pdo = $this->isRead($statement) ? $this->conn->slavePdo() : $this->conn->masterPdo();
+        $this->sth = $pdo->prepare($statement);
         return $this->execute($statement, $params) ? $this->sth : false;
     }
 
     /**
      * 插入一条数据
      * @param string $table 要插入的表名
-     * @param array $datas 要插入的数据，(name => value)形式的数组
-     * 当然value可以是子查询，Query的实例，但是查询的表不能和插入的表是同一个
+     * @param array $datas 要插入的数据,(name => value)形式的数组
+     * 当然value可以是子查询,Query的实例,但是查询的表不能和插入的表是同一个
      * @param boolean $replace 是否用REPLACE INTO
-     * @return integer|boolean 返回受影响的行数，有可能是0行，失败返回false
+     * @return integer|boolean 返回受影响的行数,有可能是0行,失败返回false
      */
     public function insert($table, $datas, $replace = false)
     {
@@ -677,7 +694,7 @@ class Query
         $statement = ($replace ? 'REPLACE INTO' : 'INSERT INTO') . " $table (" . implode(', ', $cols) . ') VALUES (' . implode(', ', $placeholders) . ')';
         return $this->execute($statement, $params) ? $this->sth->rowCount() : false;
     }
-    
+
     /**
      * 批量插入数据
      * ```php
@@ -689,7 +706,7 @@ class Query
      * ```
      * @param string $table 要插入的表名
      * @param array $columns 要插入的字段名
-     * @param array $datas 要插入的数据，应为一个二维数组
+     * @param array $datas 要插入的数据,应为一个二维数组
      * @param boolean $replace 是否用REPLACE INTO
      * @return integer|boolean 返回受影响的行数,有可能是0行,失败返回false
      */
@@ -706,15 +723,15 @@ class Query
         $statement = ($replace ? 'REPLACE INTO' : 'INSERT INTO') . " $table (" . implode(', ', $columns) . ') VALUES ' . implode(', ', $v);
         return $this->execute($statement, $params) ? $this->sth->rowCount() : false;
     }
-    
+
     /**
      * 更新数据
      * @param string $table 要更新的表名
-     * @param array $datas 要更新的数据，(name => value)形式的数组
-     * 当然value可以是子查询，Query的实例，但是查询的表不能和更新的表是同一个
-     * @param string|array $condition 更新的条件，参见where()
-     * @param array $params 条件的参数，参见where()
-     * @return integer|boolean 返回受影响的行数，有可能是0行，失败返回false
+     * @param array $datas 要更新的数据,(name => value)形式的数组
+     * 当然value可以是子查询,Query的实例,但是查询的表不能和更新的表是同一个
+     * @param string|array $condition 更新的条件,参见where()
+     * @param array $params 条件的参数,参见where()
+     * @return integer|boolean 返回受影响的行数,有可能是0行,失败返回false
      */
     public function update($table, $datas, $condition = '', $params = [])
     {
@@ -733,13 +750,13 @@ class Query
         $statement = $statement . (empty($where) ? '' : " WHERE $where");
         return $this->execute($statement, $p) ? $this->sth->rowCount() : false;
     }
-    
+
     /**
      * 删除数据
      * @param string $table 要删除的表名
-     * @param string|array $condition 删除的条件，参见where()
-     * @param array $params 条件的参数，参见where()
-     * @return integer|boolean 返回受影响的行数，有可能是0行，失败返回false
+     * @param string|array $condition 删除的条件,参见where()
+     * @param array $params 条件的参数,参见where()
+     * @return integer|boolean 返回受影响的行数,有可能是0行,失败返回false
      */
     public function delete($table, $condition = '', $params = [])
     {

@@ -43,14 +43,27 @@ return [
     //数据库组件
     'db' => [
         'class' => 'lying\db\Connection',
-        'dsn' => 'mysql:host=127.0.0.1;dbname=lying;charset=utf8',
+        'dsn' => 'mysql:host=127.0.0.1;dbname=ncphp;charset=utf8',
         'user' => 'root',
         'pass' => 'root',
+        'slave' => [
+            ['dsn' => 'mysql:host=127.0.0.1;dbname=ncphp;charset=utf8', 'user' => 'root', 'pass' => 'root'],
+            ['dsn' => 'mysql:host=127.0.0.1;dbname=ncphp;charset=utf8', 'user' => 'root', 'pass' => 'root'],
+            ['dsn' => 'mysql:host=127.0.0.1;dbname=ncphp;charset=utf8', 'user' => 'root', 'pass' => 'root'],
+        ],
+        'master' => [
+
+        ],
+    ],
+    //锁组件
+    'lock' => [
+        'class' => 'lying\service\Lock',
+        'dir' => DIR_RUNTIME . '/lock',
     ],
     //日志组件
     'logger' => [
         'class' => 'lying\service\Logger',
-        'path' => DIR_RUNTIME . '/log',
+        'dir' => DIR_RUNTIME . '/log',
         'file' => 'lying',
         'maxItem' => 500,
         'maxSize' => 1024,

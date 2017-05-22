@@ -1,15 +1,19 @@
 <?php
+/**
+ * @author carolkey <me@suyaqi.cn>
+ * @link https://github.com/carolkey/lying
+ * @copyright 2017 Lying
+ * @license MIT
+ */
+
 namespace lying\db;
 
 use lying\service\Service;
 
 /**
- * 活动记录基类
- *
- * @author carolkey <me@suyaqi.cn>
+ * Class ActiveRecord
+ * @package lying\db
  * @since 2.0
- * @link https://github.com/carolkey/lying
- * @license MIT
  */
 class ActiveRecord extends Service
 {
@@ -77,7 +81,7 @@ class ActiveRecord extends Service
     }
 
     /**
-     * 返回所有的主键，没有主键返回false
+     * 返回所有的主键,没有主键返回false
      * @return array|boolean
      */
     private static function pk()
@@ -149,8 +153,8 @@ class ActiveRecord extends Service
     
     /**
      * 查找一条记录
-     * @param mixed $condition 如果为数组，则为查找条件，否则的话为查找第一个主键
-     * @return ActiveRecord|boolean 返回查询结果，失败返回false
+     * @param mixed $condition 如果为数组,则为查找条件,否则的话为查找第一个主键
+     * @return ActiveRecord|boolean 返回查询结果,失败返回false
      * @throws \Exception 主键不存在抛出异常
      */
     public static function findOne($condition)
@@ -168,16 +172,38 @@ class ActiveRecord extends Service
     /**
      * 查找所有符合条件的记录
      * @param array $condition 查看Query::where()的数组使用方式
-     * @return ActiveRecord[]|boolean 返回查询结果数组，失败返回false
+     * @return ActiveRecord[]|boolean 返回查询结果数组,失败返回false
      */
     public static function findAll($condition = [])
     {
         return self::find()->where($condition)->all();
     }
+
+    /**
+     * 根据条件删除数据
+     * @param string|array $condition 删除的条件,参见where()
+     * @return boolean|integer 返回受影响的行数,有可能是0行,失败返回false
+     */
+    public static function deleteAll($condition = '')
+    {
+        return self::find()->delete(self::table(), $condition);
+    }
+
+    /**
+     * 更新数据
+     * @param array $datas 要更新的数据,(name => value)形式的数组;
+     * 当然value可以是子查询,Query的实例,但是查询的表不能和更新的表是同一个
+     * @param string|array $condition 更新的条件,参见where()
+     * @return boolean|integer 返回受影响的行数,有可能是0行,失败返回false
+     */
+    public static function updateAll($datas, $condition = '')
+    {
+        return self::find()->update(self::table(), $datas, $condition);
+    }
     
     /**
      * 插入当前设置的数据
-     * @return integer|boolean 成功返回插入的行数，失败返回false
+     * @return integer|boolean 成功返回插入的行数,失败返回false
      */
     public function insert()
     {
@@ -194,7 +220,7 @@ class ActiveRecord extends Service
     }
 
     /**
-     * 返回旧数据的条件(主键键值对)，用于更新数据
+     * 返回旧数据的条件(主键键值对),用于更新数据
      * @return array 条件数组
      * @throws \Exception 主键不存在抛出异常
      */
@@ -212,7 +238,7 @@ class ActiveRecord extends Service
     
     /**
      * 更新当前数据
-     * @return integer|boolean 成功返回更新的行数，失败返回false
+     * @return integer|boolean 成功返回更新的行数,失败返回false
      */
     public function update()
     {
@@ -227,7 +253,7 @@ class ActiveRecord extends Service
     
     /**
      * 删除本条数据
-     * @return integer|boolean 成功返回删除的行数，失败返回false
+     * @return integer|boolean 成功返回删除的行数,失败返回false
      */
     public function delete()
     {
@@ -242,7 +268,7 @@ class ActiveRecord extends Service
     
     /**
      * 是否为新记录
-     * @return boolean 新纪录返回true，否则返回false
+     * @return boolean 新纪录返回true,否则返回false
      */
     public function isNewRecord()
     {
@@ -251,7 +277,7 @@ class ActiveRecord extends Service
     
     /**
      * 保存数据
-     * @return integer|boolean 成功返回保存的行数，失败返回false
+     * @return integer|boolean 成功返回保存的行数,失败返回false
      */
     public function save()
     {
