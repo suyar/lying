@@ -43,13 +43,13 @@ return [
     //数据库组件
     'db' => [
         'class' => 'lying\db\Connection',
-        'dsn' => 'mysql:host=127.0.0.1;dbname=ncphp;charset=utf8',
+        'dsn' => 'mysql:host=127.0.0.1;dbname=lying;charset=utf8',
         'user' => 'root',
         'pass' => 'root',
         'slave' => [
-            ['dsn' => 'mysql:host=127.0.0.1;dbname=ncphp;charset=utf8', 'user' => 'root', 'pass' => 'root'],
-            ['dsn' => 'mysql:host=127.0.0.1;dbname=ncphp;charset=utf8', 'user' => 'root', 'pass' => 'root'],
-            ['dsn' => 'mysql:host=127.0.0.1;dbname=ncphp;charset=utf8', 'user' => 'root', 'pass' => 'root'],
+            ['dsn' => 'mysql:host=127.0.0.1;dbname=lying;charset=utf8', 'user' => 'root', 'pass' => 'root'],
+            ['dsn' => 'mysql:host=127.0.0.1;dbname=lying;charset=utf8', 'user' => 'root', 'pass' => 'root'],
+            ['dsn' => 'mysql:host=127.0.0.1;dbname=lying;charset=utf8', 'user' => 'root', 'pass' => 'root'],
         ],
         'master' => [
 
