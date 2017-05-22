@@ -655,6 +655,56 @@ class Query
     }
 
     /**
+     * 获取指定列的记录数
+     * @param string $column 要统计的列
+     * @return integer 返回记录数
+     */
+    public function count($column = '*')
+    {
+        return $this->select(['count' => "COUNT($column)"])->column();
+    }
+
+    /**
+     * 获取指定列所有值之和
+     * @param string $column 要相加的列
+     * @return integer 返回相加后的值
+     */
+    public function sum($column)
+    {
+        return $this->select(['sum' => "SUM($column)"])->column();
+    }
+
+    /**
+     * 获取指定列的最大值
+     * @param string $column 计算的列
+     * @return integer 最大值
+     */
+    public function max($column)
+    {
+        return $this->select(['max' => "MAX($column)"])->column();
+    }
+
+    /**
+     * 获取指定列的最小值
+     * @param string $column 计算的列
+     * @return integer 最小值
+     */
+    public function min($column)
+    {
+        return $this->select(['min' => "MIN($column)"])->column();
+    }
+
+    /**
+     * 获取指定列的平均值
+     * @param string $column 计算的列
+     * @return integer 平均值
+     */
+    public function avg($column)
+    {
+        return $this->select(['avg' => "AVG($column)"])->column();
+    }
+
+    /**
      * 执行原生SQL,返回的是语句执行后的\PDOStatement对象,直接调用fetch,fetchAll,rowCount等函数即可
      * ```php
      * db()->createQuery()->raw('select * from user')->fetchAll(\PDO::FETCH_ASSOC);
