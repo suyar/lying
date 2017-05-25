@@ -18,7 +18,7 @@ class Session
     /**
      * 初始化SESSION
      */
-    protected function init()
+    protected function __construct()
     {
         $this->start();
     }
