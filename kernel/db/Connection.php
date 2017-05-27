@@ -67,7 +67,7 @@ class Connection extends Service
      * 获取数据库实例
      * @return \PDO
      */
-    public function pdo()
+    protected function pdo()
     {
         if ($this->dbh === null) {
             $this->dbh = new \PDO($this->dsn, $this->user, $this->pass, [
@@ -130,7 +130,7 @@ class Connection extends Service
     public function schema($table)
     {
         if (!isset($this->schema[$table])) {
-            $struct = $this->pdo()->query("DESC `$table`")->fetchAll();
+            $struct = $this->slavePdo()->query("DESC `$table`")->fetchAll();
             foreach ($struct as $column) {
                 $this->schema[$table]['fields'][] = $column['Field'];
                 if ($column['Key'] === 'PRI') {
@@ -148,7 +148,7 @@ class Connection extends Service
      */
     public function lastInsertId($name = null)
     {
-        return $this->pdo()->lastInsertId($name);
+        return $this->masterPdo()->lastInsertId($name);
     }
     
     /**
@@ -157,7 +157,7 @@ class Connection extends Service
      */
     public function begin()
     {
-        return $this->pdo()->beginTransaction();
+        return $this->masterPdo()->beginTransaction();
     }
     
     /**
@@ -166,7 +166,7 @@ class Connection extends Service
      */
     public function commit()
     {
-        return $this->pdo()->commit();
+        return $this->masterPdo()->commit();
     }
     
     /**
@@ -175,6 +175,6 @@ class Connection extends Service
      */
     public function rollBack()
     {
-        return $this->pdo()->rollBack();
+        return $this->masterPdo()->rollBack();
     }
 }

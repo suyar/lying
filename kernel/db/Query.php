@@ -711,11 +711,12 @@ class Query
      * ```
      * @param string $statement SQL语句
      * @param array $params 绑定的参数
-     * @return \PDOStatement|boolean 失败返回false
+     * @param boolean $master 是否使用主库执行语句,这个参数适合FOR UPDATE等操作
+     * @return boolean|\PDOStatement 失败返回false
      */
-    public function raw($statement, $params = [])
+    public function raw($statement, $params = [], $master = false)
     {
-        $pdo = $this->isRead($statement) ? $this->conn->slavePdo() : $this->conn->masterPdo();
+        $pdo = !$master && $this->isRead($statement) ? $this->conn->slavePdo() : $this->conn->masterPdo();
         $this->sth = $pdo->prepare($statement);
         return $this->execute($statement, $params) ? $this->sth : false;
     }

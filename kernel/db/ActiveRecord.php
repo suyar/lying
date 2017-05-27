@@ -186,7 +186,7 @@ class ActiveRecord extends Service
      */
     public static function deleteAll($condition = '')
     {
-        return self::find()->delete(self::table(), $condition);
+        return self::find()->delete(static::table(), $condition);
     }
 
     /**
@@ -198,7 +198,7 @@ class ActiveRecord extends Service
      */
     public static function updateAll($datas, $condition = '')
     {
-        return self::find()->update(self::table(), $datas, $condition);
+        return self::find()->update(static::table(), $datas, $condition);
     }
     
     /**
@@ -208,10 +208,10 @@ class ActiveRecord extends Service
     public function insert()
     {
         $this->trigger(self::EVENT_BEFORE_INSERT);
-        $res = self::db()->createQuery()->insert(static::table(), $this->attr);
+        $res = static::db()->createQuery()->insert(static::table(), $this->attr);
         if (false !== $res && (false !== $keys = self::pk())) {
             foreach ($keys as $key) {
-                $this->attr[$key] = self::db()->lastInsertId($key);
+                $this->attr[$key] = static::db()->lastInsertId($key);
             }
             $this->reload();
         }
@@ -243,7 +243,7 @@ class ActiveRecord extends Service
     public function update()
     {
         $this->trigger(self::EVENT_BEFORE_UPDATE);
-        $res = self::db()->createQuery()->update(static::table(), $this->attr, $this->oldCondition());
+        $res = static::db()->createQuery()->update(static::table(), $this->attr, $this->oldCondition());
         if (false !== $res) {
             $this->reload();
         }
@@ -258,7 +258,7 @@ class ActiveRecord extends Service
     public function delete()
     {
         $this->trigger(self::EVENT_BEFORE_DELETE);
-        $res = self::db()->createQuery()->delete(static::table(), $this->oldCondition());
+        $res = static::db()->createQuery()->delete(static::table(), $this->oldCondition());
         if (false !== $res) {
             $this->oldAttr = null;
         }
