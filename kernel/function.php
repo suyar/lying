@@ -23,23 +23,23 @@ function url($path, $params = [], $normal = false)
 /**
  * 获取GET参数
  * @param string $name 参数名
- * @param boolean $trim 是否trim过滤,默认true
+ * @param mixed $defaultValue 默认值
  * @return array|mixed|string
  */
-function G($name, $trim = true)
+function G($name = null, $defaultValue = null)
 {
-    $value = Lying::$maker->request()->get($name);
-    return $trim && is_string($value) ? trim($value) : $value;
+    $value = Lying::$maker->request()->get($name, $defaultValue);
+    return is_string($value) ? trim($value) : $value;
 }
 
 /**
  * 获取POST参数
  * @param string $name 参数名
- * @param boolean $trim 是否trim过滤,默认true
+ * @param null $defaultValue 默认值
  * @return array|mixed|string
  */
-function P($name, $trim = true)
+function P($name = null, $defaultValue = null)
 {
-    $value = Lying::$maker->request()->post($name);
-    return $trim && is_string($value) ? trim($value) : $value;
+    $value = Lying::$maker->request()->post($name, $defaultValue);
+    return is_string($value) ? trim($value) : $value;
 }
