@@ -88,11 +88,9 @@ class Controller extends Service
         
         while (ob_get_level() !== 0) ob_end_clean();
         http_response_code(302);
-        $ajax = isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest';
-        $pjax = $ajax && !empty($_SERVER['HTTP_X_PJAX']);
-        if ($pjax) {
+        if ($this->request->isPjax()) {
             header("X-Pjax-Url: $url");
-        } else if ($ajax) {
+        } else if ($this->request->isAjax()) {
             header("X-Redirect: $url");
         } else {
             header("Location: $url");
@@ -110,11 +108,6 @@ class Controller extends Service
      */
     final public function render($view, $params= [], $layout = false, $subparams = [])
     {
-        return (new View())->render(
-            $view,
-            $params,
-            $layout ? $layout : $this->layout,
-            array_merge($this->subparams, $subparams)
-        );
+        return (new View())->render($view, $params, $layout ? $layout : $this->layout, array_merge($this->subparams, $subparams));
     }
 }

@@ -25,7 +25,7 @@ class Lock extends Service
      */
     protected function init()
     {
-        empty($this->dir) && ($this->dir = DIR_RUNTIME . '/lock');
+        empty($this->dir) && ($this->dir = DIR_RUNTIME . DS . 'lock');
         !is_dir($this->dir) && @mkdir($this->dir, 0777, true);
     }
 
@@ -41,7 +41,7 @@ class Lock extends Service
      */
     public function call($name, $type, callable $call)
     {
-        if ($fp = @fopen($this->dir . '/' . md5($name), 'w')) {
+        if ($fp = @fopen($this->dir . DS . md5($name), 'w')) {
             if (@flock($fp, $type)) {
                 $res = call_user_func($call);
                 @flock($fp, LOCK_UN);

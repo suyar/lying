@@ -58,12 +58,12 @@ return [
     //锁组件
     'lock' => [
         'class' => 'lying\service\Lock',
-        'dir' => DIR_RUNTIME . '/lock',
+        'dir' => DIR_RUNTIME . DS . 'lock',
     ],
     //日志组件
     'logger' => [
         'class' => 'lying\service\Logger',
-        'dir' => DIR_RUNTIME . '/log',
+        'dir' => DIR_RUNTIME . DS . 'log',
         'file' => 'lying',
         'maxItem' => 500,
         'maxSize' => 1024,
@@ -73,7 +73,7 @@ return [
     //缓存组件
     'cache' => [
         'class' => 'lying\cache\FileCache',
-        'dir' => DIR_RUNTIME . '/cache',
+        'dir' => DIR_RUNTIME . DS . 'cache',
         'gc' => 50,
     ],
     'apcu' => [

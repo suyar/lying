@@ -18,7 +18,7 @@ class Request
     /**
      * @var array 请求的GET/POST数据
      */
-    private $requestData;
+    private $data;
 
     /**
      * 装载GET/POST数据,此函数第一次执行有效
@@ -26,11 +26,8 @@ class Request
      */
     public function load($get)
     {
-        if ($this->requestData === null) {
-            $this->requestData = [
-                'get' => $get,
-                'post' => $_POST
-            ];
+        if ($this->data === null) {
+            $this->data = ['get' => $get, 'post' => $_POST];
         }
     }
 
@@ -43,9 +40,9 @@ class Request
     public function get($name = null, $defaultValue = null)
     {
         if ($name === null) {
-            return $this->requestData['get'];
+            return $this->data['get'];
         } else {
-            return isset($this->requestData['get'][$name]) ? $this->requestData['get'][$name] : $defaultValue;
+            return isset($this->data['get'][$name]) ? $this->data['get'][$name] : $defaultValue;
         }
     }
 
@@ -58,9 +55,9 @@ class Request
     public function post($name = null, $defaultValue = null)
     {
         if ($name === null) {
-            return $this->requestData['post'];
+            return $this->data['post'];
         } else {
-            return isset($this->requestData['post'][$name]) ? $this->requestData['post'][$name] : $defaultValue;
+            return isset($this->data['post'][$name]) ? $this->data['post'][$name] : $defaultValue;
         }
     }
 

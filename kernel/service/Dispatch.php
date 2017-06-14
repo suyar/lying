@@ -50,9 +50,7 @@ class Dispatch extends Service
      */
     private function checkAccess($pregs, $action)
     {
-        $pregs = array_merge([
-            '/^(init|beforeAction|afterAction)$/i',
-        ], $pregs);
+        $pregs = array_merge(['/^(init|beforeAction|afterAction)$/i'], $pregs);
         foreach ($pregs as $pattern) {
             if (preg_match($pattern, $action)) {
                 return false;
@@ -70,7 +68,8 @@ class Dispatch extends Service
     {
         $args = [];
         foreach ($params as $param) {
-            if (($arg = \Lying::$maker->request()->get($param->name)) !== null) {
+            $arg = \Lying::$maker->request()->get($param->name);
+            if ($arg !== null) {
                 $args[] = $arg;
             }
         }

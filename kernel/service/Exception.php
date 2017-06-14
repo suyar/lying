@@ -94,7 +94,7 @@ class Exception
         http_response_code($code === 404 ? 404 : 500);
         ob_start();
         ob_implicit_flush(false);
-        require DIR_KERNEL . '/view/error.php';
+        require DIR_KERNEL . DS . 'view' . DS . 'error.php';
         ob_end_flush();
         flush();
         exit(1);

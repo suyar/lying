@@ -104,7 +104,7 @@ class Lying
         while (false !== $pos = strrpos($prefix, '\\')) {
             $prefix = substr($prefix, 0, $pos);
             if ($filePre = self::config("loader.psr-4.$prefix")) {
-                $relativeClass = str_replace('\\', DIRECTORY_SEPARATOR, substr($className, $pos));
+                $relativeClass = str_replace('\\', DS, substr($className, $pos));
                 if (is_array($filePre)) {
                     foreach ($filePre as $path) {
                         $file = $path . $relativeClass . '.php';
@@ -131,14 +131,14 @@ class Lying
     private static function psr0Loader($className)
     {
         if (false === $pos = strrpos($className, '\\')) {
-            $file = str_replace('_', DIRECTORY_SEPARATOR, $className) . '.php';
+            $file = str_replace('_', DS, $className) . '.php';
         } else {
-            $namespace = str_replace('\\', DIRECTORY_SEPARATOR, substr($className, 0, $pos));
-            $class = str_replace(['_', '\\'], DIRECTORY_SEPARATOR, substr($className, $pos));
+            $namespace = str_replace('\\', DS, substr($className, 0, $pos));
+            $class = str_replace(['_', '\\'], DS, substr($className, $pos));
             $file = $namespace . $class . '.php';
         }
         foreach (self::config('loader.psr-0') as $baseDir) {
-            $absoluteFile = $baseDir . DIRECTORY_SEPARATOR . $file;
+            $absoluteFile = $baseDir . DS . $file;
             if (file_exists($absoluteFile)) {
                 return $absoluteFile;
             }

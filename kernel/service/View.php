@@ -56,21 +56,21 @@ class View
     private function findViewPath($view)
     {
         $router = \Lying::$maker->router();
-        $file = DIR_MODULE . '/';
+        $file = DIR_MODULE . DS;
         if (strncmp($view, '/', 1) === 0) {
-            $file .= $router->module() . '/view' . rtrim($view, '/');
+            $file .= $router->module() . DS . 'view' . str_replace('/', DS, rtrim($view, '/'));
         } else {
             $view = trim($view, '/');
             $viewArr = explode('/', $view);
             switch (count($viewArr)) {
                 case 1:
-                    $file .= $router->module() . '/view/' . $router->controller() . "/$view.php";
+                    $file .= $router->module() . DS . 'view' . DS . $router->controller() . DS . $view . '.php';
                     break;
                 case 2:
-                    $file .= $router->module() . "/view/$view.php";
+                    $file .= $router->module() . DS . 'view' . DS . str_replace('/', DS, $view) . '.php';
                     break;
                 case 3:
-                    $file .= "$viewArr[0]/view/$viewArr[1]/$viewArr[2].php";
+                    $file .= $viewArr[0] . DS . 'view' . DS . $viewArr[1] . DS . $viewArr[2] . '.php';
                     break;
             }
         }
