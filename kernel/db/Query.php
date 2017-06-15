@@ -646,12 +646,22 @@ class Query
     }
 
     /**
-     * 从结果集中的下一行返回单独的一列,查询结果为标量
-     * @return mixed 返回查询结果
+     * 从结果集中的下一行返回单独的一个字段值,查询结果为标量
+     * @param integer $column_number 你想从行里取回的列的索引数字,以0开始
+     * @return mixed 返回查询结果,查询结果为标量
+     */
+    public function scalar($column_number = 0)
+    {
+        return $this->fetch('fetchColumn', [$column_number ]);
+    }
+
+    /**
+     * 从结果集中的取出第一列的值
+     * @return array|boolean 返回查询结果
      */
     public function column()
     {
-        return $this->fetch('fetchColumn');
+        return $this->fetch('fetchAll', [\PDO::FETCH_COLUMN]);
     }
 
     /**
