@@ -10,8 +10,6 @@ class Index extends Controller
     
     public function index()
     {
-        $schema = new Schema(\Lying::$maker->db());
-        var_dump($schema->getTableSchema('user'));
         return $this->render('index');
     }
 }

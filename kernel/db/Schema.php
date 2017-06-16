@@ -8,29 +8,59 @@
 
 namespace lying\db;
 
+use lying\cache\Cache;
+
 /**
  * Class Schema
  * @package lying\db
  */
 class Schema
 {
+    /**
+     * @var array 所有的表名
+     */
     private $tableNames = [];
 
+    /**
+     * @var TableSchema[] 所有的表结构
+     */
     private $tables = [];
 
+    /**
+     * @var Connection 数据库连接实例
+     */
     private $db;
 
+    /**
+     * @var Cache 缓存服务
+     */
     private $cache;
 
-    public function __construct(Connection $db, $cache)
+    /**
+     * @var string 缓存键名
+     */
+    private $cacheKey;
+
+    /**
+     * Schema constructor.
+     * @param Connection $db 数据库连接实例
+     * @param string $dsn 实例唯一标识
+     * @param string $cache 使用的缓存服务名
+     */
+    public function __construct(Connection $db, $dsn, $cache)
     {
         $this->db = $db;
-        $this->cache = $cache;
+        $this->cacheKey = $dsn;
+        $this->cache = $cache ? \Lying::$maker->cache($cache) : null;
+        if ($cache) {
+            $this->cache = \Lying::$maker->cache($cache);
+            $this->tables = $this->cache->get($this->cacheKey);
+        }
     }
 
     /**
      * 获取数据库中所有的表名
-     * @return array
+     * @return array 返回数据库中所有的表名
      */
     public function getTableNames()
     {
@@ -43,16 +73,29 @@ class Schema
     /**
      * 获取表结构
      * @param string $tableName 完整的表名
-     * @return TableSchema
+     * @return TableSchema 获取表信息
      */
     public function getTableSchema($tableName)
     {
         if (!isset($this->tables[$tableName])) {
-            $sql = "SHOW FULL COLUMNS FROM $tableName";
-            $columnsInfo = $this->db->createQuery()->raw($sql)->fetchAll();
-            $this->tables[$tableName] = new TableSchema($columnsInfo);
+            $query = $this->db->createQuery();
+            $columnsInfo = $query->raw("DESC $tableName")->fetchAll();
+            $this->tables[$tableName] = new TableSchema($tableName, $columnsInfo);
+            if ($this->cache instanceof Cache) {
+                $this->cache->set($this->cacheKey, $this->tables);
+            }
         }
         return $this->tables[$tableName];
     }
 
+    /**
+     * 获取数据表创建语句
+     * @param string $tableName 表名
+     * @return string SQL语句
+     */
+    public function getCreateTableSql($tableName)
+    {
+        $row = $this->db->createQuery()->raw("SHOW CREATE TABLE $tableName")->fetch();
+        return $row['Create Table'];
+    }
 }
