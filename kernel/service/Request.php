@@ -125,6 +125,33 @@ class Request
     }
 
     /**
+     * 判断是否在CLI模式下运行
+     * @return boolean
+     */
+    public function isCli()
+    {
+        return php_sapi_name() === 'cli';
+    }
+
+    /**
+     * 获取CLI下的参数
+     * @param integer $offect 参数下标,0为脚本名称,1为参数1,不存在返回null
+     * @param mixed $defaultValue 值不存在时的默认值
+     * @return null|string
+     */
+    public function getArgv($offect = null, $defaultValue = null)
+    {
+        if (isset($_SERVER['argv'])) {
+            if ($offect === null) {
+                return $_SERVER['argv'];
+            } else if (isset($_SERVER['argv'][$offect])) {
+                return $_SERVER['argv'][$offect];
+            }
+        }
+        return $defaultValue;
+    }
+
+    /**
      * 返回服务器端口
      * @return integer
      */

@@ -94,7 +94,17 @@ class Exception
         http_response_code($code === 404 ? 404 : 500);
         ob_start();
         ob_implicit_flush(false);
-        require DIR_KERNEL . DS . 'view' . DS . 'error.php';
+        if (php_sapi_name() === 'cli') {
+            echo "[root@lying ~]Error Code:$code" . PHP_EOL;
+            echo "[root@lying ~]Error Info:$msg" . PHP_EOL;
+            echo "[root@lying ~]Error File:$file" . PHP_EOL;
+            echo "[root@lying ~]Error Line:$line" . PHP_EOL;
+            foreach ($trace as $t) {
+                echo "[root@lying ~]$t" . PHP_EOL;
+            }
+        } else {
+            require DIR_KERNEL . DS . 'view' . DS . 'error.php';
+        }
         ob_end_flush();
         flush();
         exit(1);

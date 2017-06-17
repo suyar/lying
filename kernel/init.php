@@ -11,6 +11,8 @@ define('DIR_ROOT', dirname(DIR_WEB));
 
 define('DIR_CONFIG', DIR_ROOT . DS . 'config');
 
+define('DIR_CONSOLE', DIR_ROOT . DS . 'console');
+
 define('DIR_MODULE', DIR_ROOT . DS . 'module');
 
 define('DIR_RUNTIME', DIR_ROOT . DS . 'runtime');

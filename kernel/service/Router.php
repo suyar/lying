@@ -81,8 +81,10 @@ class Router extends Service
      */
     public function resolve()
     {
+        $request = \Lying::$maker->request();
+        $uri = $request->isCli() ? $request->getArgv(1, '/') : $request->uri();
         //解析URI
-        $parse = parse_url(\Lying::$maker->request()->uri());
+        $parse = parse_url($uri);
         //解析原生GET,这里是为了去除转发规则中$_GET本身中无用的参数
         parse_str(isset($parse['query']) ? $parse['query'] : '', $_GET);
         //去掉index.php

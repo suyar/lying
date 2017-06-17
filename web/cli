@@ -1,0 +1,7 @@
+<?php
+version_compare(PHP_VERSION, '5.5.0', '>=') || die('Lying require 5.5.0 or higher PHP version :)');
+require __DIR__ . '/../kernel/init.php';
+$config = require DIR_CONFIG . '/web.php';
+$config['service']['dispatch']['moduleNamespace'] = 'console';
+$config['service']['router'] = 'lying\service\Router';
+Lying::run($config);
