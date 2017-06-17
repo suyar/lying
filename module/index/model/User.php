@@ -3,7 +3,10 @@ namespace module\index\model;
 
 use lying\db\ActiveRecord;
 
-class User extends ActiveRecord
-{
-    
+/**
+ * Class User
+ * @package module\index\model
+ */
+class User extends ActiveRecord {
+
 }

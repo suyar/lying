@@ -627,7 +627,7 @@ class Query
      * 返回结果集中的一条记录
      * @param boolean $obj 是否返回对象(默认返回关联数组)
      * @param string $class 要实例化的对象,不写默认为匿名对象
-     * @return boolean|array|\stdClass|\lying\db\ActiveRecord
+     * @return mixed 成功返回查询结果,失败返回false
      */
     public function one($obj = false, $class = null)
     {
@@ -638,7 +638,7 @@ class Query
      * 返回所有查询结果的数组
      * @param boolean $obj 是否返回对象(默认返回关联数组)
      * @param string $class 要实例化的对象,不写默认为匿名对象
-     * @return boolean|array|\stdClass[]|\lying\db\ActiveRecord[]
+     * @return mixed 成功返回查询结果,失败返回false
      */
     public function all($obj = false, $class = null)
     {
@@ -671,7 +671,7 @@ class Query
      */
     public function count($column = '*')
     {
-        return $this->select(['count' => "COUNT($column)"])->column();
+        return $this->select(['count' => "COUNT($column)"])->scalar();
     }
 
     /**
@@ -681,7 +681,7 @@ class Query
      */
     public function sum($column)
     {
-        return $this->select(['sum' => "SUM($column)"])->column();
+        return $this->select(['sum' => "SUM($column)"])->scalar();
     }
 
     /**
@@ -691,7 +691,7 @@ class Query
      */
     public function max($column)
     {
-        return $this->select(['max' => "MAX($column)"])->column();
+        return $this->select(['max' => "MAX($column)"])->scalar();
     }
 
     /**
@@ -701,7 +701,7 @@ class Query
      */
     public function min($column)
     {
-        return $this->select(['min' => "MIN($column)"])->column();
+        return $this->select(['min' => "MIN($column)"])->scalar();
     }
 
     /**
@@ -711,7 +711,7 @@ class Query
      */
     public function avg($column)
     {
-        return $this->select(['avg' => "AVG($column)"])->column();
+        return $this->select(['avg' => "AVG($column)"])->scalar();
     }
 
     /**

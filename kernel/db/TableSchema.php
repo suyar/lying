@@ -15,6 +15,7 @@ namespace lying\db;
  * @property string $name
  * @property array $columns
  * @property array $primaryKeys
+ * @property string $autoIncrement
  */
 class TableSchema
 {
@@ -34,6 +35,11 @@ class TableSchema
     private $primaryKeys = [];
 
     /**
+     * @var string 自增的字段
+     */
+    private $autoIncrement;
+
+    /**
      * TableSchema constructor.
      * @param string $name 表名
      * @param array $columnsInfo 表结构查询结果
@@ -46,16 +52,19 @@ class TableSchema
             if ($info['Key'] === 'PRI') {
                 $this->primaryKeys[] = $info['Field'];
             }
+            if ($info['Extra'] === 'auto_increment') {
+                $this->autoIncrement = $info['Field'];
+            }
         }
     }
 
     /**
      * 获取私有属性的值
      * @param string $name 属性
-     * @return string
+     * @return mixed
      */
     public function __get($name)
     {
-        return $this->name;
+        return $this->$name;
     }
 }

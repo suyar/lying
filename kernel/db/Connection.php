@@ -34,6 +34,16 @@ class Connection extends Service
     protected $pass;
 
     /**
+     * @var string 数据表前缀
+     */
+    protected $prefix = '';
+
+    /**
+     * @var string 将要使用的CacheID
+     */
+    protected $cache;
+
+    /**
      * @var array 主库列表
      */
     protected $master = [];
@@ -49,7 +59,7 @@ class Connection extends Service
     private $dbh;
 
     /**
-     * @var array 数据库表的结构
+     * @var Schema 数据库表的结构
      */
     private $schema;
 
@@ -123,22 +133,24 @@ class Connection extends Service
     }
 
     /**
-     * 返回指定的表结构
-     * @param string $table 表名
-     * @return array
+     * 获取数据表前缀
+     * @return string
      */
-    public function schema($table)
+    public function prefix()
     {
-        if (!isset($this->schema[$table])) {
-            $struct = $this->slavePdo()->query("DESC `$table`")->fetchAll();
-            foreach ($struct as $column) {
-                $this->schema[$table]['fields'][] = $column['Field'];
-                if ($column['Key'] === 'PRI') {
-                    $this->schema[$table]['keys'][] = $column['Field'];
-                }
-            }
+        return $this->prefix;
+    }
+
+    /**
+     * 获取Schema实例
+     * @return Schema
+     */
+    public function schema()
+    {
+        if ($this->schema == null) {
+            $this->schema = new Schema($this, $this->dsn, $this->cache);
         }
-        return $this->schema[$table];
+        return $this->schema;
     }
 
     /**

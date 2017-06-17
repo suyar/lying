@@ -35,10 +35,10 @@ class ActiveRecordQuery extends Query
         parent::__construct($connection);
         $this->class = $class;
     }
-    
+
     /**
      * 调用此方法则返回数组
-     * @return \lying\db\ActiveRecordQuery
+     * @return $this
      */
     public function asArray()
     {
@@ -50,7 +50,7 @@ class ActiveRecordQuery extends Query
      * 返回查询的对象的实例
      * @param boolean $obj 在这边没作用
      * @param string $class 在这边没作用
-     * @return boolean|array|\stdClass|\lying\db\ActiveRecord
+     * @return ActiveRecord|array|false 成功返回查询结果,失败返回false
      */
     public function one($obj = false, $class = null)
     {
@@ -62,7 +62,7 @@ class ActiveRecordQuery extends Query
      * 返回查询的对象的实例数组
      * @param boolean $obj 在这边没作用
      * @param string $class 在这边没作用
-     * @return boolean|array|\stdClass[]|\lying\db\ActiveRecord[]
+     * @return ActiveRecord[]|array|false 成功返回查询结果,失败返回false
      */
     public function all($obj = false, $class = null)
     {

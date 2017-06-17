@@ -46,6 +46,16 @@ class ActiveRecord extends Service
      * @var string 删除后触发的事件ID
      */
     const EVENT_AFTER_DELETE = 'afterDelete';
+
+    /**
+     * @var string 插入或更新前触发的事件ID
+     */
+    const EVENT_BEFORE_SAVE = 'beforeSave';
+
+    /**
+     * @var string 插入或更新后触发的事件ID
+     */
+    const EVENT_AFTER_SAVE = 'afterSave';
     
     /**
      * @var array 新数据
@@ -77,26 +87,7 @@ class ActiveRecord extends Service
     public static function table()
     {
         $tmp = explode('\\', get_called_class());
-        return strtolower(preg_replace('/((?<=[a-z])(?=[A-Z]))/', '_', array_pop($tmp)));
-    }
-
-    /**
-     * 返回所有的主键,没有主键返回false
-     * @return array|boolean
-     */
-    private static function pk()
-    {
-        $schema = static::db()->schema(static::table());
-        return isset($schema['keys']) ? $schema['keys'] : false;
-    }
-
-    /**
-     * 返回表中所有字段
-     * @return array
-     */
-    private static function fields()
-    {
-        return static::db()->schema(static::table())['fields'];
+        return static::db()->prefix() . strtolower(preg_replace('/((?<=[a-z])(?=[A-Z]))/', '_', array_pop($tmp)));
     }
     
     /**
@@ -106,7 +97,8 @@ class ActiveRecord extends Service
      */
     public function __set($name, $value)
     {
-        if (in_array($name, self::fields())) {
+        $columns = static::db()->schema()->getTableSchema(static::table())->columns;
+        if (in_array($name, $columns)) {
             $this->attr[$name] = $value;
         }
     }
@@ -116,10 +108,10 @@ class ActiveRecord extends Service
      * @param string $name 属性名
      * @return mixed 不存在返回null
      */
-    public function __get($name)
+    /*public function __get($name)
     {
-        return isset($this->attr[$name]) ? $this->attr[$name] : null;
-    }
+        return $this->__isset($name) ? $this->attr[$name] : null;
+    }*/
     
     /**
      * 属性是否存在
@@ -128,7 +120,7 @@ class ActiveRecord extends Service
      */
     public function __isset($name)
     {
-        return $this->__get($name) !== null;
+        return isset($this->attr[$name]);
     }
     
     /**
@@ -150,73 +142,80 @@ class ActiveRecord extends Service
     {
         return (new ActiveRecordQuery(static::db(), get_called_class()))->from([static::table()]);
     }
-    
+
     /**
      * 查找一条记录
-     * @param mixed $condition 如果为数组,则为查找条件,否则的话为查找第一个主键
-     * @return ActiveRecord|boolean 返回查询结果,失败返回false
+     * @param string|integer|array $condition 如果为字符串并且参数绑定为空匹配第一个主键,否则为正常查询条件
+     * @param array $params 参数绑定,在查询条件为字符串的时候有效
+     * @return static|false 返回查询结果,失败返回false
      * @throws \Exception 主键不存在抛出异常
      */
-    public static function findOne($condition)
+    public static function findOne($condition, $params = [])
     {
         if (!is_array($condition)) {
-            if (false === $pks = self::pk()) {
-                throw new \Exception(get_called_class() . ' does not have a primary key.');
+            $primaryKeys = static::db()->schema()->getTableSchema(static::table())->primaryKeys;
+            if ($primaryKeys) {
+                $condition = [reset($primaryKeys) => $condition];
             } else {
-                $condition = [reset($pks) => (string)$condition];
+                throw new \Exception(static::table() . ' does not have a primary key.');
             }
         }
-        return self::find()->where($condition)->limit(1)->one();
+        return self::find()->where($condition, $params)->limit(1)->one();
     }
-    
+
     /**
      * 查找所有符合条件的记录
-     * @param array $condition 查看Query::where()的数组使用方式
-     * @return ActiveRecord[]|boolean 返回查询结果数组,失败返回false
+     * @param string|array $condition 查找条件数组
+     * @param array $params 参数绑定,在查询条件为字符串的时候有效
+     * @return static[]|false 返回查询结果数组,失败返回false
      */
-    public static function findAll($condition = [])
+    public static function findAll($condition = '', $params = [])
     {
-        return self::find()->where($condition)->all();
+        return self::find()->where($condition, $params)->all();
     }
 
     /**
      * 根据条件删除数据
-     * @param string|array $condition 删除的条件,参见where()
-     * @return boolean|integer 返回受影响的行数,有可能是0行,失败返回false
+     * @param string|array $condition 删除的条件
+     * @param array $params 参数绑定,在查询条件为字符串的时候有效
+     * @return integer|false 返回受影响的行数,有可能是0行,失败返回false
      */
-    public static function deleteAll($condition = '')
+    public static function deleteAll($condition = '', $params = [])
     {
-        return self::find()->delete(static::table(), $condition);
+        return self::find()->delete(static::table(), $condition, $params);
     }
 
     /**
      * 更新数据
-     * @param array $datas 要更新的数据,(name => value)形式的数组;
-     * 当然value可以是子查询,Query的实例,但是查询的表不能和更新的表是同一个
-     * @param string|array $condition 更新的条件,参见where()
-     * @return boolean|integer 返回受影响的行数,有可能是0行,失败返回false
+     * @param array $datas 要更新的数据,[key => value]形式的数组;
+     * @param string|array $condition 更新的条件
+     * @param array $params 参数绑定,在查询条件为字符串的时候有效
+     * @return integer|false 返回受影响的行数,有可能是0行,失败返回false
      */
-    public static function updateAll($datas, $condition = '')
+    public static function updateAll($datas, $condition = '', $params = [])
     {
-        return self::find()->update(static::table(), $datas, $condition);
+        return self::find()->update(static::table(), $datas, $condition, $params);
     }
     
     /**
      * 插入当前设置的数据
-     * @return integer|boolean 成功返回插入的行数,失败返回false
+     * @return integer|false 成功返回插入的行数,失败返回false
      */
     public function insert()
     {
         $this->trigger(self::EVENT_BEFORE_INSERT);
-        $res = static::db()->createQuery()->insert(static::table(), $this->attr);
-        if (false !== $res && (false !== $keys = self::pk())) {
-            foreach ($keys as $key) {
-                $this->attr[$key] = static::db()->lastInsertId($key);
+        $this->trigger(self::EVENT_BEFORE_SAVE);
+        $rows = self::find()->insert(static::table(), $this->attr);
+        if (false !== $rows) {
+            $autoIncrement = static::db()->schema()->getTableSchema(static::table())->autoIncrement;
+            if ($autoIncrement) {
+                $this->attr[$autoIncrement] = static::db()->lastInsertId();
             }
             $this->reload();
+            $this->trigger(self::EVENT_AFTER_INSERT, [$rows]);
+            $this->trigger(self::EVENT_AFTER_SAVE, [$rows]);
         }
-        $this->trigger(self::EVENT_AFTER_INSERT, [$res]);
-        return $res;
+        return $rows;
     }
 
     /**
@@ -226,44 +225,48 @@ class ActiveRecord extends Service
      */
     private function oldCondition()
     {
-        if (false === $pks = self::pk()) {
-            throw new \Exception(get_called_class() . ' does not have a primary key.');
+        $primaryKeys = static::db()->schema()->getTableSchema(static::table())->primaryKeys;
+        if ($primaryKeys) {
+            $values = [];
+            foreach ($primaryKeys as $primaryKey) {
+                $values[$primaryKey] = isset($this->oldAttr[$primaryKey]) ? $this->oldAttr[$primaryKey] : null;
+            }
+            return $values;
+        } else {
+            throw new \Exception(static::table() . ' does not have a primary key.');
         }
-        $values = [];
-        foreach ($pks as $pk) {
-            $values[$pk] = isset($this->oldAttr[$pk]) ? $this->oldAttr[$pk] : null;
-        }
-        return $values;
     }
     
     /**
      * 更新当前数据
-     * @return integer|boolean 成功返回更新的行数,失败返回false
+     * @return integer|false 成功返回更新的行数,可能是0行,失败返回false
      */
     public function update()
     {
         $this->trigger(self::EVENT_BEFORE_UPDATE);
-        $res = static::db()->createQuery()->update(static::table(), $this->attr, $this->oldCondition());
-        if (false !== $res) {
+        $this->trigger(self::EVENT_BEFORE_SAVE);
+        $rows = self::find()->update(static::table(), $this->attr, $this->oldCondition());
+        if (false !== $rows) {
             $this->reload();
+            $this->trigger(self::EVENT_AFTER_UPDATE, [$rows]);
+            $this->trigger(self::EVENT_AFTER_SAVE, [$rows]);
         }
-        $this->trigger(self::EVENT_AFTER_UPDATE, [$res]);
-        return $res;
+        return $rows;
     }
     
     /**
      * 删除本条数据
-     * @return integer|boolean 成功返回删除的行数,失败返回false
+     * @return integer|false 成功返回删除的行数,可能是0行,失败返回false
      */
     public function delete()
     {
         $this->trigger(self::EVENT_BEFORE_DELETE);
-        $res = static::db()->createQuery()->delete(static::table(), $this->oldCondition());
-        if (false !== $res) {
+        $rows = self::find()->delete(static::table(), $this->oldCondition());
+        if (false !== $rows) {
             $this->oldAttr = null;
+            $this->trigger(self::EVENT_AFTER_DELETE, [$rows]);
         }
-        $this->trigger(self::EVENT_AFTER_DELETE, [$res]);
-        return $res;
+        return $rows;
     }
     
     /**
@@ -277,7 +280,7 @@ class ActiveRecord extends Service
     
     /**
      * 保存数据
-     * @return integer|boolean 成功返回保存的行数,失败返回false
+     * @return integer|false 成功返回保存的行数,失败返回false
      */
     public function save()
     {
@@ -286,7 +289,7 @@ class ActiveRecord extends Service
     
     /**
      * 把新数据赋值给旧数据
-     * @return ActiveRecord
+     * @return $this
      */
     public function reload()
     {
