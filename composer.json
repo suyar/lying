@@ -4,7 +4,7 @@
 	"type": "project",
 	"keywords": ["PHP", "Framework"],
 	"homepage": "https://github.com/carolkey/lying",
-	"time": "2017-05-01",
+	"time": "2017-06-18",
 	"license": "MIT",
 	"authors": [
 		{"name": "lying", "email": "me@suyaqi.cn", "homepage": "https://github.com/carolkey", "role": "Developer"}
