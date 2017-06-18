@@ -154,13 +154,12 @@ class Connection extends Service
     }
 
     /**
-     * 返回最后插入行的ID,或者是一个序列对象最后的值
-     * @param string $name 应该返回ID的那个序列对象的名称
+     * 返回最后插入行的自增ID
      * @return string 返回ID
      */
-    public function lastInsertId($name = null)
+    public function lastInsertId()
     {
-        return $this->masterPdo()->lastInsertId($name);
+        return $this->masterPdo()->lastInsertId();
     }
     
     /**
