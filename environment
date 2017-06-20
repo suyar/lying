@@ -32,7 +32,7 @@ cd nginx-1.10.3
 ./configure --prefix=/usr/local/nginx --with-pcre --with-zlib --with-http_ssl_module
 make && make install
 4.控制命令
-/usr/local/nginx/sbin
+cd /usr/local/nginx/sbin
 ./nginx 启动
 ./nginx -s stop 立即终止
 ./nginx -s quit 平滑终止

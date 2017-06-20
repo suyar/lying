@@ -21,6 +21,11 @@ class Request
     private $data;
 
     /**
+     * @var string CSRF
+     */
+    private $csrfToken;
+
+    /**
      * 装载GET/POST数据,此函数第一次执行有效
      * @param array $get
      */
@@ -251,5 +256,45 @@ class Request
         } else {
             return isset($_SERVER['REQUEST_TIME']) ? $_SERVER['REQUEST_TIME'] : null;
         }
+    }
+
+    /**
+     * 获取csrfToken
+     * @return string
+     */
+    public function getCsrfToken()
+    {
+        if ($this->csrfToken === null) {
+            $cookie = \Lying::$maker->cookie();
+            $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-.';
+            if (($token = $cookie->get('_csrf')) === false) {
+                $token = str_pad(uniqid('_csrf', true), 32, substr(str_shuffle($chars), 0, 4));
+                $cookie->set('_csrf', $token);
+            }
+            $mask = substr(str_shuffle($chars), 0, 8);
+            $this->csrfToken = $mask . hash_hmac('sha256', $token, $mask);
+        }
+        return $this->csrfToken;
+    }
+
+    /**
+     * 校验csrfToken
+     * @param string|null $csrfToken 手动传入csrfToken,放空的话则自动获取csrfToken
+     * @return boolean 校验成功返回true,失败返回false
+     */
+    public function validateCsrfToken($csrfToken = null)
+    {
+        if (in_array($this->method(), ['GET', 'HEAD', 'OPTIONS'], true)) {
+            return true;
+        }
+        $csrfToken ||
+        ($csrfToken = $this->post('_csrf')) ||
+        ($csrfToken = isset($_SERVER['HTTP_X_CSRF_TOKEN']) ? $_SERVER['HTTP_X_CSRF_TOKEN'] : null);
+        if ($csrfToken && ($cookieToken = \Lying::$maker->cookie()->get('_csrf'))) {
+            $mask = substr($csrfToken, 0, 8);
+            $token = substr($csrfToken, 8);
+            return hash_hmac('sha256', $cookieToken, $mask) === $token;
+        }
+        return false;
     }
 }

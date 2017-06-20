@@ -58,8 +58,13 @@ class Controller extends Service
     /**
      * 在执行action之前执行
      * @param string $action 执行的方法名称
+     * @throws \Exception 当CSRF验证未通过的时候抛出400
      */
-    public function beforeAction($action) {}
+    public function beforeAction($action) {
+        if ($this->request->validateCsrfToken() === false) {
+            throw new \Exception('Unable to verify your data submission.', 400);
+        }
+    }
     
     /**
      * 在执行action之后执行
