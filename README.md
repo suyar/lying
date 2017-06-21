@@ -32,7 +32,6 @@ DOCUMENTATION
 
 TODO
 ----
-* CSRF安全
 * REDIS（并不想弄成和memcached一样的key => value形式的缓存，因为这太埋没了redis），所以暂时不打算封装。
 
 FEATURES
