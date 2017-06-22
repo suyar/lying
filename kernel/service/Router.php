@@ -18,7 +18,7 @@ class Router extends Service
     /**
      * @var boolean 是否绑定模块
      */
-    private $binding;
+    protected $binding;
 
     /**
      * @var array 存当前路由[module, controller, action]

@@ -12,6 +12,7 @@ return [
     //路由组件
     'router' => [
         'class' => 'lying\service\Router',
+        'binding' => true,
         'module' => 'index',
         'controller' => 'index',
         'action' => 'index',
