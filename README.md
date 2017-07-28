@@ -43,7 +43,7 @@ FEATURES
 * 基于Service Locator的设计，懒加载、配置和逻辑代码分离，扩展方便。
 * 统一功能接口，功能相同的服务类在配置文件即可自由无缝切换，不影响逻辑代码。
 * PDO实现的MySQL QueryBuilder + ActiveRecord支持，数据库支持主从分离。
-* ApcCache/DbCache/Memcached/FileCache多种缓存实现。
+* Apcu/Memcached/File多种缓存实现。
 * 高性能FileLog日志实现。
 * 支持pathinfo模式和rewrite模式的路由，路由支持正反向解析。
 * 完善的CLI制度。
