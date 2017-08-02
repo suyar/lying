@@ -58,7 +58,7 @@ class View
         $router = \Lying::$maker->router();
         $file = DIR_MODULE . DS;
         if (strncmp($view, '/', 1) === 0) {
-            $file .= $router->module() . DS . 'view' . str_replace('/', DS, rtrim($view, '/'));
+            $file .= $router->module() . DS . 'view' . str_replace('/', DS, rtrim($view, '/')) . '.php';
         } else {
             $view = trim($view, '/');
             $viewArr = explode('/', $view);
