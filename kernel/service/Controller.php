@@ -31,9 +31,9 @@ class Controller extends Service
     protected $layout = false;
 
     /**
-     * @var array 布局文件参数,此参数会和render()函数里的$subparams合并
+     * @var View 视图实例
      */
-    protected $subparams = [];
+    private $view;
 
     /**
      * @var Request 请求类
@@ -104,15 +104,35 @@ class Controller extends Service
     }
 
     /**
+     * 获取视图实例
+     * @return View
+     */
+    private function getView()
+    {
+        if ($this->view == null) {
+            $this->view = new View();
+        }
+        return $this->view;
+    }
+
+    /**
+     * 渲染输出参数
+     * @param string $key 参数名
+     * @param mixed $value 参数值
+     */
+    final public function assign($key, $value)
+    {
+        $this->getView()->assign($key, $value);
+    }
+
+    /**
      * 渲染页面
      * @param string $view 视图文件名称
-     * @param array $params 视图参数
-     * @param string|boolean $layout 布局文件
-     * @param array $subparams 布局文件的参数
+     * @param string|bool $layout 布局文件
      * @return string 渲染的HTML代码
      */
-    final public function render($view, $params= [], $layout = false, $subparams = [])
+    final public function render($view, $layout = false)
     {
-        return (new View())->render($view, $params, $layout ? $layout : $this->layout, array_merge($this->subparams, $subparams));
+        return $this->getView()->render($view, $layout ? $layout : $this->layout);
     }
 }

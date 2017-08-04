@@ -6,6 +6,6 @@
 	<title>欢迎使用Lying框架</title>
 </head>
 <body>
-	<?= $container ?>
+	<?= $container; ?>
 </body>
 </html>

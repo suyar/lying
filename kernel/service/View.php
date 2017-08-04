@@ -16,19 +16,32 @@ namespace lying\service;
 class View
 {
     /**
+     * @var array 要渲染输出的参数
+     */
+    private $params = [];
+
+    /**
+     * 输出数据
+     * @param string $key 参数名
+     * @param mixed $value 参数值
+     */
+    public function assign($key, $value)
+    {
+        $this->params[$key] = $value;
+    }
+
+    /**
      * 渲染视图文件
      * @param string $view 视图文件名称
-     * @param array $params 视图文件参数
-     * @param string|boolean $layout 布局文件
-     * @param array $subparams 布局文件参数
+     * @param string|bool $layout 布局文件
      * @return string 返回渲染后的HTML
      */
-    public function render($view, $params = [], $layout = false, $subparams = [])
+    public function render($view, $layout = false)
     {
-        $content = $this->renderFile($this->findViewPath($view), $params);
+        $content = $this->renderFile($this->findViewPath($view), $this->params);
         return empty($layout) ? $content : $this->renderFile(
             $this->findViewPath($layout),
-            array_merge($subparams, ['container'=>$content])
+            array_merge($this->params, ['container'=>$content])
         );
     }
     
