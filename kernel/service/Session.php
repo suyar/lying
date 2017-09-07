@@ -94,6 +94,11 @@ class Session
      */
     public function destroy()
     {
-        return $this->isActive() && session_destroy();
+        if ($this->isActive()) {
+            session_unset();
+            session_destroy();
+            return true;
+        }
+        return false;
     }
 }
