@@ -28,15 +28,17 @@ class Dispatch extends Service
     {
         list($m, $c, $a) = \Lying::$maker->router()->resolve();
         $class = "$this->moduleNamespace\\$m\\controller\\$c";
-        if (class_exists($class) && method_exists($class, $a)) {
+        if (class_exists($class)) {
             $instance = new $class();
-            $method = new \ReflectionMethod($instance, $a);
-            if ($method->isPublic() && $this->checkAccess($instance->deny, $a)) {
-                $instance->trigger($instance::EVENT_BEFORE_ACTION, [$a]);
-                $response = call_user_func_array([$instance, $a], $this->parseArgs($method->getParameters()));
-                $instance->trigger($instance::EVENT_AFTER_ACTION, [$a, $response]);
-                echo $response;
-                exit(0);
+            if (method_exists($instance, $a)) {
+                $method = new \ReflectionMethod($instance, $a);
+                if ($method->isPublic() && $this->checkAccess($instance->deny, $a)) {
+                    $instance->trigger($instance::EVENT_BEFORE_ACTION, [$a]);
+                    $response = call_user_func_array([$instance, $a], $this->parseArgs($method->getParameters()));
+                    $instance->trigger($instance::EVENT_AFTER_ACTION, [$a, $response]);
+                    echo (is_string($response) || is_numeric($response)) ? $response : json_encode($response, JSON_UNESCAPED_UNICODE);
+                    exit(0);
+                }
             }
         }
         throw new \Exception('Not Found (#404)', 404);
