@@ -36,7 +36,7 @@ class Dispatch extends Service
                     $instance->trigger($instance::EVENT_BEFORE_ACTION, [$a]);
                     $response = call_user_func_array([$instance, $a], $this->parseArgs($method->getParameters()));
                     $instance->trigger($instance::EVENT_AFTER_ACTION, [$a, $response]);
-                    echo (is_string($response) || is_numeric($response)) ? $response : json_encode($response, JSON_UNESCAPED_UNICODE);
+                    echo (is_string($response) || is_numeric($response) || is_null($response) || is_bool($response)) ? $response : json_encode($response, JSON_UNESCAPED_UNICODE);
                     exit(0);
                 }
             }
