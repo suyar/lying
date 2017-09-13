@@ -119,7 +119,7 @@ class Router extends Service
         //转换为驼峰,返回当前请求的模块/控制器/方法
         return [
             $this->str2hump($this->router[0]),
-            $this->str2hump($this->router[1], true),
+            $this->str2hump($this->router[1], true).'Ctrl',
             $this->str2hump($this->router[2])
         ];
     }

@@ -3,7 +3,7 @@ namespace module\index\controller;
 
 use lying\service\Controller;
 
-class Index extends Controller
+class IndexCtrl extends Controller
 {
     public $layout = 'layout';
     

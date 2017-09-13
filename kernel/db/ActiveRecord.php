@@ -79,15 +79,16 @@ class ActiveRecord extends Service
     /**
      * 设置模型对应的表名
      * ```php
-     * User 对应表 user
-     * UserName 对应表 user_name
+     * UserModel 对应表 user
+     * UserNameModel 对应表 user_name
      * ```
      * @return string 返回表名
      */
     public static function table()
     {
         $tmp = explode('\\', get_called_class());
-        return static::db()->prefix() . strtolower(preg_replace('/((?<=[a-z])(?=[A-Z]))/', '_', array_pop($tmp)));
+        $table = preg_replace('/Model$/', '', array_pop($tmp));
+        return static::db()->prefix() . strtolower(preg_replace('/((?<=[a-z])(?=[A-Z]))/', '_', $table));
     }
     
     /**
