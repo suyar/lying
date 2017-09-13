@@ -3,7 +3,7 @@ namespace console\index\controller;
 
 use lying\service\Controller;
 
-class Index extends Controller
+class IndexCtrl extends Controller
 {
     public function index()
     {
