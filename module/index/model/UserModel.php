@@ -7,6 +7,6 @@ use lying\db\ActiveRecord;
  * Class User
  * @package module\index\model
  */
-class User extends ActiveRecord {
+class UserModel extends ActiveRecord {
 
 }
