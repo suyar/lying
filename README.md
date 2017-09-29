@@ -62,4 +62,4 @@ FEEDBACK
 --------
 * Issue：[Lying](https://github.com/carolkey/lying/issues)
 * QQ：[296399959](http://wpa.qq.com/msgrd?v=3&uin=296399959&site=qq&menu=yes)
-* MAIL：<me@suyaqi.cn>
+* MAIL：<su@revoke.cc>
