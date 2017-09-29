@@ -21,10 +21,10 @@ INSTALL
 REQUIREMENTS
 ------------
 > * php : >= 5.5.0
-> * ext-pdo : *
-> * ext-apc : *（optional）
-> * ext-apcu : *（optional）
-> * ext-memcached : *（optional）
+> * pdo : *
+> * apc : *（可选）
+> * apcu : *（可选）
+> * memcached : *（可选）
 
 DOCUMENTATION
 -------------
