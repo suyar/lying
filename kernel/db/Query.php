@@ -158,7 +158,7 @@ class Query
      * 如果要使用'字段1 = 字段2'的形式,请用字符串带入,用数组的话'字段2'将被解析为绑定参数
      * where("user.id = admin.id and name = :name", [':name'=>'lying']);
      * where(['id'=>1, 'name'=>'lying']);
-     * where(['id'=>[1, 2, 3]], ['or', 'name'=>'lying', 'sex'=>1]);
+     * where(['id'=>[1, 2, 3], ['or', 'name'=>'lying', 'sex'=>1]]);
      * ```
      * @param string|array $condition 要查询的条件
      * @param array $params 当$condition为字符串时,绑定参数的数组
@@ -717,7 +717,7 @@ class Query
     /**
      * 执行原生SQL,返回的是语句执行后的\PDOStatement对象,直接调用fetch,fetchAll,rowCount等函数即可
      * ```php
-     * db()->createQuery()->raw('select * from user')->fetchAll(\PDO::FETCH_ASSOC);
+     * $query->raw('select * from user')->fetchAll(\PDO::FETCH_ASSOC);
      * ```
      * @param string $statement SQL语句
      * @param array $params 绑定的参数
@@ -729,6 +729,74 @@ class Query
         $pdo = !$master && $this->isRead($statement) ? $this->conn->slavePdo() : $this->conn->masterPdo();
         $this->sth = $pdo->prepare($statement);
         return $this->execute($statement, $params) ? $this->sth : false;
+    }
+
+    /**
+     * 执行查询语句(使用从库)
+     * ```php
+     * $query->query('select * from user where id=:id', [':id'=>1]);
+     * ```
+     * @param string $statement SQL语句
+     * @param array $params 绑定的参数
+     * @return array|bool 成功返回查询的数据数组,失败返回false
+     */
+    public function query($statement, $params = [])
+    {
+        $sth = $this->raw($statement, $params);
+        return false == $sth ? $sth : $sth->fetchAll();
+    }
+
+    /**
+     * 执行写入语句(使用主库)
+     * ```php
+     * $query->exec('update user set num=num+1 where id=:id', [':id'=>1]);
+     * ```
+     * @param string $statement SQL语句
+     * @param array $params 绑定的参数
+     * @return bool|integer 成功返回受影响的行数(可能为0行),失败返回false
+     */
+    public function exec($statement, $params = [])
+    {
+        $sth = $this->raw($statement, $params, true);
+        return false == $sth ? $sth : $sth->rowCount();
+    }
+
+    /**
+     * 字段值自增
+     * ```php
+     * $query->from('user')->where(['id'=>1])->inc('num');
+     * ```
+     * @param string $field 字段名
+     * @param integer $num 自增的值,必须为正整数
+     * @return boolean|integer 成功返回受影响的行数,失败返回false
+     */
+    public function inc($field, $num = 1)
+    {
+        $tables = implode(', ', $this->quoteColumns($this->from, $params));
+        $field = $this->quoteColumn($field);
+        $num = abs(intval($num));
+        $where = $this->buildWhere($params);
+        $statement = "UPDATE $tables SET $field=$field+$num" . ($where ? " $where" : '');
+        return $this->exec($statement, $params);
+    }
+
+    /**
+     * 字段值自减
+     * ```php
+     * $query->from('user')->where(['id'=>1])->dec('num');
+     * ```
+     * @param string $field 字段名
+     * @param integer $num 自减的值,必须为正整数
+     * @return boolean|integer 成功返回受影响的行数,失败返回false
+     */
+    public function dec($field, $num = 1)
+    {
+        $tables = implode(', ', $this->quoteColumns($this->from, $params));
+        $field = $this->quoteColumn($field);
+        $num = abs(intval($num));
+        $where = $this->buildWhere($params);
+        $statement = "UPDATE $tables SET $field=$field-$num" . ($where ? " $where" : '');
+        return $this->exec($statement, $params);
     }
 
     /**

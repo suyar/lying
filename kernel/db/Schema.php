@@ -81,13 +81,25 @@ class Schema
     {
         if (!isset($this->tables[$tableName])) {
             $query = $this->db->createQuery();
-            $columnsInfo = $query->raw("DESC $tableName")->fetchAll();
+            $columnsInfo = $query->query("DESC $tableName");
             $this->tables[$tableName] = new TableSchema($tableName, $columnsInfo);
             if ($this->cache instanceof Cache) {
                 $this->cache->set($this->cacheKey, $this->tables);
             }
         }
         return $this->tables[$tableName];
+    }
+
+    /**
+     * 清除表结构缓存(当开启了缓存时,更改表结构后调用)
+     * @return boolean 总是返回true
+     */
+    public function clearCache()
+    {
+        if ($this->cache instanceof Cache) {
+            $this->cache->del($this->cacheKey);
+        }
+        return true;
     }
 
     /**
