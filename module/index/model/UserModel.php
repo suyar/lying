@@ -1,12 +1,11 @@
 <?php
 namespace module\index\model;
 
-use lying\db\ActiveRecord;
-
 /**
- * Class User
+ * Class UserModel
  * @package module\index\model
  */
-class UserModel extends ActiveRecord {
+class UserModel extends \lying\db\ActiveRecord
+{
 
 }
