@@ -35,7 +35,7 @@ class Lock extends Service
      * @param integer $type 锁类型
      * LOCK_SH 共享锁
      * LOCK_EX 独占锁
-     * LOCK_NB 非阻塞(Windows上不支持),用法[LOCK_EX|LOCK_NB]
+     * LOCK_NB 非阻塞,用法[LOCK_EX|LOCK_NB]
      * @param callable $call 锁定的代码
      * @return boolean|mixed 返回代码执行结果,锁定失败返回false
      */
@@ -52,5 +52,15 @@ class Lock extends Service
             }
         }
         return false;
+    }
+
+    /**
+     * 删除锁名对应的锁文件
+     * @param string $name 锁名
+     * @return boolean 成功返回true,失败返回false
+     */
+    public function removeFile($name)
+    {
+        return @unlink($this->dir . DS . md5($name));
     }
 }
