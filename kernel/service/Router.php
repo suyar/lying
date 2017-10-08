@@ -91,10 +91,7 @@ class Router extends Service
         $path = trim(preg_replace('/^\/index\.php/i', '', $parse['path'], 1), '/');
         //匹配后缀名
         if ($path && $this->suffix) {
-            $path = rtrim(preg_replace('/\\' . $this->suffix . '$/i', '', $path, 1, $validate), '/');
-            if ($validate === 0) {
-                throw new \Exception('Not Found (#404)', 404);
-            }
+            $path = rtrim(preg_replace('/\\' . $this->suffix . '$/i', '', $path, 1), '/');
         }
         //分割后对每个元素进行URL解码
         $pathArray = empty($path) ? [] : array_map(function ($val) {
