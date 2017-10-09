@@ -51,6 +51,7 @@ cd php-7.1.1
 ./configure --prefix=/usr/local/php --with-apxs2=/usr/local/httpd/bin/apxs --with-bz2 --with-zlib --with-mcrypt --with-openssl --enable-mbstring --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --enable-calendar --enable-exif --with-gd --with-jpeg-dir --with-png-dir --enable-gd-native-ttf --with-freetype-dir --enable-bcmath --with-curl --enable-ftp --enable-sockets --enable-libxml
 <note:下面的一句配置是以php-fpm方式运行>
 ./configure --prefix=/usr/local/php --with-bz2 --with-zlib --with-mcrypt --with-openssl --enable-mbstring --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --enable-calendar --enable-exif --with-gd --with-jpeg-dir --with-png-dir --enable-gd-native-ttf --with-freetype-dir --enable-bcmath --with-curl --enable-ftp --enable-sockets --enable-libxml --enable-fpm
+参考:./configure --prefix=/usr/local/php7 --with-bz2 --enable-zip --with-mhash --with-openssl --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --enable-calendar --with-gettext --enable-mbstring --enable-exif --with-gd --with-jpeg-dir --with-png-dir --enable-gd-native-ttf --with-freetype-dir --enable-bcmath --with-curl --enable-ftp --enable-sockets --enable-libxml --enable-fpm --enable-pcntl
 make && make install
 4.控制命令<用于以php-fpm方式运行时>
 cd /usr/local/php/sbin

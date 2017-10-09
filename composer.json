@@ -7,7 +7,7 @@
 	"time": "2017-09-29",
 	"license": "MIT",
 	"authors": [
-		{"name": "lying", "email": "me@suyaqi.cn", "homepage": "https://github.com/carolkey", "role": "Developer"}
+		{"name": "lying", "email": "su@revoke.cc", "homepage": "https://github.com/carolkey", "role": "Developer"}
 	],
 	"require":{
 		"php": ">=5.5.0",
