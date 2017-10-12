@@ -269,7 +269,7 @@ class Router extends Service
             $absolute = false;
         }
         //拼接URL
-        $url = ($this->pathinfo ? '/index.php/' : '/') . $route;
+        $url = ($this->pathinfo ? '/index.php/' : '/') . trim($route, '/');
         //如果为完全匹配,多余的参数形式就用[?a=1&b=2]
         if ($normal || isset($absolute) && $absolute) {
             $query = http_build_query($params, '', '&');
