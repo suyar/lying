@@ -286,6 +286,6 @@ class Router extends Service
             $url .= $query ? "/$query" : '';
             $url .= $this->suffix ? $this->suffix : '';
         }
-        return $url;
+        return \Lying::$maker->request()->host(true) . $url;
     }
 }
