@@ -189,7 +189,7 @@ class Request
             $host .= $_SERVER['SERVER_NAME'];
             $port = $this->serverPort();
             if ((!$secure && $port !== 80) || ($secure && $port !== 443)) {
-                $host .= $port;
+                $host .= ':' . $port;
             }
         }
         return $host;
