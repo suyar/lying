@@ -23,9 +23,9 @@ class View
     /**
      * 输出数据
      * @param string|array $key 参数名,如果为数组,则判断为批量输出数据
-     * @param mixed $value 参数值
+     * @param mixed $value 参数值,如果key为数组,此参数可不填写
      */
-    public function assign($key, $value)
+    public function assign($key, $value = null)
     {
         if (is_array($key)) {
             $this->params = array_merge($this->params, $key);
