@@ -22,12 +22,16 @@ class View
 
     /**
      * 输出数据
-     * @param string $key 参数名
+     * @param string|array $key 参数名,如果为数组,则判断为批量输出数据
      * @param mixed $value 参数值
      */
     public function assign($key, $value)
     {
-        $this->params[$key] = $value;
+        if (is_array($key)) {
+            $this->params = array_merge($this->params, $key);
+        } else {
+            $this->params[$key] = $value;
+        }
     }
 
     /**
