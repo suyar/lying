@@ -772,11 +772,12 @@ class Query
      */
     public function inc($field, $num = 1)
     {
+        $params = [];
         $tables = implode(', ', $this->quoteColumns($this->from, $params));
         $field = $this->quoteColumn($field);
-        $num = abs(intval($num));
         $where = $this->buildWhere($params);
-        $statement = "UPDATE $tables SET $field=$field+$num" . ($where ? " $where" : '');
+        array_unshift($params, abs(intval($num)));
+        $statement = "UPDATE $tables SET $field=$field+?" . ($where ? " $where" : '');
         return $this->exec($statement, $params);
     }
 
@@ -791,11 +792,12 @@ class Query
      */
     public function dec($field, $num = 1)
     {
+        $params = [];
         $tables = implode(', ', $this->quoteColumns($this->from, $params));
         $field = $this->quoteColumn($field);
-        $num = abs(intval($num));
         $where = $this->buildWhere($params);
-        $statement = "UPDATE $tables SET $field=$field-$num" . ($where ? " $where" : '');
+        array_unshift($params, abs(intval($num)));
+        $statement = "UPDATE $tables SET $field=$field-?" . ($where ? " $where" : '');
         return $this->exec($statement, $params);
     }
 
