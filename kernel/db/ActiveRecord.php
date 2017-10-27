@@ -109,10 +109,10 @@ class ActiveRecord extends Service
      * @param string $name 属性名
      * @return mixed 不存在返回null
      */
-    /*public function __get($name)
+    public function __get($name)
     {
         return $this->__isset($name) ? $this->attr[$name] : null;
-    }*/
+    }
     
     /**
      * 属性是否存在
