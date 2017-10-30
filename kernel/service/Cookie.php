@@ -33,7 +33,7 @@ class Cookie extends Service
     /**
      * @var string COOKIE路径
      */
-    private $path = '';
+    private $path = '/';
 
     /**
      * @var string COOKIE域名
