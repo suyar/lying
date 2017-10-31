@@ -117,7 +117,7 @@ class Controller extends Service
 
     /**
      * 渲染输出参数
-     * @param string $key 参数名,如果为数组,则判断为批量输出数据
+     * @param string|array $key 参数名,如果为数组,则判断为批量输出数据
      * @param mixed $value 参数值,如果key为数组,此参数可不填写
      */
     final public function assign($key, $value = null)
