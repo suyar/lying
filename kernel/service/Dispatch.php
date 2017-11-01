@@ -60,10 +60,10 @@ class Dispatch extends Service
         }
         return true;
     }
-    
+
     /**
      * 返回方法所带的GET参数数组
-     * @param array $params 一个\ReflectionParameter的数组
+     * @param \ReflectionParameter[] $params 一个\ReflectionParameter的数组
      * @return array 返回要带入执行方法的GET参数
      */
     private function parseArgs($params)
@@ -73,6 +73,8 @@ class Dispatch extends Service
             $arg = \Lying::$maker->request()->get($param->name);
             if ($arg !== null) {
                 $args[] = $arg;
+            } elseif ($param->isDefaultValueAvailable()) {
+                $args[] = $param->getDefaultValue();
             }
         }
         return $args;
