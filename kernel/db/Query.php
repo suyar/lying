@@ -384,7 +384,7 @@ class Query
     private function buildOperator($condition, &$container)
     {
         list($operation, $field, $val) = $condition;
-        $field = $this->quoteColumn($field);
+        $field = is_array($field) ? implode(', ', array_map([$this, 'quoteColumn'], $field)) : $this->quoteColumn($field);
         $place = is_bool($val) ? '' : $this->buildPlaceholders($val, $container);
         switch (trim(strtoupper($operation))) {
             case 'IN':
@@ -407,6 +407,8 @@ class Query
                 return "EXISTS $place";
             case 'NOT EXISTS':
                 return "NOT EXISTS $place";
+            case 'MATCH':
+                return "MATCH ($field) AGAINST (?)";
             default:
                 return "$field $operation $place";
         }
