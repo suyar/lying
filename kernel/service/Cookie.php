@@ -118,7 +118,7 @@ class Cookie extends Service
     private function reset()
     {
         $this->expire = 0;
-        $this->path = '';
+        $this->path = '/';
         $this->domain = '';
         $this->secure = false;
         $this->httpOnly = false;
