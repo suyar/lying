@@ -1,14 +1,5 @@
 <?php
 return [
-    //调度器组件
-    'dispatch' => [
-        'class' => 'lying\service\Dispatch',
-        'moduleNamespace' => 'module',
-    ],
-    //异常组件
-    'exception' => 'lying\service\Exception',
-    //请求组件
-    'request' => 'lying\service\Request',
     //路由组件
     'router' => [
         'class' => 'lying\service\Router',
@@ -34,13 +25,6 @@ return [
             ],
         ],
     ],
-    //COOKIE组件
-    'cookie' => [
-        'class' => 'lying\service\Cookie',
-        'key' => '123456',
-    ],
-    //SESSION组件
-    'session' => 'lying\service\Session',
     //数据库组件
     'db' => [
         'class' => 'lying\db\Connection',
@@ -79,10 +63,7 @@ return [
         'dir' => DIR_RUNTIME . DS . 'cache',
         'gc' => 50,
     ],
-    'apcu' => [
-        'class' => 'lying\cache\ApcCache',
-        'apcu' => true,
-    ],
+    'apcu' => 'lying\cache\ApcuCache',
     'memcached' => [
         'class' => 'lying\cache\MemCached',
         'servers' => [

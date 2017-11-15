@@ -11,17 +11,12 @@ namespace lying\cache;
 use lying\service\Service;
 
 /**
- * Class ApcCache
+ * Class ApcuCache
  * @package lying\cache
  * @since 2.0
  */
-class ApcCache extends Service implements Cache
+class ApcuCache extends Service implements Cache
 {
-    /**
-     * @var boolean 是否使用APCu
-     */
-    protected $apcu = false;
-
     /**
      * 添加一个缓存,如果缓存已经存在,此次设置的值不会覆盖原来的值,并返回false
      * @param string $key 缓存的键
@@ -31,7 +26,7 @@ class ApcCache extends Service implements Cache
      */
     public function add($key, $value, $ttl = 0)
     {
-        return $this->apcu ? apcu_add($key, $value, $ttl) : apc_add($key, $value, $ttl);
+        return apcu_add($key, $value, $ttl);
     }
 
     /**
@@ -42,7 +37,7 @@ class ApcCache extends Service implements Cache
      */
     public function madd($data, $ttl = 0)
     {
-        $res = $this->apcu ? apcu_add($data, null, $ttl) : apc_add($data, null, $ttl);
+        $res = apcu_add($data, null, $ttl);
         return is_array($res) ? array_keys($res) : [];
     }
 
@@ -55,7 +50,7 @@ class ApcCache extends Service implements Cache
      */
     public function set($key, $value, $ttl = 0)
     {
-        return $this->apcu ? apcu_store($key, $value, $ttl) : apc_store($key, $value, $ttl);
+        return apcu_store($key, $value, $ttl);
     }
 
     /**
@@ -66,7 +61,7 @@ class ApcCache extends Service implements Cache
      */
     public function mset($data, $ttl = 0)
     {
-        $res = $this->apcu ? apcu_store($data, null, $ttl) : apc_store($data, null, $ttl);
+        $res = apcu_store($data, null, $ttl);
         return is_array($res) ? array_keys($res) : [];
     }
 
@@ -77,7 +72,7 @@ class ApcCache extends Service implements Cache
      */
     public function get($key)
     {
-        return $this->apcu ? apcu_fetch($key) : apc_fetch($key);
+        return apcu_fetch($key);
     }
 
     /**
@@ -87,7 +82,8 @@ class ApcCache extends Service implements Cache
      */
     public function mget($keys)
     {
-        return $this->apcu ? apcu_fetch($keys) : apc_fetch($keys);
+        $values = apcu_fetch($keys);
+        return is_array($values) ? $values : [];
     }
 
     /**
@@ -97,7 +93,7 @@ class ApcCache extends Service implements Cache
      */
     public function exist($key)
     {
-        return $this->apcu ? apcu_exists($key) : apc_exists($key);
+        return apcu_exists($key);
     }
 
     /**
@@ -107,7 +103,7 @@ class ApcCache extends Service implements Cache
      */
     public function del($key)
     {
-        return $this->apcu ? apcu_delete($key) : apc_delete($key);
+        return apcu_delete($key);
     }
 
     /**
@@ -116,6 +112,6 @@ class ApcCache extends Service implements Cache
      */
     public function flush()
     {
-        return $this->apcu ? apcu_clear_cache() : apc_clear_cache('user');
+        return apcu_clear_cache();
     }
 }

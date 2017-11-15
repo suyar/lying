@@ -5,9 +5,9 @@ define('DS', DIRECTORY_SEPARATOR);
 
 define('DIR_KERNEL', __DIR__);
 
-define('DIR_WEB', dirname($_SERVER['SCRIPT_FILENAME']));
+define('DIR_ROOT', dirname(DIR_KERNEL));
 
-define('DIR_ROOT', php_sapi_name() === 'cli' ? DIR_WEB : dirname(DIR_WEB));
+define('DIR_WEB', php_sapi_name() === 'cli' ? DIR_ROOT . DS . 'web' : $_SERVER['DOCUMENT_ROOT']);
 
 define('DIR_CONFIG', DIR_ROOT . DS . 'config');
 

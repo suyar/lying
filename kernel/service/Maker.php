@@ -45,7 +45,15 @@ class Maker
      */
     public function __construct($service)
     {
-        self::$service = $service;
+        $core = [
+            'cookie' => 'lying\service\Cookie',
+            'dispatch' => 'lying\service\Dispatch',
+            'exception' => 'lying\service\Exception',
+            'request' => 'lying\service\Request',
+            'session' => 'lying\service\Session',
+        ];
+        (php_sapi_name() === 'cli') && ($core['router'] = 'lying\service\Router');
+        self::$service = array_merge($service, $core);
     }
 
     /**
