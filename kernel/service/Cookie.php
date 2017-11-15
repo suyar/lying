@@ -18,7 +18,7 @@ class Cookie extends Service
     /**
      * @var string COOKIE加密密钥
      */
-    protected $key;
+    private $key = '';
 
     /**
      * @var integer 密钥长度

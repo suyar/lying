@@ -16,18 +16,14 @@ namespace lying\service;
 class Dispatch extends Service
 {
     /**
-     * @var string 模块的命名空间
-     */
-    protected $moduleNamespace = 'module';
-
-    /**
      * 程序执行入口
      * @throws \Exception 页面不存在抛出404错误
      */
     public function run()
     {
         list($m, $c, $a) = \Lying::$maker->router()->resolve();
-        $class = "$this->moduleNamespace\\$m\\controller\\$c";
+        $moduleNamespace = php_sapi_name() === 'cli' ? 'console' : 'module';
+        $class = "$moduleNamespace\\$m\\controller\\$c";
         if (class_exists($class)) {
             $instance = new $class();
             if (method_exists($instance, $a)) {
