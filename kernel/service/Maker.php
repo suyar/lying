@@ -50,10 +50,11 @@ class Maker
             'dispatch' => 'lying\service\Dispatch',
             'exception' => 'lying\service\Exception',
             'request' => 'lying\service\Request',
+            'router' => 'lying\service\Router',
             'session' => 'lying\service\Session',
         ];
         (php_sapi_name() === 'cli') && ($core['router'] = 'lying\service\Router');
-        self::$service = array_merge($service, $core);
+        self::$service = array_merge($core, $service);
     }
 
     /**
