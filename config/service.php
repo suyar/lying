@@ -1,5 +1,10 @@
 <?php
 return [
+    //COOKIE组件
+    'cookie' => [
+        'class' => 'lying\service\Cookie',
+        'key' => '123456',
+    ],
     //路由组件
     'router' => [
         'class' => 'lying\service\Router',
