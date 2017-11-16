@@ -53,8 +53,8 @@ class Maker
             'router' => 'lying\service\Router',
             'session' => 'lying\service\Session',
         ];
-        (php_sapi_name() === 'cli') && ($core['router'] = 'lying\service\Router');
         self::$service = array_merge($core, $service);
+        (php_sapi_name() === 'cli') && (self::$service['router'] = 'lying\service\Router');
     }
 
     /**
