@@ -167,13 +167,14 @@ class Exception
         ob_start();
         ob_implicit_flush(false);
         if (php_sapi_name() === 'cli') {
-            echo "[root@lying ~]Error Code:$code" . PHP_EOL;
-            echo "[root@lying ~]Error Info:$msg" . PHP_EOL;
-            echo "[root@lying ~]Error File:$file" . PHP_EOL;
-            echo "[root@lying ~]Error Line:$line" . PHP_EOL;
+            $err = "[root@lying ~]Error Code:$code" . PHP_EOL;
+            $err .= "[root@lying ~]Error Info:$msg" . PHP_EOL;
+            $err .= "[root@lying ~]Error File:$file" . PHP_EOL;
+            $err .= "[root@lying ~]Error Line:$line" . PHP_EOL;
             foreach ($trace as $t) {
-                echo "[root@lying ~]$t" . PHP_EOL;
+                $err .= "[root@lying ~]$t" . PHP_EOL;
             }
+            fwrite(STDERR, $err);
         } else {
             require DIR_KERNEL . DS . 'view' . DS . 'error.php';
         }
