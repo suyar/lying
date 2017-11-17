@@ -1,31 +1,16 @@
 <?php
 namespace console\tool\controller;
 
-use lying\db\Connection;
-use lying\service\Controller;
-
-class IndexCtrl extends Controller
+/**
+ * Class IndexCtrl
+ * @package console\tool\controller
+ */
+class IndexCtrl extends BaseTool
 {
     /**
-     * @var Connection
+     * LOGO
      */
-    private $db;
-
-    /**
-     * @inheritdoc
-     */
-    public function init()
-    {
-        parent::init();
-        $this->db = \Lying::$maker->db();
-    }
-
-    /**
-     * 选择工具
-     */
-    public function index()
-    {
-        $LOGO = <<<EOL
+    private static $LOGO = <<<EOL
      __        __
     / / __ __ /_/__  __ ____
    / / / // // //  \/ // _  \
@@ -33,115 +18,41 @@ class IndexCtrl extends Controller
  /____\_  //_//_/ /_/_\_  /
     /____/          \____/
 EOL;
-        $this->cliPut("$LOGO\n");
-        $this->cliPut("Model Builder: 1\n");
-        $this->cliPut("Exit: 0\n");
-        $this->cliPut("Type the number into the corresponding tool:");
-        switch ($this->cliGet()) {
-            case '0':
-                $this->cliPut("Exit!");
-                exit;
-            case '1':
-                $this->model();
-                break;
-            default:
-                $this->cliPut("Unknown tool\n");
-        }
+
+    /**
+     * @var array
+     */
+    private static $TOOLS = [
+        1 => ['Model Create', [ModelTool::class, 'create']],
+        2 => ['Model Update', [ModelTool::class, 'update']],
+        0 => ['Exit'],
+    ];
+
+    /**
+     * @inheritdoc
+     */
+    protected function init()
+    {
+        parent::init();
+        $this->stdOut(self::$LOGO);
     }
 
     /**
-     * 模型工具
+     * 选择工具
      */
-    private function model()
+    public function index()
     {
-        $tables = $this->db->schema()->getTableNames();
-        $this->cliPut('Please enter the table name:');
-        $table = $this->cliGet();
-        if ($table !== '' && !in_array($table, $tables)) {
-            return $this->cliPut("Table $table does not exist!");
+        foreach (self::$TOOLS as $id => $tool) {
+            $this->stdOut("{$id}: {$tool[0]}");
         }
-        $this->cliPut('Please enter a namespace:');
-        while (!($namespace = trim($this->cliGet(), '/\\'))) {
-            $this->cliPut('Please enter a namespace:');
-        }
-        $namespace = str_replace('/', '\\', trim($namespace, '/\\'));
-        $dir = DIR_ROOT . DS . str_replace('\\', DS, $namespace);
-        if (!is_dir($dir)) {
-            return $this->cliPut("Directory $dir does not exist");
-        }
-        if ($table === '') {
-            foreach ($tables as $t) {
-                $this->createModel($t, $namespace, $dir);
-            }
+        $this->stdOut("Type the number into the corresponding tool:", false);
+        $toolId = $this->stdIn();
+        if (isset(self::$TOOLS[$toolId])) {
+            call_user_func([new self::$TOOLS[$toolId][1][0](), self::$TOOLS[$toolId][1][1]]);
+        } elseif ($toolId === '0') {
+            exit(0);
         } else {
-            $this->createModel($table, $namespace, $dir);
+            $this->stdErr("Unknown tool");
         }
-    }
-
-    /**
-     * 创建一个模型
-     * @param string $tableName 表全名
-     * @param string $namespace 命名空间全名,开头不用
-     * @param string $dir 命名空间所在路径
-     */
-    private function createModel($tableName, $namespace, $dir)
-    {
-        $cols = $this->db->schema()->getTableSchema($tableName)->columns;
-        $tableName = preg_replace('/^'.preg_quote($this->db->prefix()).'/', '', $tableName);
-        $modelName = str_replace(' ', '', ucwords(str_replace('_', ' ', $tableName))).'Model';
-        $file = $dir . DS . $modelName . '.php';
-        if (file_exists($file)) {
-            $this->cliPut("Model $modelName already exists, regenerated?(y/n):");
-            while (!($continue = strtolower($this->cliGet()))) {
-                $this->cliPut("Model $modelName already exists, regenerated?(y/n):");
-            }
-            if ($continue !== 'y') {
-                $this->cliPut("Model $modelName is skipped\n");
-                return;
-            }
-        }
-        $content = implode(PHP_EOL, [
-            '<?php',
-            'namespace ' . $namespace . ';',
-            '',
-            '/**',
-            ' * Class ' . $modelName,
-            ' * @package ' . $namespace,
-            '',
-        ]);
-        foreach ($cols as $col) {
-            $content .= (' * @property string $' . $col . PHP_EOL);
-        }
-        $content .= implode(PHP_EOL, [
-            ' */',
-            'class ' . $modelName . ' extends \lying\db\ActiveRecord',
-            '{',
-            '',
-            '}',
-            '',
-        ]);
-        if (file_put_contents($file, $content)) {
-            $this->cliPut('Model ' . $modelName . ' is created!' . "\n");
-        } else {
-            $this->cliPut("Fail to create model $modelName!\n");
-        }
-    }
-
-    /**
-     * CLI输入
-     * @return string
-     */
-    private function cliGet()
-    {
-        return trim(fgets(STDIN));
-    }
-
-    /**
-     * CLI输出
-     * @param string $tips 输出的文字
-     */
-    private function cliPut($tips = '')
-    {
-        fwrite(STDOUT, $tips);
     }
 }

@@ -1,0 +1,149 @@
+<?php
+namespace console\tool\controller;
+
+/**
+ * Class ModelTool
+ * @package console\tool\controller
+ */
+class ModelTool extends BaseTool
+{
+    /**
+     * 创建数据库模型
+     */
+    public function create()
+    {
+        $tableArr = $this->getInputTables();
+        list($namespace, $dir) = $this->getInputNamespace();
+
+        $prefix = \Lying::$maker->db()->prefix();
+        foreach ($tableArr as $table) {
+            $tableName = preg_replace('/^'.preg_quote($prefix).'/', '', $table);
+            $modelName = str_replace(' ', '', ucwords(str_replace('_', ' ', $tableName))) . 'Model';
+            $modelFile = $dir . DS . $modelName . '.php';
+            if (file_exists($modelFile)) {
+                $this->stdOut("Model `$modelName` already exists, whether to regenerate?(y/n):", false);
+                if ($this->stdIn() !== 'y') {
+                    $this->stdOut("Model `$modelName` is skipped");
+                    continue;
+                }
+            }
+
+            $cols = \Lying::$maker->db()->schema()->getTableSchema($table)->columns;
+            $content = implode(PHP_EOL, [
+                '<?php',
+                'namespace ' . $namespace . ';',
+                '',
+                '/**',
+                ' * Class ' . $modelName,
+                ' * @package ' . $namespace,
+                '',
+            ]);
+            foreach ($cols as $col) {
+                $content .= (' * @property string $' . $col . PHP_EOL);
+            }
+            $content .= implode(PHP_EOL, [
+                ' */',
+                'class ' . $modelName . ' extends \lying\db\ActiveRecord',
+                '{',
+                '',
+                '}',
+                '',
+            ]);
+
+            if (file_put_contents($modelFile, $content)) {
+                $this->stdOut("Model `$modelName` is created!");
+            } else {
+                $this->stdOut("Failed to create model `$modelName`!");
+            }
+        }
+    }
+
+    /**
+     * 更新数据库模型
+     */
+    public function update()
+    {
+        $tableArr = $this->getInputTables();
+        list($namespace, $dir) = $this->getInputNamespace();
+
+        $prefix = \Lying::$maker->db()->prefix();
+        foreach ($tableArr as $table) {
+            $tableName = preg_replace('/^'.preg_quote($prefix).'/', '', $table);
+            $modelName = str_replace(' ', '', ucwords(str_replace('_', ' ', $tableName))) . 'Model';
+            $modelFile = $dir . DS . $modelName . '.php';
+            if (!file_exists($modelFile)) {
+                $this->stdOut("Model `$modelName` does not exist");
+                continue;
+            }
+
+            $cols = \Lying::$maker->db()->schema()->getTableSchema($table)->columns;
+            $content = implode(PHP_EOL, [
+                '<?php',
+                'namespace ' . $namespace . ';',
+                '',
+                '/**',
+                ' * Class ' . $modelName,
+                ' * @package ' . $namespace,
+                '',
+            ]);
+            foreach ($cols as $col) {
+                $content .= (' * @property string $' . $col . PHP_EOL);
+            }
+            $content .= ' */';
+
+            $old = file_get_contents($modelFile);
+            $new = preg_replace('/^<\?php.*\*\/$/is', $content, $old);
+
+            preg_match('/ \* @property string \$.*\n$/s', $old, $matches);
+            var_dump($matches);die;
+
+            if (file_put_contents($modelFile, $new)) {
+                $this->stdOut("Model `$modelName` is updated!");
+            } else {
+                $this->stdOut("Failed to update model `$modelName`!");
+            }
+        }
+
+    }
+
+    /**
+     * 获取用户手动输入的表名数组
+     * @return array
+     */
+    private function getInputTables()
+    {
+        $tables = \Lying::$maker->db()->schema()->getTableNames();
+        $this->stdOut('Enter the table name(split width | or just enter for all):', false);
+        $table = $this->stdIn();
+        if ($table === '') {
+            $tableArr = $tables;
+        } else {
+            $tableArr = explode('|', trim($table, '|'));
+            foreach ($tableArr as $t) {
+                in_array($t, $tables) || $this->stdErr("Table `$t` does not exist!");
+            }
+        }
+        return $tableArr;
+    }
+
+    /**
+     * 获取命名空间和对应文件夹
+     * @return array
+     */
+    private function getInputNamespace()
+    {
+        $this->stdOut('Enter a namespace(use psr-0 with path `ROOT`):', false);
+        $namespace = str_replace('/', '\\', trim($this->stdIn(), '/\\'));
+        $namespace || $this->stdErr('Unable to use empty or / for namespace');
+        $this->stdOut("Use namespace `$namespace`");
+        $dir = DIR_ROOT . DS . str_replace('\\', DS, $namespace);
+        if (is_dir($dir)) {
+            $this->stdOut("Use directory `$dir`");
+        } else if (@mkdir($dir, 0777, true)) {
+            $this->stdOut("Created directory `$dir`");
+        } else {
+            $this->stdErr("Failed to create directory `$dir`");
+        }
+        return [$namespace, $dir];
+    }
+}
