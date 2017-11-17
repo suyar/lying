@@ -47,10 +47,10 @@ EOL;
         }
         $this->stdOut("Type the number into the corresponding tool:", false);
         $toolId = $this->stdIn();
-        if (isset(self::$TOOLS[$toolId])) {
-            call_user_func([new self::$TOOLS[$toolId][1][0](), self::$TOOLS[$toolId][1][1]]);
-        } elseif ($toolId === '0') {
+        if ($toolId === '0') {
             exit(0);
+        } if (isset(self::$TOOLS[$toolId])) {
+            call_user_func([new self::$TOOLS[$toolId][1][0](), self::$TOOLS[$toolId][1][1]]);
         } else {
             $this->stdErr("Unknown tool");
         }
