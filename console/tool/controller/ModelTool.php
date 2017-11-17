@@ -78,9 +78,6 @@ class ModelTool extends BaseTool
 
             $cols = \Lying::$maker->db()->schema()->getTableSchema($table)->columns;
             $content = implode(PHP_EOL, [
-                '<?php',
-                'namespace ' . $namespace . ';',
-                '',
                 '/**',
                 ' * Class ' . $modelName,
                 ' * @package ' . $namespace,
@@ -92,18 +89,17 @@ class ModelTool extends BaseTool
             $content .= ' */';
 
             $old = file_get_contents($modelFile);
-            $new = preg_replace('/^<\?php.*\*\/$/is', $content, $old);
-
-            preg_match('/ \* @property string \$.*\n$/s', $old, $matches);
-            var_dump($matches);die;
-
-            if (file_put_contents($modelFile, $new)) {
-                $this->stdOut("Model `$modelName` is updated!");
+            if (preg_match('/\/\*\*.* \*\//s', $old, $matches)) {
+                $new = str_replace($matches[0], $content, $old);
+                if (file_put_contents($modelFile, $new)) {
+                    $this->stdOut("Model `$modelName` is updated!");
+                } else {
+                    $this->stdOut("Failed to update model `$modelName`!");
+                }
             } else {
                 $this->stdOut("Failed to update model `$modelName`!");
             }
         }
-
     }
 
     /**
