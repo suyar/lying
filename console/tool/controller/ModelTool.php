@@ -64,7 +64,7 @@ class ModelTool extends BaseTool
     public function update()
     {
         $tableArr = $this->getInputTables();
-        list($namespace, $dir) = $this->getInputNamespace();
+        list($namespace, $dir) = $this->getInputNamespace(false);
 
         $prefix = \Lying::$maker->db()->prefix();
         foreach ($tableArr as $table) {
@@ -124,9 +124,10 @@ class ModelTool extends BaseTool
 
     /**
      * 获取命名空间和对应文件夹
+     * @param bool $cdir 是否创建文件夹
      * @return array
      */
-    private function getInputNamespace()
+    private function getInputNamespace($cdir = true)
     {
         $this->stdOut('Enter a namespace(use psr-0 with path `ROOT`):', false);
         $namespace = str_replace('/', '\\', trim($this->stdIn(), '/\\'));
@@ -135,10 +136,12 @@ class ModelTool extends BaseTool
         $dir = DIR_ROOT . DS . str_replace('\\', DS, $namespace);
         if (is_dir($dir)) {
             $this->stdOut("Use directory `$dir`");
-        } else if (@mkdir($dir, 0777, true)) {
+        } else if ($cdir && @mkdir($dir, 0777, true)) {
             $this->stdOut("Created directory `$dir`");
-        } else {
+        } else if ($cdir) {
             $this->stdErr("Failed to create directory `$dir`");
+        } else {
+            $this->stdErr("Directory `$dir` does not exist!");
         }
         return [$namespace, $dir];
     }
