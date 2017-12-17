@@ -13,7 +13,7 @@ namespace lying\service;
  * @package lying\service
  * @since 2.0
  */
-class Router extends Service
+class Router1 extends Service
 {
     /**
      * @var boolean 是否绑定模块
@@ -72,135 +72,14 @@ class Router extends Service
                 $this->$name = $value;
             }
         }
-        $this->initRule();
     }
-
-    /**
-     * 预解析路由规则
-     */
-    private function initRule()
-    {
-        $rules = [];
-        if (is_array($this->rule) && $this->rule) {
-            foreach ($this->rule as $pattern => $rule) {
-                $temp = [];
-                $pattern = preg_replace('/\$$/', '', $pattern, 1, $temp['absolute']);
-                $temp['pattern'] = $pattern;
-                $temp['router'] = $rule[0];
-                $temp['suffix'] = isset($rule[1]) ? $rule[1] : false;
-                if (preg_match_all('/<([^<>]+)>/', $pattern, $matches)) {
-                    foreach ($matches[1] as $k => $match) {
-                        if (strpos($match, ':')) {
-                            list($col, $reg) = explode(':', $match);
-                            $temp['params'][$col] = ['reg'=>$reg, 'rep'=>$matches[0][$k], 'name'=>$col];
-                        } else {
-                            $temp['params'][$match] = ['reg'=>false, 'rep'=>$matches[0][$k], 'name'=>$match];
-                        }
-                    }
-                } else {
-                    $temp['params'] = [];
-                }
-                $rules[] = $temp;
-            }
-        }
-        $this->rule = $rules;
-    }
-
-    /**
-     * 解析路由规则
-     * @param string $path 请求路径
-     * @return bool 匹配到了返回true,没有匹配返回false
-     */
-    private function parseRule($path)
-    {
-        foreach ($this->rule as $rule) {
-            //匹配后缀
-            if ($rule['suffix']) {
-                $len = strlen($rule['suffix']);
-                if (substr_compare($path, $rule['suffix'], -$len, $len) === 0) {
-                    $path = substr_replace($path, '', -$len, $len);
-                } else {
-                    continue;
-                }
-            }
-
-            //匹配参数个数
-            $pathArr = array_map(function ($val) {
-                return urldecode($val);
-            }, explode('/', $path));
-            $patternArr = explode('/', $rule['pattern']);
-            $count_path = count($pathArr);
-            $count_pattern = count($patternArr);
-            if ($count_path < $count_pattern || $rule['absolute'] && $count_path !== $count_pattern) {
-                continue;
-            }
-
-            //匹配路由规则
-            $cols = $rule['params'];
-            $params = [];
-            foreach ($patternArr as $k => $val) {
-                if (strpos($val, '<') === 0) {
-                    $col = array_shift($cols);
-                    if ($col['reg'] && preg_match("/{$col['reg']}/", $pathArr[$k])) {
-                        $params[$col['name']] = $pathArr[$k];
-                    } else {
-                        $params[$col['name']] = $pathArr[$k];
-                    }
-                } elseif (strcmp($val, $pathArr[$k]) !== 0) {
-                    continue 2;
-                }
-            }
-
-            //匹配成功
-            $_GET = array_merge($params, $_GET);
-            while (array_slice($pathArr, $count_path)) {
-                $k = array_shift($pathArr);
-                $v = array_shift($pathArr);
-                $_GET[$k] = $v;
-            }
-            $routerArr = explode('/', $rule['router']);
-            $this->router = [
-                $this->binding ? $this->module : array_shift($routerArr),
-                array_shift($routerArr),
-                array_shift($routerArr),
-            ];
-            return true;
-        }
-        return false;
-    }
-
-    private function parseNormal($path)
-    {
-
-    }
-
-    public function resolve()
-    {
-        $request = \Lying::$maker->request();
-        $uri = $request->isCli() ? $request->getArgv(1, '/') : $request->uri();
-        $parse = parse_url($uri);
-        isset($parse['query']) && parse_str($parse['query'], $_GET);
-        $path = preg_replace('/^\/index\.php/i', '', $parse['path'], 1);
-        $path = trim($path, '/');
-        if ($path) {
-            $this->parseRule($path);
-        }
-
-        //$this->parseRule($parse['path']);
-
-
-        var_dump($path);die;
-
-    }
-
-
 
     /**
      * 路由解析
      * @return array 返回路由数组[module, controller, action]
      * @throws \Exception 当后缀名不匹配的时候抛出404异常
      */
-    public function resolve1()
+    public function resolve()
     {
         $request = \Lying::$maker->request();
         $uri = $request->isCli() ? $request->getArgv(1, '/') : $request->uri();

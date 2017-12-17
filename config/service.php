@@ -15,7 +15,8 @@ return [
         'pathinfo' => false,
         'suffix' => '.html',
         'rule' => [
-            'blog/:id$' => ['admin/blog/get', 'id' => '/\d{50}/'],
+            //'blog/:id$' => ['admin/blog/get', 'id' => '/\d{50}/'],
+            'blog/<id:\d+>/<name>$' => ['admin/blog/get', '.htm'],
         ],
         'host' => [
             'api.lying.com' => [
