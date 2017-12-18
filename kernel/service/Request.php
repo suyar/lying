@@ -27,13 +27,10 @@ class Request
 
     /**
      * 装载GET/POST数据,此函数第一次执行有效
-     * @param array $get
      */
-    public function load($get)
+    public function load()
     {
-        if ($this->data === null) {
-            $this->data = ['get' => $get, 'post' => $_POST];
-        }
+        $this->data === null || ($this->data = ['get' => $_GET, 'post' => $_POST]);
     }
 
     /**
