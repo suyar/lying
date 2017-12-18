@@ -73,6 +73,7 @@ class Router extends Service
             }
         }
         $this->initRule();
+        $this->parse();
     }
 
     /**
@@ -141,8 +142,8 @@ class Router extends Service
             foreach ($patternArr as $k => $val) {
                 if (strpos($val, '<') === 0) {
                     $col = array_shift($cols);
-                    if ($col['reg'] && preg_match("/{$col['reg']}/", $pathArr[$k])) {
-                        $params[$col['name']] = $pathArr[$k];
+                    if ($col['reg'] && !preg_match("/{$col['reg']}/", $pathArr[$k])) {
+                        continue 2;
                     } else {
                         $params[$col['name']] = $pathArr[$k];
                     }
@@ -160,21 +161,52 @@ class Router extends Service
             }
             $routerArr = explode('/', $rule['router']);
             $this->router = [
-                $this->binding ? $this->module : array_shift($routerArr),
-                array_shift($routerArr),
-                array_shift($routerArr),
+                strtolower($this->binding ? $this->module : array_shift($routerArr)),
+                strtolower(array_shift($routerArr)),
+                strtolower(array_shift($routerArr)),
             ];
             return true;
         }
         return false;
     }
 
+    /**
+     * 常规解析路由
+     * @param string $path 请求路径
+     * @return bool 无论什么情况都返回true
+     */
     private function parseNormal($path)
     {
+        if ($path && $this->suffix) {
+            $len = strlen($this->suffix);
+            if (substr_compare($path, $this->suffix, -$len, $len) === 0) {
+                substr_replace($path, $this->suffix, -$len, $len);
+            }
+        }
 
+        $pathArr = array_map(function ($val) {
+            return urldecode($val);
+        }, explode('/', $path));
+
+        $this->router = [
+            strtolower($this->binding ? $this->module : (array_shift($pathArr) ?: $this->module)),
+            strtolower(array_shift($pathArr) ?: $this->controller),
+            strtolower(array_shift($pathArr) ?: $this->action),
+        ];
+
+        while ($pathArr) {
+            $k = array_shift($pathArr);
+            $v = array_shift($pathArr);
+            $_GET[$k] = $v;
+        }
+
+        return true;
     }
 
-    public function resolve()
+    /**
+     * 解析请求路由
+     */
+    private function parse()
     {
         $request = \Lying::$maker->request();
         $uri = $request->isCli() ? $request->getArgv(1, '/') : $request->uri();
@@ -182,113 +214,34 @@ class Router extends Service
         isset($parse['query']) && parse_str($parse['query'], $_GET);
         $path = preg_replace('/^\/index\.php/i', '', $parse['path'], 1);
         $path = trim($path, '/');
-        if ($path) {
-            $this->parseRule($path);
-        }
-
-        //$this->parseRule($parse['path']);
-
-
-        var_dump($path);die;
-
-    }
-
-
-
-    /**
-     * 路由解析
-     * @return array 返回路由数组[module, controller, action]
-     * @throws \Exception 当后缀名不匹配的时候抛出404异常
-     */
-    public function resolve1()
-    {
-        $request = \Lying::$maker->request();
-        $uri = $request->isCli() ? $request->getArgv(1, '/') : $request->uri();
-        //解析URI
-        $parse = parse_url($uri);
-        //解析原生GET,这里是为了去除转发规则中$_GET本身中无用的参数
-        parse_str(isset($parse['query']) ? $parse['query'] : '', $_GET);
-        //去掉index.php
-        $path = trim(preg_replace('/^\/index\.php/i', '', $parse['path'], 1), '/');
-        //匹配后缀名
-        if ($path && $this->suffix) {
-            $path = rtrim(preg_replace('/\\' . $this->suffix . '$/i', '', $path, 1), '/');
-        }
-        //分割后对每个元素进行URL解码
-        $pathArray = empty($path) ? [] : array_map(function ($val) {
-            return urldecode($val);
-        }, explode('/', $path));
-        //路由匹配
-        $this->resolveRule($pathArray);
-        //获取模块/控制器/方法
-        $m = $this->binding ? $this->module : (($module = array_shift($pathArray)) ? $module : $this->module);
-        $c = ($controller = array_shift($pathArray)) ? $controller : $this->controller;
-        $a = ($action = array_shift($pathArray)) ? $action : $this->action;
-        //存下当前的路由,全部小写,没有转换成驼峰
-        $this->router = [strtolower($m), strtolower($c), strtolower($a)];
-        //解析多余的参数到GET
-        while ($pathArray) {
-            $key = array_shift($pathArray);
-            $value = array_shift($pathArray);
-            $_GET[$key] = $value === null ? '' : $value;
-        }
-        //把GET参数载入REQUEST
-        \Lying::$maker->request()->load($_GET);
-        //转换为驼峰,返回当前请求的模块/控制器/方法
-        return [
-            $this->str2hump($this->router[0]),
-            $this->str2hump($this->router[1], true).'Ctrl',
-            $this->str2hump($this->router[2])
-        ];
-    }
-
-    /**
-     * 路由规则解析
-     * @param array $pathArray 路由数组
-     */
-    private function resolveRule(&$pathArray)
-    {
-        if ($pathArray) {
-            $pathNum = count($pathArray);
-            foreach ($this->rule as $pattern => $rule) {
-                //是完全匹配
-                $pattern = preg_replace('/\$$/', '', $pattern, 1, $absolute);
-                $patternArr = explode('/', $pattern);
-                $patternNum = count($patternArr);
-                //个数不匹配,匹配下一个
-                if ($absolute && $pathNum !== $patternNum || !$absolute && $pathNum < $patternNum) {
-                    continue;
-                }
-                //参数映射
-                $params = [];
-                foreach ($patternArr as $i => $r) {
-                    if (strncmp($r, ':', 1) === 0 && ($key = ltrim($r, ':'))) {
-                        if (isset($rule[$key]) && !preg_match($rule[$key], $pathArray[$i])) {
-                            continue 2;
-                        } else {
-                            array_push($params, $key, $pathArray[$i]);
-                        }
-                    } elseif ($pathArray[$i] !== $r) {
-                        continue 2;
-                    }
-                }
-                //匹配到就不进行下一条匹配
-                $pathArray = array_merge(explode('/', $rule[0]), $params, array_splice($pathArray, $patternNum));
-                break;
-            }
-        }
+        $path && $this->parseRule($path) || $this->parseNormal($path);
+        $request->load();
     }
 
     /**
      * 把横线分割的小写字母转换为驼峰
      * @param string $str 要转换的字符串
+     * @param string $delimiter 分隔符
      * @param boolean $ucfirst 首字母是否大写
      * @return string 返回转换后的字符串
      */
-    private function str2hump($str, $ucfirst = false)
+    private function str2hump($str, $delimiter, $ucfirst = false)
     {
-        $str = str_replace(' ', '', ucwords(str_replace('-', ' ', $str)));
+        $str = str_replace(' ', '', ucwords(str_replace($delimiter, ' ', $str)));
         return $ucfirst ? $str : lcfirst($str);
+    }
+
+    /**
+     * 返回可供调度器使用的数组
+     * @return array
+     */
+    public function resolve()
+    {
+        return [
+            $this->str2hump($this->router[0], '-'),
+            $this->str2hump($this->router[0], '-', true) . 'Ctrl',
+            $this->str2hump($this->router[0], '-'),
+        ];
     }
 
     /**
@@ -316,6 +269,36 @@ class Router extends Service
     public function action()
     {
         return $this->router[2];
+    }
+
+    /**
+     * URL生成
+     * @param string $path 路径
+     * @param array $params 参数数组,不合法的参数将被剔除
+     * @param bool $host 是否携带完整域名,包含协议头,默认是
+     * @param bool $normal 是否把参数设置成?a=1&b=2,默认否,优先pathinfo
+     * @return string
+     */
+    public function createUrl1($path, array $params = [], $host = true, $normal = false)
+    {
+        $host = $host ? \Lying::$maker->request()->host(true) : '';
+        if (strncmp($path, '/', 1) === 0 || !$path) {
+            $path = rtrim($path, '?&');
+            strpos($path, '.') || ($path = rtrim($path, '/') . '/');
+            if ($query =http_build_query($params, '', '&', PHP_QUERY_RFC3986)) {
+                $query = (strpos($path, '?') ? '&' : '?') . $query;
+            }
+            return $host . $path . $query;
+        } else {
+            $pathArr = explode('/', rtrim($path, '/'));
+            switch (count($pathArr)) {
+                case 3:
+                    $routeArr = [$this->binding ? $this->module : $pathArr[0], $pathArr[1], $pathArr[2]];
+                    break;
+                case 2:
+                    $routeArr = [$this->module, $pathArr[0], $pathArr[1]];
+            }
+        }
     }
 
     /**
