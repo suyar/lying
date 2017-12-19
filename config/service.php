@@ -17,6 +17,7 @@ return [
         'rule' => [
             //'blog/:id$' => ['admin/blog/get', 'id' => '/\d{50}/'],
             'blog/<id:\d+>/<name>$' => ['admin/blog/get', '.htm'],
+            'user/name' => ['user/info/name'],
         ],
         'host' => [
             'api.lying.com' => [
