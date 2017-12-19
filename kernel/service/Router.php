@@ -150,23 +150,16 @@ class Router extends Service
                 }
             }
 
-            //删除已经用过的参数咯
+            //删除已经用过的参数,剩余的参数并入GET参数
             $pathArr = array_slice($pathArr, $count_path);
             $more = [];
             while ($pathArr) {
                 $more[] = array_shift($pathArr) . '=' . array_shift($pathArr);
             }
-            $more && ($more = implode('&', $more)) && parse_str($more, $_GET);
+            $more && ($more = implode('&', $more)) && parse_str($more, $more);
+            $_GET = array_merge($_GET, $more, $params);
 
-            $_GET = array_merge();
-
-            //匹配成功
-            $_GET = array_merge($params, $_GET);
-            while (array_slice($pathArr, $count_path)) {
-                $k = array_shift($pathArr);
-                $v = array_shift($pathArr);
-                $_GET[$k] = $v;
-            }
+            //分发路由
             $routerArr = explode('/', $rule['router']);
             $this->router = [
                 strtolower($this->binding ? $this->module : array_shift($routerArr)),
@@ -192,21 +185,21 @@ class Router extends Service
             }
         }
 
-        $pathArr = array_map(function ($val) {
-            return urldecode($val);
-        }, explode('/', $path));
-
+        //分发路由
+        $pathArr = explode('/', $path);
         $this->router = [
-            strtolower($this->binding ? $this->module : (array_shift($pathArr) ?: $this->module)),
-            strtolower(array_shift($pathArr) ?: $this->controller),
-            strtolower(array_shift($pathArr) ?: $this->action),
+            strtolower($this->binding ? $this->module : (urldecode(array_shift($pathArr)) ?: $this->module)),
+            strtolower(urldecode(array_shift($pathArr)) ?: $this->controller),
+            strtolower(urldecode(array_shift($pathArr)) ?: $this->action),
         ];
 
+        //剩余的参数并入GET参数
+        $more = [];
         while ($pathArr) {
-            $k = array_shift($pathArr);
-            $v = array_shift($pathArr);
-            $_GET[$k] = $v;
+            $more[] = array_shift($pathArr) . '=' . array_shift($pathArr);
         }
+        $more && ($more = implode('&', $more)) && parse_str($more, $more);
+        $_GET = array_merge($_GET, $more);
 
         return true;
     }
@@ -285,15 +278,15 @@ class Router extends Service
      * @param array $params 参数数组,不合法的参数将被剔除
      * @param bool $host 是否携带完整域名,包含协议头,默认是
      * @param bool $normal 是否把参数设置成?a=1&b=2,默认否,优先pathinfo
-     * @return string
+     * @return string 返回生成的URL
      */
-    public function createUrl1($path, array $params = [], $host = true, $normal = false)
+    public function createUrl($path, array $params = [], $host = true, $normal = false)
     {
         $host = $host ? \Lying::$maker->request()->host(true) : '';
         if (strncmp($path, '/', 1) === 0 || !$path) {
             $path = rtrim($path, '?&');
             strpos($path, '.') || ($path = rtrim($path, '/') . '/');
-            if ($query =http_build_query($params, '', '&', PHP_QUERY_RFC3986)) {
+            if ($query = http_build_query($params, '', '&', PHP_QUERY_RFC3986)) {
                 $query = (strpos($path, '?') ? '&' : '?') . $query;
             }
             return $host . $path . $query;
@@ -301,23 +294,88 @@ class Router extends Service
             $pathArr = explode('/', rtrim($path, '/'));
             switch (count($pathArr)) {
                 case 3:
-                    $routeArr = [$this->binding ? $this->module : $pathArr[0], $pathArr[1], $pathArr[2]];
+                    $routeArr = [$this->binding ? $this->module() : $pathArr[0], $pathArr[1], $pathArr[2]];
                     break;
                 case 2:
-                    $routeArr = [$this->module, $pathArr[0], $pathArr[1]];
+                    $routeArr = [$this->module(), $pathArr[0], $pathArr[1]];
                     break;
                 case 1:
-                    $routeArr = [$this->module, $this->controller, $pathArr[0]];
+                    $routeArr = [$this->module(), $this->controller(), $pathArr[0]];
                     break;
                 default:
                     $routeArr = $this->router;
             }
-            echo $this->buildRule($routeArr, $params, $normal);
-
-
+            $this->binding && array_shift($routeArr);
+            $requestUri = $this->buildRule($routeArr, $params, $normal) ?: $this->buildNormal($routeArr, $params, $normal);
+            return $host . $requestUri;
         }
     }
 
+    /**
+     * 去掉url上默认的参数
+     * @param array $routeArr 路由数组
+     */
+    private function rtrimDefault(array &$routeArr)
+    {
+        for ($i = count($routeArr) - 1; $i >= 0; $i--) {
+            if ($i == 2) {
+                if ($routeArr[$i] == $this->action) {
+                    array_pop($routeArr);
+                } else {
+                    break;
+                }
+            } elseif ($i == 1) {
+                if ($routeArr[$i] == ($this->binding ? $this->action : $this->controller)) {
+                    array_pop($routeArr);
+                } else {
+                    break;
+                }
+            } elseif ($i == 0) {
+                if ($routeArr[$i] == ($this->binding ? $this->controller : $this->module)) {
+                    array_pop($routeArr);
+                } else {
+                    break;
+                }
+            }
+        }
+    }
+
+    /**
+     * 正常生成url
+     * @param array $routeArr 路由数组
+     * @param array $params 请求参数
+     * @param bool $normal 是否把参数设置成?a=1&b=2
+     * @return string 返回path参数
+     */
+    private function buildNormal($routeArr, array $params, $normal)
+    {
+        $params = http_build_query($params, '', '&', PHP_QUERY_RFC3986);
+        if ($normal) {
+            $this->rtrimDefault($routeArr);
+            $route = implode('/', $routeArr);
+            $route = $route ? ($this->suffix ? "/{$route}{$this->suffix}" : "/{$route}/") : '/';
+            $route = $params ? "{$route}?{$params}" : $route;
+        } else {
+            if ($params) {
+                $route = implode('/', $routeArr);
+                $params = str_replace(['=','&'], '/', $params);
+                $route = $this->suffix ? "/{$route}/{$params}{$this->suffix}" : "/{$route}/{$params}/";
+            } else {
+                $this->rtrimDefault($routeArr);
+                $route = implode('/', $routeArr);
+                $route = $route ? ($this->suffix ? "/{$route}{$this->suffix}" : "/{$route}/") : '/';
+            }
+        }
+        return $route;
+    }
+
+    /**
+     * 根据路由规则反解析
+     * @param array $routeArr 路由数组
+     * @param array $params 请求参数
+     * @param bool $normal 是否把参数设置成?a=1&b=2
+     * @return bool|string 成功返回path参数,失败返回false
+     */
     private function buildRule($routeArr, array $params, $normal)
     {
         $route = implode('/', $routeArr);
@@ -373,7 +431,7 @@ class Router extends Service
      * @param boolean $normal 是否把参数设置成?a=1&b=2
      * @return string 返回生成的URL
      */
-    public function createUrl($path, $params = [], $normal = false)
+    public function createUrl2($path, $params = [], $normal = false)
     {
         if (strncmp($path, '/', 1) === 0) {
             $route = rtrim($path, '/');
