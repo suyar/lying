@@ -1,8 +1,8 @@
 <?php
 /**
- * @author carolkey <me@suyaqi.cn>
+ * @author carolkey <su@revoke.cc>
  * @link https://github.com/carolkey/lying
- * @copyright 2017 Lying
+ * @copyright 2018 Lying
  * @license MIT
  */
 
@@ -11,7 +11,6 @@ namespace lying\service;
 /**
  * Class Router
  * @package lying\service
- * @since 2.0
  */
 class Router extends Service
 {
@@ -48,7 +47,7 @@ class Router extends Service
     /**
      * @var string 后缀
      */
-    protected $suffix = '';
+    protected $suffix = false;
 
     /**
      * @var array 路由规则
@@ -61,7 +60,7 @@ class Router extends Service
     protected $host = [];
 
     /**
-     * 判断域名是否绑定模块
+     * 判断域名是否绑定模块&解析请求路径
      */
     protected function init()
     {
@@ -93,9 +92,9 @@ class Router extends Service
                     foreach ($matches[1] as $k => $match) {
                         if (strpos($match, ':')) {
                             list($col, $reg) = explode(':', $match);
-                            $temp['params'][$col] = ['reg'=>$reg, 'rep'=>$matches[0][$k], 'name'=>$col];
+                            $temp['params'][] = ['reg'=>$reg, 'rep'=>$matches[0][$k], 'name'=>$col];
                         } else {
-                            $temp['params'][$match] = ['reg'=>false, 'rep'=>$matches[0][$k], 'name'=>$match];
+                            $temp['params'][] = ['reg'=>false, 'rep'=>$matches[0][$k], 'name'=>$match];
                         }
                     }
                 } else {
@@ -126,11 +125,9 @@ class Router extends Service
             }
 
             //匹配参数个数
-            $pathArr = array_map(function ($val) {
-                return urldecode($val);
-            }, explode('/', $path));
-            $patternArr = explode('/', $rule['pattern']);
+            $pathArr = explode('/', $path);
             $count_path = count($pathArr);
+            $patternArr = explode('/', $rule['pattern']);
             $count_pattern = count($patternArr);
             if ($count_path < $count_pattern || $rule['absolute'] && $count_path !== $count_pattern) {
                 continue;
@@ -140,17 +137,28 @@ class Router extends Service
             $cols = $rule['params'];
             $params = [];
             foreach ($patternArr as $k => $val) {
+                $param = urldecode($pathArr[$k]);
                 if (strpos($val, '<') === 0) {
                     $col = array_shift($cols);
-                    if ($col['reg'] && !preg_match("/{$col['reg']}/", $pathArr[$k])) {
+                    if ($col['reg'] && !preg_match("/{$col['reg']}/", $param)) {
                         continue 2;
                     } else {
-                        $params[$col['name']] = $pathArr[$k];
+                        $params[$col['name']] = $param;
                     }
-                } elseif (strcmp($val, $pathArr[$k]) !== 0) {
+                } elseif (strcmp($val, $param) !== 0) {
                     continue 2;
                 }
             }
+
+            //删除已经用过的参数咯
+            $pathArr = array_slice($pathArr, $count_path);
+            $more = [];
+            while ($pathArr) {
+                $more[] = array_shift($pathArr) . '=' . array_shift($pathArr);
+            }
+            $more && ($more = implode('&', $more)) && parse_str($more, $_GET);
+
+            $_GET = array_merge();
 
             //匹配成功
             $_GET = array_merge($params, $_GET);
@@ -297,8 +305,56 @@ class Router extends Service
                     break;
                 case 2:
                     $routeArr = [$this->module, $pathArr[0], $pathArr[1]];
+                    break;
+                case 1:
+                    $routeArr = [$this->module, $this->controller, $pathArr[0]];
+                    break;
+                default:
+                    $routeArr = $this->router;
+            }
+            echo $this->buildRule($routeArr, $params, $normal);
+
+
+        }
+    }
+
+    private function buildRule($routeArr, array $params, $normal)
+    {
+        $route = implode('/', $routeArr);
+        foreach ($this->rule as $rule) {
+            if ($rule['router'] === $route) {
+                $replace = [];
+                foreach ($rule['params'] as $col) {
+                    if (!isset($params[$col['name']]) || $col['reg'] && !preg_match("/{$col['reg']}/", $params[$col['name']])) {
+                        continue 2;
+                    }
+                    $replace[] = urlencode($params[$col['name']]);
+                }
+                if ($replace) {
+                    $cols = array_flip(array_column($rule['params'], 'name'));
+                    $params = array_diff_key($params, $cols);
+                    $reps = array_column($rule['params'], 'rep');
+                    $route = str_replace($reps, $replace, $rule['pattern']);
+                }
+                $params = http_build_query($params, '',  '&', PHP_QUERY_RFC3986);
+                if ($rule['absolute'] || $normal) {
+                    if ($rule['suffix']) {
+                        $route = $params ? "/{$route}{$rule['suffix']}?{$params}" : "/{$route}{$rule['suffix']}";
+                    } else {
+                        $route = $params ? "/{$route}/?{$params}" : "/{$route}/";
+                    }
+                } else {
+                    $params = str_replace(['=','&'], '/', $params);
+                    if ($rule['suffix']) {
+                        $route = $params ? "/{$route}/{$params}{$rule['suffix']}" : "/{$route}{$rule['suffix']}";
+                    } else {
+                        $route = $params ? "/{$route}/{$params}/" : "/{$route}/";
+                    }
+                }
+                return $route;
             }
         }
+        return false;
     }
 
     /**
