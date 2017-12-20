@@ -22,11 +22,31 @@ class IndexCtrl extends Controller
         echo \Lying::$maker->router()->createUrl('/user/info.html', ['a'=>1, 'b'=>2]);
         echo "<br>\n";
 
-        //$path不以'/'开头
-        echo \Lying::$maker->router()->createUrl('admin/blog/get', ['id'=>1, 'name'=>'susu', 'num'=>23]);
+        echo \Lying::$maker->router()->createUrl('/user/info.html?name=susu', ['a'=>1, 'b'=>2]);
         echo "<br>\n";
 
-        echo \Lying::$maker->router()->createUrl('login/index', ['id'=>1, 'name'=>'susu', 'num'=>23], true, true);
+        echo "<br>\n=========================================<br>\n";
+
+        //$path不以'/'开头
+        echo \Lying::$maker->router()->createUrl('index/index/index');
+        echo "<br>\n";
+
+        echo \Lying::$maker->router()->createUrl('index/index/index', ['id'=>1, 'name'=>'susu', 'num'=>23]);
+        echo "<br>\n";
+
+        echo \Lying::$maker->router()->createUrl('index/index/index', ['id'=>1, 'name'=>'susu', 'num'=>23], true, true);
+        echo "<br>\n";
+
+        echo \Lying::$maker->router()->createUrl('admin/index/index', ['id'=>1, 'name'=>'susu', 'num'=>23]);
+        echo "<br>\n";
+
+        echo \Lying::$maker->router()->createUrl('admin/blog/get', ['id'=>1, 'name'=>'susu', 'num'=>23], true, true);
+        echo "<br>\n";
+
+        echo \Lying::$maker->router()->createUrl('user/info/name', ['id'=>1, 'name'=>'susu', 'num'=>23]);
+        echo "<br>\n";
+
+        echo \Lying::$maker->router()->createUrl('index/index/index', ['id'=>15]);
         echo "<br>\n";
 
 

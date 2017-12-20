@@ -66,10 +66,10 @@ class Router extends Service
     {
         $host = \Lying::$maker->request()->host();
         if (isset($this->host[$host])) {
-            $this->binding = true;
             foreach ($this->host[$host] as $name => $value) {
                 $this->$name = $value;
             }
+            $this->binding = true;
         }
         $this->initRule();
         $this->parse();
@@ -240,8 +240,8 @@ class Router extends Service
     {
         return [
             $this->str2hump($this->router[0], '-'),
-            $this->str2hump($this->router[0], '-', true) . 'Ctrl',
-            $this->str2hump($this->router[0], '-'),
+            $this->str2hump($this->router[1], '-', true) . 'Ctrl',
+            $this->str2hump($this->router[2], '-'),
         ];
     }
 
@@ -294,7 +294,7 @@ class Router extends Service
             $pathArr = explode('/', rtrim($path, '/'));
             switch (count($pathArr)) {
                 case 3:
-                    $routeArr = [$this->binding ? $this->module() : $pathArr[0], $pathArr[1], $pathArr[2]];
+                    $routeArr = [$pathArr[0], $pathArr[1], $pathArr[2]];
                     break;
                 case 2:
                     $routeArr = [$this->module(), $pathArr[0], $pathArr[1]];
@@ -312,7 +312,7 @@ class Router extends Service
     }
 
     /**
-     * 去掉url上默认的参数
+     * 去掉PATH上默认的参数
      * @param array $routeArr 路由数组
      */
     private function rtrimDefault(array &$routeArr)
@@ -354,7 +354,7 @@ class Router extends Service
             $this->rtrimDefault($routeArr);
             $route = implode('/', $routeArr);
             $route = $route ? ($this->suffix ? "/{$route}{$this->suffix}" : "/{$route}/") : '/';
-            $route = $params ? "{$route}?{$params}" : $route;
+            $params && ($route = "{$route}?{$params}");
         } else {
             if ($params) {
                 $route = implode('/', $routeArr);
@@ -393,117 +393,21 @@ class Router extends Service
                     $params = array_diff_key($params, $cols);
                     $reps = array_column($rule['params'], 'rep');
                     $route = str_replace($reps, $replace, $rule['pattern']);
+                } else {
+                    $route = $rule['pattern'];
                 }
                 $params = http_build_query($params, '',  '&', PHP_QUERY_RFC3986);
                 if ($rule['absolute'] || $normal) {
-                    if ($rule['suffix']) {
-                        $route = $params ? "/{$route}{$rule['suffix']}?{$params}" : "/{$route}{$rule['suffix']}";
-                    } else {
-                        $route = $params ? "/{$route}/?{$params}" : "/{$route}/";
-                    }
+                    $route = $rule['suffix'] ? "/{$route}{$rule['suffix']}" : "/{$route}/";
+                    $params && ($route = "{$route}?{$params}");
                 } else {
                     $params = str_replace(['=','&'], '/', $params);
-                    if ($rule['suffix']) {
-                        $route = $params ? "/{$route}/{$params}{$rule['suffix']}" : "/{$route}{$rule['suffix']}";
-                    } else {
-                        $route = $params ? "/{$route}/{$params}/" : "/{$route}/";
-                    }
+                    $route = $params ? "/{$route}/{$params}" : "/{$route}";
+                    $route = $rule['suffix'] ? "{$route}{$rule['suffix']}" : "{$route}/";
                 }
                 return $route;
             }
         }
         return false;
-    }
-
-    /**
-     * URL生成
-     * ```php
-     * 路径[/index/blog/info],生成[/index/blog/info],使用此形式的时候请注意参数匹配,并且不会路由反解析
-     * 路径[post],生成[当前模块/当前控制器/post]
-     * 路径[post/index],生成[当前模块/post/index]
-     * 路径[admin/post/index],生成[admin/post/index],注意:此用法在模块绑定中并不适用
-     * 携带在PATH中的GET参数类型只能是['string', 'integer', 'double', 'boolean'],否则被忽略
-     * 注意:boolean会被转换成0和1,值为空字符串也会被忽略
-     * 如果需要携带其他类型的参数,请设置为normal形式的查询字符串
-     * ```
-     * @param string $path 要生成的相对路径
-     * @param array $params 要生成的参数,一个关联数组,如果有路由规则,参数中必须包含rule中的参数才能反解析
-     * @param boolean $normal 是否把参数设置成?a=1&b=2
-     * @return string 返回生成的URL
-     */
-    public function createUrl2($path, $params = [], $normal = false)
-    {
-        if (strncmp($path, '/', 1) === 0) {
-            $route = rtrim($path, '/');
-        } elseif ($path = trim($path, '/')) {
-            $routeArr = explode('/', $path);
-            switch (count($routeArr)) {
-                case 1:
-                    $route = implode('/', $this->binding ? [
-                        $this->controller(), $routeArr[0]
-                    ] : [
-                        $this->module(), $this->controller(), $routeArr[0]
-                    ]);
-                    break;
-                case 2:
-                    $route = implode('/', $this->binding ? [
-                        $routeArr[0], $routeArr[1]
-                    ] : [
-                        $this->module(), $routeArr[0], $routeArr[1]
-                    ]);
-                    break;
-                case 3:
-                    $route = implode('/', $this->binding ? [
-                        $this->controller(), $this->action()
-                    ] : $routeArr);
-                    break;
-                default:
-                    $route = implode('/', $this->router);
-            }
-        } else {
-            $route = implode('/', $this->binding ? [
-                $this->controller(), $this->action()
-            ] : $this->router);
-        }
-        //路由反解析
-        foreach ($this->rule as $r => $v) {
-            $r = preg_replace('/\$$/', '', $r, 1, $absolute);
-            if ($route === $v[0] && false !== preg_match_all('/:([^\/]+)/', $r, $matchs)) {
-                $replace = [];
-                foreach ($matchs[1] as $k) {
-                    if (!isset($params[$k]) || isset($v[$k]) && !preg_match($v[$k], $params[$k])) {
-                        $absolute = false;
-                        continue 2;
-                    }
-                    $replace[] = urlencode($params[$k]);
-                }
-                $params = array_diff_key($params, array_flip($matchs[1]));
-                $keys = array_map(function ($val) {
-                    return ":$val";
-                }, $matchs[1]);
-                $route = str_replace($keys, $replace, $r);
-                break;
-            }
-            $absolute = false;
-        }
-        //拼接URL
-        $url = ($this->pathinfo ? '/index.php/' : '/') . trim($route, '/');
-        //如果为完全匹配,多余的参数形式就用[?a=1&b=2]
-        if ($normal || isset($absolute) && $absolute) {
-            $query = http_build_query($params, '', '&');
-            $url .= $this->suffix ? $this->suffix : '';
-            $url .= $query ? "?$query" : '';
-        } else {
-            $p = [];
-            foreach ($params as $name => $value) {
-                if (in_array(gettype($value), ['string', 'integer', 'double', 'boolean']) && $value !== '') {
-                    $p[$name] = $value;
-                }
-            }
-            $query = str_replace(['=', '&'], '/', http_build_query($p, '', '&'));
-            $url .= $query ? "/$query" : '';
-            $url .= $this->suffix ? $this->suffix : '';
-        }
-        return \Lying::$maker->request()->host(true) . $url;
     }
 }
