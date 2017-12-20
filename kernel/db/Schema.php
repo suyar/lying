@@ -1,8 +1,8 @@
 <?php
 /**
- * @author carolkey <me@suyaqi.cn>
+ * @author carolkey <su@revoke.cc>
  * @link https://github.com/carolkey/lying
- * @copyright 2017 Lying
+ * @copyright 2018 Lying
  * @license MIT
  */
 

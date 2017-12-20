@@ -20,14 +20,14 @@ return [
             'yoyo' => ['index/index/index'],
         ],
         'host' => [
-            'api.lying.com' => [
-                'module' => 'index',
+            'admin.lying.work:8080' => [
+                'module' => 'admin',
                 'controller' => 'index',
                 'action' => 'index',
                 'pathinfo' => false,
-                'suffix' => '.js',
+                'suffix' => '.html',
                 'rule' => [
-                    'user/<id>$' => ['index/user', 'id' => '/\d+/'],
+                    'user/<id>$' => ['index/user', '.html'],
                 ],
             ],
         ],
