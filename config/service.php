@@ -15,9 +15,9 @@ return [
         'pathinfo' => false,
         'suffix' => '.html',
         'rule' => [
-            //'blog/:id$' => ['admin/blog/get', 'id' => '/\d{50}/'],
             'blog/<id:\d+>/<name>$' => ['admin/blog/get', '.htm'],
-            'user/name' => ['user/info/name'],
+            'user/<name>/<id>$' => ['user/info/name'],
+            'yoyo' => ['index/index/index'],
         ],
         'host' => [
             'api.lying.com' => [
@@ -27,7 +27,7 @@ return [
                 'pathinfo' => false,
                 'suffix' => '.js',
                 'rule' => [
-                    'user/:id$' => ['index/user', 'id' => '/\d+/'],
+                    'user/<id>$' => ['index/user', 'id' => '/\d+/'],
                 ],
             ],
         ],
