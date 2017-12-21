@@ -22,7 +22,7 @@ class FileCache extends Service implements Cache
     protected $dir;
     
     /**
-     * @var float 垃圾清除的频率,数值为0到100之间,越小回收的越频繁
+     * @var float GC频率,数值为0到100之间,越小GC越频繁
      */
     protected $gc = 100;
     
@@ -36,7 +36,7 @@ class FileCache extends Service implements Cache
     }
     
     /**
-     * 生成缓存文件名
+     * 获取缓存文件名
      * @param string $key 键名
      * @return string 生成的文件名
      */
@@ -46,8 +46,8 @@ class FileCache extends Service implements Cache
     }
     
     /**
-     * 回收垃圾
-     * @param boolean $all 是否全部删除
+     * GC
+     * @param bool $all 是否全部删除
      */
     private function gc($all = false)
     {
@@ -66,8 +66,8 @@ class FileCache extends Service implements Cache
      * 添加一个缓存,如果缓存已经存在,此次设置的值不会覆盖原来的值,并返回false
      * @param string $key 缓存的键
      * @param mixed $value 缓存的数据
-     * @param integer $ttl 缓存生存时间,默认为0
-     * @return boolean 成功返回true,失败返回false
+     * @param int $ttl 缓存生存时间,默认为0
+     * @return bool 成功返回true,失败返回false
      */
     public function add($key, $value, $ttl = 0)
     {
@@ -78,7 +78,7 @@ class FileCache extends Service implements Cache
     /**
      * 添加一组缓存,如果缓存已经存在,此次设置的值不会覆盖原来的值
      * @param array $data 一个关联数组,如['name'=>'lying']
-     * @param integer $ttl 缓存生存时间,默认为0
+     * @param int $ttl 缓存生存时间,默认为0
      * @return array 返回设置失败的数组,如['name', 'sex'],否则返回空数组
      */
     public function madd($data, $ttl = 0)
@@ -96,15 +96,15 @@ class FileCache extends Service implements Cache
      * 添加一个缓存,如果缓存已经存在,此次缓存会覆盖原来的值并且重新设置生存时间
      * @param string $key 缓存的键
      * @param mixed $value 缓存的数据
-     * @param integer $ttl 缓存生存时间,默认为0
-     * @return boolean 成功返回true,失败返回false
+     * @param int $ttl 缓存生存时间,默认为0
+     * @return bool 成功返回true,失败返回false
      */
     public function set($key, $value, $ttl = 0)
     {
         $this->gc();
         $cacheFile = $this->cacheFile($key);
         if (file_put_contents($cacheFile, serialize($value), LOCK_EX) !== false) {
-            return touch($cacheFile, time() + ($ttl > 0 ? $ttl : 31536000));
+            return @touch($cacheFile, time() + ($ttl > 0 ? $ttl : 31536000));
         }
         return false;
     }
@@ -112,7 +112,7 @@ class FileCache extends Service implements Cache
     /**
      * 添加一组缓存,如果缓存已经存在,此次缓存会覆盖原来的值并且重新设置生存时间
      * @param array $data 一个关联数组,如['name' => 'lying']
-     * @param integer $ttl 缓存生存时间,默认为0
+     * @param int $ttl 缓存生存时间,默认为0
      * @return array 返回设置失败的数组,如['name', 'sex'],否则返回空数组
      */
     public function mset($data, $ttl = 0)
@@ -129,7 +129,7 @@ class FileCache extends Service implements Cache
     /**
      * 从缓存中提取存储的变量
      * @param string $key 缓存的键
-     * @return boolean 成功返回值,失败返回false
+     * @return mixed 成功返回值,失败返回false
      */
     public function get($key)
     {
@@ -163,7 +163,7 @@ class FileCache extends Service implements Cache
     /**
      * 检查缓存是否存在
      * @param string $key 要查找的缓存键
-     * @return boolean 如果键存在,则返回true,否则返回false
+     * @return bool 如果键存在,则返回true,否则返回false
      */
     public function exist($key)
     {
@@ -174,7 +174,7 @@ class FileCache extends Service implements Cache
     /**
      * 从缓存中删除存储的变量
      * @param string $key 从缓存中删除存储的变量
-     * @return boolean 成功返回true,失败返回false
+     * @return bool 成功返回true,失败返回false
      */
     public function del($key)
     {
@@ -183,7 +183,7 @@ class FileCache extends Service implements Cache
 
     /**
      * 清除所有缓存
-     * @return boolean 成功返回true,失败返回false
+     * @return bool 成功返回true,失败返回false
      */
     public function flush()
     {

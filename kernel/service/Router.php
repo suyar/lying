@@ -181,7 +181,7 @@ class Router extends Service
         if ($path && $this->suffix) {
             $len = strlen($this->suffix);
             if (substr_compare($path, $this->suffix, -$len, $len) === 0) {
-                substr_replace($path, $this->suffix, -$len, $len);
+                $path = substr_replace($path, '', -$len, $len);
             }
         }
 
