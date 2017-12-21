@@ -39,7 +39,7 @@ class Cookie extends Service
      * @param mixed $value COOKIE的值
      * @param int $expire 过期时间戳,默认0,浏览器关闭时清除
      * @param string $path COOKIE路径,默认'/'
-     * @param string $domain COOKIE域名,默认空
+     * @param string $domain COOKIE域名,默认当前域名
      * @param bool $secure 是否设置仅用HTTPS传输COOKIE,默认false
      * @param bool $httpOnly 是否设置COOKIE只能通过http请求访问,JS将不能访问,默认false
      * @return bool 成功返回true,失败返回false
@@ -74,12 +74,14 @@ class Cookie extends Service
      * 删除COOKIE
      * @param string $name COOKIE名称
      * @param string $path COOKIE路径,默认'/'
-     * @param string $domain COOKIE域名,默认空
+     * @param string $domain COOKIE域名,默认当前域名
+     * @param bool $secure 是否设置仅用HTTPS传输COOKIE,默认false
+     * @param bool $httpOnly 是否设置COOKIE只能通过http请求访问,JS将不能访问,默认false
      * @return bool 成功返回true,失败返回false
      */
-    public function remove($name, $path = '/', $domain = '')
+    public function remove($name, $path = '/', $domain = '', $secure = false, $httpOnly = false)
     {
-        return $this->set($name, '', time() - 31536000, $path, $domain);
+        return $this->set($name, '', time() - 31536000, $path, $domain, $secure, $httpOnly);
     }
 
     /**

@@ -26,7 +26,7 @@ class CookieCtrl extends Controller
 
     public function set()
     {
-        $result = $this->cookie->setExpire(time() + 10)->set('username', ['id'=>1, 'name'=>'苏亚琦']);
+        $result = $this->cookie->set('username', ['id'=>1, 'name'=>'苏亚琦'], time() + 10);
         var_dump($result);
     }
 
