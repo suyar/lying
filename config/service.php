@@ -49,11 +49,6 @@ return [
 
         ],
     ],
-    //锁组件
-    'lock' => [
-        'class' => 'lying\service\Lock',
-        'dir' => DIR_RUNTIME . DS . 'lock',
-    ],
     //日志组件
     'logger' => [
         'class' => 'lying\service\Logger',
