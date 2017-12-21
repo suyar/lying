@@ -24,6 +24,19 @@ class CookieCtrl extends Controller
         $this->cookie = \Lying::$maker->cookie();
     }
 
+    public function index()
+    {
+        $links = [
+            'set' => url('set'),
+            'get' => url('get'),
+            'exists' => url('exists'),
+            'remove' => url('remove'),
+        ];
+        foreach ($links as $key => $link) {
+            echo '<a target="_blank" href="' . $link . '">' . $key . '</a><br>';
+        }
+    }
+
     public function set()
     {
         $result = $this->cookie->set('username', ['id'=>1, 'name'=>'苏亚琦'], time() + 10);
@@ -36,6 +49,11 @@ class CookieCtrl extends Controller
         var_dump($result);
     }
 
+    public function exists()
+    {
+        $result = $this->cookie->exists('username');
+        var_dump($result);
+    }
 
     public function remove()
     {
