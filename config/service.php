@@ -75,4 +75,14 @@ return [
         'username' => '',
         'password' => '',
     ],
+    'redis' => [
+        'class' => 'lying\service\Redis',
+        'host' => '127.0.0.1',
+        'port' => 6379,
+        'timeout' => 0,
+        'persistentId' => false,
+        'password' => '',
+        'select' => 0,
+        'prefix' => 'lying',
+    ],
 ];

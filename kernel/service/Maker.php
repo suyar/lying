@@ -20,8 +20,9 @@ use lying\db\Connection;
  * @method Connection db(string $id = 'db')
  * @method Dispatch dispatch()
  * @method Exception exception()
- * @method Logger logger()
+ * @method Logger logger(string $id = 'logger')
  * @method Request request()
+ * @method Redis redis(string $id = 'redis')
  * @method Router router()
  * @method Session session()
  */
