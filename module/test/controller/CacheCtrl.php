@@ -22,8 +22,8 @@ class CacheCtrl extends Controller
     {
         parent::init();
         //$cacheId = 'cache';
-        $cacheId = 'apcu';
-        //$cacheId = 'memcached';
+        //$cacheId = 'apcu';
+        $cacheId = 'memcached';
         $this->cache = \Lying::$maker->cache($cacheId);
     }
 

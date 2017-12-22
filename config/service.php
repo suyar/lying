@@ -69,9 +69,9 @@ return [
     'memcached' => [
         'class' => 'lying\cache\MemCached',
         'servers' => [
-            ['127.0.0.1', 11211, 50],
+            ['127.0.0.1', 11211, 1],
         ],
-        'username' => 'user',
-        'password' => 'pass',
+        'username' => '',
+        'password' => '',
     ],
 ];

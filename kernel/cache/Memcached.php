@@ -17,13 +17,22 @@ use lying\service\Service;
 class MemCached extends Service implements Cache
 {
     /**
-     * Memcached服务器连接列表
+     * @var string 通过persistent_id为每个实例指定唯一的ID,在请求间共享实例
+     */
+    protected $persistentId;
+
+    /**
+     * Memcached服务器连接列表,如:
+     * ```php
      * 'servers'=>[
      *     ['127.0.0.1', 11211, 50],
      * ]
+     * ```
      * @var array
      */
-    protected $servers = [];
+    protected $servers = [
+        ['127.0.0.1', 11211, 1],
+    ];
     
     /**
      * @var string Memcached sasl用户名
@@ -34,6 +43,17 @@ class MemCached extends Service implements Cache
      * @var string Memcached sasl密码
      */
     protected $password;
+
+    /**
+     * 额外的Memcached选项,如:
+     * ```php
+     * 'options'=>[
+     *     Memcached::OPT_HASH => Memcached::HASH_MURMUR,
+     * ]
+     * ```
+     * @var array
+     */
+    protected $options = [];
     
     /**
      * @var \Memcached Memcached的实例
@@ -41,58 +61,41 @@ class MemCached extends Service implements Cache
     private $instance;
     
     /**
-     * 初始化缓存服务器
+     * 初始化实例
      */
     protected function init()
     {
-        $this->addServers($this->instance());
-    }
-    
-    /**
-     * 添加缓存服务器
-     * @param \Memcached $instance Memcached实例
-     * @return boolean 成功时返回true,或者在失败时返回false
-     */
-    private function addServers(\Memcached $instance)
-    {
+        //实例化Memcached
+        $this->instance = $this->persistentId ? new \Memcached($this->persistentId) : new \Memcached();
+        $this->options && $this->instance->setOptions($this->options);
+        if ($this->username || $this->password) {
+            $this->instance->setOption(\Memcached::OPT_BINARY_PROTOCOL, true);
+            $this->instance->setSaslAuthData($this->username, $this->password);
+        }
+
+        //排除Memcached服务器(长连接时)
         $exist = [];
-        foreach ($instance->getServerList() as $ex) {
-            $exist[] = $ex['host'] . ':' . $ex['port'];
+        if ($this->persistentId) {
+            foreach ($this->instance->getServerList() as $s) {
+                $exist[$s['host'] . ':' . $s['port']] = true;
+            }
         }
-        $servers = [];
+
+        //向服务器池中增加服务器
         foreach ($this->servers as $server) {
-            if (!in_array($server[0] . ':' . $server[1], $exist)) {
-                $servers[] = $server;
+            isset($server[1]) || ($server[1] = 11211);
+            if (empty($exist) || !isset($exist[$server[0] . ':' . $server[1]])) {
+                $this->instance->addServer($server[0], $server[1], isset($server[2]) ? $server[2] : 1);
             }
         }
-        return $instance->addServers($servers);
-    }
-    
-    /**
-     * 返回Memcached的实例
-     * @return \Memcached
-     */
-    private function instance()
-    {
-        if ($this->instance === null) {
-            $this->instance = new \Memcached();
-            if ($this->username || $this->password) {
-                $this->instance->setSaslAuthData($this->username, $this->password);
-            }
-            $this->instance->setOptions([
-                \Memcached::OPT_DISTRIBUTION => \Memcached::DISTRIBUTION_CONSISTENT,
-                \Memcached::OPT_LIBKETAMA_COMPATIBLE => true,
-            ]);
-        }
-        return $this->instance;
     }
 
     /**
      * 添加一个缓存,如果缓存已经存在,此次设置的值不会覆盖原来的值,并返回false
      * @param string $key 缓存的键
      * @param mixed $value 缓存的数据
-     * @param integer $ttl 缓存生存时间,默认为0
-     * @return boolean 成功返回true,失败返回false
+     * @param int $ttl 缓存生存时间,默认为0
+     * @return bool 成功返回true,失败返回false
      */
     public function add($key, $value, $ttl = 0)
     {
@@ -102,7 +105,7 @@ class MemCached extends Service implements Cache
     /**
      * 添加一组缓存,如果缓存已经存在,此次设置的值不会覆盖原来的值
      * @param array $data 一个关联数组,如['name'=>'lying']
-     * @param integer $ttl 缓存生存时间,默认为0
+     * @param int $ttl 缓存生存时间,默认为0
      * @return array 返回设置失败的数组,如['name', 'sex'],否则返回空数组
      */
     public function madd($data, $ttl = 0)
@@ -120,8 +123,8 @@ class MemCached extends Service implements Cache
      * 添加一个缓存,如果缓存已经存在,此次缓存会覆盖原来的值并且重新设置生存时间
      * @param string $key 缓存的键
      * @param mixed $value 缓存的数据
-     * @param integer $ttl 缓存生存时间,默认为0
-     * @return boolean 成功返回true,失败返回false
+     * @param int $ttl 缓存生存时间,默认为0
+     * @return bool 成功返回true,失败返回false
      */
     public function set($key, $value, $ttl = 0)
     {
@@ -131,7 +134,7 @@ class MemCached extends Service implements Cache
     /**
      * 添加一组缓存,如果缓存已经存在,此次缓存会覆盖原来的值并且重新设置生存时间
      * @param array $data 一个关联数组,如['name' => 'lying']
-     * @param integer $ttl 缓存生存时间,默认为0
+     * @param int $ttl 缓存生存时间,默认为0
      * @return array 返回设置失败的数组,如['name', 'sex'],否则返回空数组
      */
     public function mset($data, $ttl = 0)
@@ -143,7 +146,7 @@ class MemCached extends Service implements Cache
     /**
      * 从缓存中提取存储的变量
      * @param string $key 缓存的键
-     * @return boolean 成功返回值,失败返回false
+     * @return mixed 成功返回值,失败返回false
      */
     public function get($key)
     {
@@ -158,24 +161,27 @@ class MemCached extends Service implements Cache
     public function mget($keys)
     {
         $res = $this->instance->getMulti($keys);
+        var_dump($res);
         return $res === false ? [] : $res;
     }
 
     /**
      * 检查缓存是否存在
      * @param string $key 要查找的缓存键
-     * @return boolean 如果键存在,则返回true,否则返回false
+     * @return bool 如果键存在,则返回true,否则返回false
      */
     public function exist($key)
     {
         $this->get($key);
-        return $this->instance->getResultCode() === \Memcached::RES_SUCCESS;
+        $code = $this->instance->getResultCode();
+        var_dump($code);
+        return $code === \Memcached::RES_SUCCESS;
     }
 
     /**
      * 从缓存中删除存储的变量
      * @param string $key 从缓存中删除存储的变量
-     * @return boolean 成功返回true,失败返回false
+     * @return bool 成功返回true,失败返回false
      */
     public function del($key)
     {
@@ -184,7 +190,7 @@ class MemCached extends Service implements Cache
 
     /**
      * 清除所有缓存
-     * @return boolean 成功返回true,失败返回false
+     * @return bool 成功返回true,失败返回false
      */
     public function flush()
     {
