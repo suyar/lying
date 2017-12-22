@@ -14,7 +14,7 @@ use lying\service\Service;
  * Class MemCached
  * @package lying\cache
  */
-class MemCached extends Service implements Cache
+class Memcached extends Service implements Cache
 {
     /**
      * @var string 通过persistent_id为每个实例指定唯一的ID,在请求间共享实例
