@@ -67,6 +67,7 @@ class Memcached extends Service implements Cache
     {
         //实例化Memcached
         $this->instance = $this->persistentId ? new \Memcached($this->persistentId) : new \Memcached();
+        $this->instance->setOption(\Memcached::OPT_TCP_NODELAY, true);
         $this->options && $this->instance->setOptions($this->options);
         if ($this->username || $this->password) {
             $this->instance->setOption(\Memcached::OPT_BINARY_PROTOCOL, true);
@@ -160,9 +161,7 @@ class Memcached extends Service implements Cache
      */
     public function mget($keys)
     {
-        $res = $this->instance->getMulti($keys);
-        var_dump($res);
-        return $res === false ? [] : $res;
+        return $this->instance->getMulti($keys);
     }
 
     /**
@@ -173,9 +172,7 @@ class Memcached extends Service implements Cache
     public function exist($key)
     {
         $this->get($key);
-        $code = $this->instance->getResultCode();
-        var_dump($code);
-        return $code === \Memcached::RES_SUCCESS;
+        return $this->instance->getResultCode() !== \Memcached::RES_NOTFOUND;
     }
 
     /**
