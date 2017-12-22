@@ -68,6 +68,7 @@ return [
     'apcu' => 'lying\cache\ApcuCache',
     'memcached' => [
         'class' => 'lying\cache\Memcached',
+        'persistentId' => false,
         'servers' => [
             ['127.0.0.1', 11211, 1],
         ],
