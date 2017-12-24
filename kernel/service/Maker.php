@@ -85,6 +85,7 @@ class Maker
      * @param string $name 方法名
      * @param array $arguments 方法参数
      * @return Service 返回方法对应的服务类
+     * @throws \Exception
      */
     public function __call($name, $arguments)
     {
