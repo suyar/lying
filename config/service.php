@@ -74,6 +74,7 @@ return [
         ],
         'username' => '',
         'password' => '',
+        'options' => [],
     ],
     'redis' => [
         'class' => 'lying\service\Redis',
