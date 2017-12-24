@@ -20,6 +20,7 @@ class IndexCtrl extends Controller
     
     public function index()
     {
+        $this->redirect('user/info/name', ['a'=>1, 'id'=>123, 'name'=>'susu']);
         //return $this->render('index');
     }
 }
