@@ -116,7 +116,7 @@ class ActiveRecord extends Service
     /**
      * 属性是否存在
      * @param string $name 属性名
-     * @return boolean
+     * @return bool
      */
     public function __isset($name)
     {
@@ -145,7 +145,7 @@ class ActiveRecord extends Service
 
     /**
      * 查找一条记录
-     * @param string|integer|array $condition 如果为字符串并且参数绑定为空匹配第一个主键,否则为正常查询条件
+     * @param string|int|array $condition 如果为字符串并且参数绑定为空匹配第一个主键,否则为正常查询条件
      * @param array $params 参数绑定,在查询条件为字符串的时候有效
      * @return static|false 返回查询结果,失败返回false
      * @throws \Exception 主键不存在抛出异常
@@ -178,7 +178,7 @@ class ActiveRecord extends Service
      * 根据条件删除数据
      * @param string|array $condition 删除的条件
      * @param array $params 参数绑定,在查询条件为字符串的时候有效
-     * @return integer|false 返回受影响的行数,有可能是0行,失败返回false
+     * @return int|false 返回受影响的行数,有可能是0行,失败返回false
      */
     public static function deleteAll($condition = '', $params = [])
     {
@@ -190,7 +190,7 @@ class ActiveRecord extends Service
      * @param array $datas 要更新的数据,[key => value]形式的数组;
      * @param string|array $condition 更新的条件
      * @param array $params 参数绑定,在查询条件为字符串的时候有效
-     * @return integer|false 返回受影响的行数,有可能是0行,失败返回false
+     * @return int|false 返回受影响的行数,有可能是0行,失败返回false
      */
     public static function updateAll($datas, $condition = '', $params = [])
     {
@@ -199,7 +199,7 @@ class ActiveRecord extends Service
     
     /**
      * 插入当前设置的数据
-     * @return integer|false 成功返回插入的行数,失败返回false
+     * @return int|false 成功返回插入的行数,失败返回false
      */
     public function insert()
     {
@@ -236,10 +236,11 @@ class ActiveRecord extends Service
             throw new \Exception(static::table() . ' does not have a primary key.');
         }
     }
-    
+
     /**
      * 更新当前数据
-     * @return integer|false 成功返回更新的行数,可能是0行,失败返回false
+     * @return int|false 成功返回更新的行数,可能是0行,失败返回false
+     * @throws \Exception
      */
     public function update()
     {
@@ -253,10 +254,11 @@ class ActiveRecord extends Service
         }
         return $rows;
     }
-    
+
     /**
      * 删除本条数据
-     * @return integer|false 成功返回删除的行数,可能是0行,失败返回false
+     * @return int|false 成功返回删除的行数,可能是0行,失败返回false
+     * @throws \Exception
      */
     public function delete()
     {
@@ -271,16 +273,17 @@ class ActiveRecord extends Service
     
     /**
      * 是否为新记录
-     * @return boolean 新纪录返回true,否则返回false
+     * @return bool 新纪录返回true,否则返回false
      */
     public function isNewRecord()
     {
         return $this->oldAttr === null;
     }
-    
+
     /**
      * 保存数据
-     * @return integer|false 成功返回保存的行数,失败返回false
+     * @return int|false 成功返回保存的行数,失败返回false
+     * @throws \Exception
      */
     public function save()
     {

@@ -92,7 +92,7 @@ class Schema
 
     /**
      * 清除表结构缓存(当开启了缓存时,更改表结构后调用)
-     * @return boolean 总是返回true
+     * @return bool 总是返回true
      */
     public function clearCache()
     {

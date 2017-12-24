@@ -163,7 +163,7 @@ class Connection extends Service
     
     /**
      * 启动一个事务
-     * @return boolean 成功时返回true,或者在失败时返回false
+     * @return bool 成功时返回true,或者在失败时返回false
      */
     public function begin()
     {
@@ -172,7 +172,7 @@ class Connection extends Service
     
     /**
      * 提交一个事务
-     * @return boolean 成功时返回true,或者在失败时返回false
+     * @return bool 成功时返回true,或者在失败时返回false
      */
     public function commit()
     {
@@ -181,7 +181,7 @@ class Connection extends Service
     
     /**
      * 回滚一个事务
-     * @return boolean 成功时返回true,或者在失败时返回false
+     * @return bool 成功时返回true,或者在失败时返回false
      */
     public function rollBack()
     {
