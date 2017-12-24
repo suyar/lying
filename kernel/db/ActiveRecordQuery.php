@@ -20,7 +20,7 @@ class ActiveRecordQuery extends Query
     private $class;
     
     /**
-     * @var boolean 是否返回数组
+     * @var bool 是否返回数组
      */
     private $array;
     
@@ -47,7 +47,7 @@ class ActiveRecordQuery extends Query
     
     /**
      * 返回查询的对象的实例
-     * @param boolean $obj 在这边没作用
+     * @param bool $obj 在这边没作用
      * @param string $class 在这边没作用
      * @return ActiveRecord|array|false 成功返回查询结果,失败返回false
      */
@@ -59,7 +59,7 @@ class ActiveRecordQuery extends Query
     
     /**
      * 返回查询的对象的实例数组
-     * @param boolean $obj 在这边没作用
+     * @param bool $obj 在这边没作用
      * @param string $class 在这边没作用
      * @return ActiveRecord[]|array|false 成功返回查询结果,失败返回false
      */

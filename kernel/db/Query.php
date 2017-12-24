@@ -232,8 +232,8 @@ class Query
      * limit(10);
      * limit(5, 20);
      * ```
-     * @param integer $offset 偏移的条数,如果只提供此参数,则等同于limit(0, $offset)
-     * @param integer $limit 限制的条数
+     * @param int $offset 偏移的条数,如果只提供此参数,则等同于limit(0, $offset)
+     * @param int $limit 限制的条数
      * @return $this
      */
     public function limit($offset, $limit = null)
@@ -245,7 +245,7 @@ class Query
     /**
      * 设置联合查询,可多次使用
      * @param Query $query 子查询
-     * @param boolean $all 是否使用UNION ALL,默认false
+     * @param bool $all 是否使用UNION ALL,默认false
      * @return $this
      */
     public function union(Query $query, $all = false)
@@ -589,7 +589,7 @@ class Query
     /**
      * 判断是否为读取数据
      * @param string $statement
-     * @return boolean
+     * @return bool
      */
     private function isRead($statement)
     {
@@ -601,7 +601,7 @@ class Query
      * 执行一条SQL语句
      * @param string $statement SQL语句
      * @param array $params 绑定的参数
-     * @return boolean 成功返回true,失败返回false
+     * @return bool 成功返回true,失败返回false
      */
     private function execute($statement, $params = [])
     {
@@ -614,7 +614,7 @@ class Query
      * 查询数据
      * @param string $method 查询的方法
      * @param array $args 要带入的参数列表
-     * @return boolean|array 查询的数据,失败返回false
+     * @return bool|array 查询的数据,失败返回false
      */
     private function fetch($method, $args = [])
     {
@@ -626,7 +626,7 @@ class Query
 
     /**
      * 返回结果集中的一条记录
-     * @param boolean $obj 是否返回对象(默认返回关联数组)
+     * @param bool $obj 是否返回对象(默认返回关联数组)
      * @param string $class 要实例化的对象,不写默认为匿名对象
      * @return mixed 成功返回查询结果,失败返回false
      */
@@ -637,7 +637,7 @@ class Query
 
     /**
      * 返回所有查询结果的数组
-     * @param boolean $obj 是否返回对象(默认返回关联数组)
+     * @param bool $obj 是否返回对象(默认返回关联数组)
      * @param string $class 要实例化的对象,不写默认为匿名对象
      * @return mixed 成功返回查询结果,失败返回false
      */
@@ -648,7 +648,7 @@ class Query
 
     /**
      * 从结果集中的下一行返回单独的一个字段值,查询结果为标量
-     * @param integer $column_number 你想从行里取回的列的索引数字,以0开始
+     * @param int $column_number 你想从行里取回的列的索引数字,以0开始
      * @return mixed 返回查询结果,查询结果为标量
      */
     public function scalar($column_number = 0)
@@ -658,7 +658,7 @@ class Query
 
     /**
      * 从结果集中的取出第一列的值
-     * @return array|boolean 返回查询结果
+     * @return array|bool 返回查询结果
      */
     public function column()
     {
@@ -668,7 +668,7 @@ class Query
     /**
      * 获取指定列的记录数
      * @param string $column 要统计的列
-     * @return integer 返回记录数
+     * @return int 返回记录数
      */
     public function count($column = '*')
     {
@@ -678,7 +678,7 @@ class Query
     /**
      * 获取指定列所有值之和
      * @param string $column 要相加的列
-     * @return integer 返回相加后的值
+     * @return int 返回相加后的值
      */
     public function sum($column)
     {
@@ -688,7 +688,7 @@ class Query
     /**
      * 获取指定列的最大值
      * @param string $column 计算的列
-     * @return integer 最大值
+     * @return int 最大值
      */
     public function max($column)
     {
@@ -698,7 +698,7 @@ class Query
     /**
      * 获取指定列的最小值
      * @param string $column 计算的列
-     * @return integer 最小值
+     * @return int 最小值
      */
     public function min($column)
     {
@@ -708,7 +708,7 @@ class Query
     /**
      * 获取指定列的平均值
      * @param string $column 计算的列
-     * @return integer 平均值
+     * @return int 平均值
      */
     public function avg($column)
     {
@@ -722,8 +722,8 @@ class Query
      * ```
      * @param string $statement SQL语句
      * @param array $params 绑定的参数
-     * @param boolean $master 是否使用主库执行语句,这个参数适合FOR UPDATE等操作
-     * @return boolean|\PDOStatement 失败返回false
+     * @param bool $master 是否使用主库执行语句,这个参数适合FOR UPDATE等操作
+     * @return bool|\PDOStatement 失败返回false
      */
     public function raw($statement, $params = [], $master = false)
     {
@@ -754,7 +754,7 @@ class Query
      * ```
      * @param string $statement SQL语句
      * @param array $params 绑定的参数
-     * @return bool|integer 成功返回受影响的行数(可能为0行),失败返回false
+     * @return bool|int 成功返回受影响的行数(可能为0行),失败返回false
      */
     public function exec($statement, $params = [])
     {
@@ -768,8 +768,8 @@ class Query
      * $query->from('user')->where(['id'=>1])->inc('num');
      * ```
      * @param string $field 字段名
-     * @param integer $num 自增的值,必须为正整数
-     * @return boolean|integer 成功返回受影响的行数,失败返回false
+     * @param int $num 自增的值,必须为正整数
+     * @return bool|int 成功返回受影响的行数,失败返回false
      */
     public function inc($field, $num = 1)
     {
@@ -788,8 +788,8 @@ class Query
      * $query->from('user')->where(['id'=>1])->dec('num');
      * ```
      * @param string $field 字段名
-     * @param integer $num 自减的值,必须为正整数
-     * @return boolean|integer 成功返回受影响的行数,失败返回false
+     * @param int $num 自减的值,必须为正整数
+     * @return bool|int 成功返回受影响的行数,失败返回false
      */
     public function dec($field, $num = 1)
     {
@@ -807,8 +807,8 @@ class Query
      * @param string $table 要插入的表名
      * @param array $datas 要插入的数据,(name => value)形式的数组
      * 当然value可以是子查询,Query的实例,但是查询的表不能和插入的表是同一个
-     * @param boolean $replace 是否用REPLACE INTO
-     * @return integer|boolean 返回受影响的行数,有可能是0行,失败返回false
+     * @param bool $replace 是否用REPLACE INTO
+     * @return int|bool 返回受影响的行数,有可能是0行,失败返回false
      */
     public function insert($table, $datas, $replace = false)
     {
@@ -839,8 +839,8 @@ class Query
      * @param string $table 要插入的表名
      * @param array $columns 要插入的字段名
      * @param array $datas 要插入的数据,应为一个二维数组
-     * @param boolean $replace 是否用REPLACE INTO
-     * @return integer|boolean 返回受影响的行数,有可能是0行,失败返回false
+     * @param bool $replace 是否用REPLACE INTO
+     * @return int|bool 返回受影响的行数,有可能是0行,失败返回false
      */
     public function batchInsert($table, $columns, $datas, $replace = false)
     {
@@ -863,7 +863,7 @@ class Query
      * 当然value可以是子查询,Query的实例,但是查询的表不能和更新的表是同一个
      * @param string|array $condition 更新的条件,参见where()
      * @param array $params 条件的参数,参见where()
-     * @return integer|boolean 返回受影响的行数,有可能是0行,失败返回false
+     * @return int|bool 返回受影响的行数,有可能是0行,失败返回false
      */
     public function update($table, $datas, $condition = '', $params = [])
     {
@@ -888,7 +888,7 @@ class Query
      * @param string $table 要删除的表名
      * @param string|array $condition 删除的条件,参见where()
      * @param array $params 条件的参数,参见where()
-     * @return integer|boolean 返回受影响的行数,有可能是0行,失败返回false
+     * @return int|bool 返回受影响的行数,有可能是0行,失败返回false
      */
     public function delete($table, $condition = '', $params = [])
     {
