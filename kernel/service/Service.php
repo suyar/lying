@@ -20,7 +20,7 @@ class Service
     private $events = [];
     
     /**
-     * 初始化子类的公有/受保护成员变量
+     * 初始化子类的公有&受保护成员变量
      * @param array $params 参数,一个关联数组
      */
     final public function __construct($params = [])
@@ -66,7 +66,7 @@ class Service
      * 移除事件
      * @param string $id 事件的ID
      * @param callable|null $callback 要移除的事件函数
-     * @return boolean 成功返回true,失败返回false
+     * @return bool 成功返回true,失败返回false
      */
     final public function unhook($id, callable $callback = null)
     {
