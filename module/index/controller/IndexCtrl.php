@@ -20,12 +20,6 @@ class IndexCtrl extends Controller
     
     public function index()
     {
-        $redis = \Lying::$maker->redis();
-        var_dump($redis->setex('name', 10, '666'));
-
-
-
-
         //return $this->render('index');
     }
 }
