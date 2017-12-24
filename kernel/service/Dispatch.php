@@ -31,7 +31,7 @@ class Dispatch extends Service
                     $instance->trigger($instance::EVENT_BEFORE_ACTION, [$a]);
                     $response = call_user_func_array([$instance, $a], $this->parseArgs($method->getParameters()));
                     $instance->trigger($instance::EVENT_AFTER_ACTION, [$a, $response]);
-                    echo (is_string($response) || is_numeric($response) || is_null($response) || is_bool($response)) ? $response : json_encode($response, JSON_UNESCAPED_UNICODE);
+                    echo (is_string($response) || is_numeric($response) || is_null($response) || is_bool($response)) ? $response : json_encode($response);
                     exit(0);
                 }
             }
@@ -43,7 +43,7 @@ class Dispatch extends Service
      * 匹配到的方法将不能被访问,默认init|beforeAction|afterAction不能被访问
      * @param array $pregs 一个存放正则表达式的数组
      * @param string $action 方法名称
-     * @return boolean 返回true允许访问,false禁止访问
+     * @return bool 返回true允许访问,false禁止访问
      */
     private function checkAccess($pregs, $action)
     {
