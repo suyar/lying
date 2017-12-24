@@ -20,6 +20,11 @@ class Request
     private $data;
 
     /**
+     * @var string 原生请求数据
+     */
+    private $rawPost;
+
+    /**
      * @var string CSRF
      */
     private $csrfToken;
@@ -73,7 +78,7 @@ class Request
 
     /**
      * 是否为GET请求
-     * @return boolean
+     * @return bool
      */
     public function isGet()
     {
@@ -82,7 +87,7 @@ class Request
 
     /**
      * 是否为POST请求
-     * @return boolean
+     * @return bool
      */
     public function isPost()
     {
@@ -91,7 +96,7 @@ class Request
 
     /**
      * 是否为AJAX请求
-     * @return boolean
+     * @return bool
      */
     public function isAjax()
     {
@@ -100,7 +105,7 @@ class Request
 
     /**
      * 是否为PJAX请求
-     * @return boolean
+     * @return bool
      */
     public function isPjax()
     {
@@ -109,11 +114,11 @@ class Request
 
     /**
      * 返回请求的原始数据
-     * @return boolean|string
+     * @return bool|string
      */
     public function rawBody()
     {
-        return file_get_contents('php://input');
+        return $this->rawPost ?: ($this->rawPost = file_get_contents('php://input'));
     }
 
     /**
@@ -127,7 +132,7 @@ class Request
 
     /**
      * 判断是否在CLI模式下运行
-     * @return boolean
+     * @return bool
      */
     public function isCli()
     {
@@ -136,7 +141,7 @@ class Request
 
     /**
      * 获取CLI下的参数
-     * @param integer $offect 参数下标,0为脚本名称,1为参数1,不存在返回null
+     * @param int $offect 参数下标,0为脚本名称,1为参数1,不存在返回null
      * @param mixed $defaultValue 值不存在时的默认值
      * @return null|string
      */
@@ -154,7 +159,7 @@ class Request
 
     /**
      * 返回服务器端口
-     * @return integer
+     * @return int
      */
     public function serverPort()
     {
@@ -172,7 +177,7 @@ class Request
 
     /**
      * 返回HOST
-     * @param boolean $schema 是否显示协议头http(s)://
+     * @param bool $schema 是否显示协议头http(s)://
      * @return string
      */
     public function host($schema = false)
@@ -251,7 +256,7 @@ class Request
 
     /**
      * 返回请求开始时间
-     * @param boolean $millisecond 是否毫秒级
+     * @param bool $millisecond 是否毫秒级
      * @return string|null
      */
     public function time($millisecond = false)
@@ -289,7 +294,7 @@ class Request
     /**
      * 校验csrfToken
      * @param string|null $csrfToken 手动传入csrfToken,放空的话则自动获取csrfToken
-     * @return boolean 校验成功返回true,失败返回false
+     * @return bool 校验成功返回true,失败返回false
      */
     public function validateCsrfToken($csrfToken = null)
     {
