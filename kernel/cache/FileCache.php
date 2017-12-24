@@ -72,7 +72,7 @@ class FileCache extends Service implements Cache
     public function add($key, $value, $ttl = 0)
     {
         $this->gc();
-        return $this->exist($key) ? false : $this->set($key, $value, $ttl);
+        return $this->exists($key) ? false : $this->set($key, $value, $ttl);
     }
 
     /**
@@ -134,7 +134,7 @@ class FileCache extends Service implements Cache
     public function get($key)
     {
         $cacheFile = $this->cacheFile($key);
-        if ($this->exist($key) && $fp = @fopen($cacheFile, 'r')) {
+        if ($this->exists($key) && $fp = @fopen($cacheFile, 'r')) {
             @flock($fp, LOCK_SH);
             $value = unserialize(stream_get_contents($fp));
             @flock($fp, LOCK_UN);
@@ -153,7 +153,7 @@ class FileCache extends Service implements Cache
     {
         $values = [];
         foreach ($keys as $key) {
-            if ($this->exist($key)) {
+            if ($this->exists($key)) {
                 $values[$key] = $this->get($key);
             }
         }
@@ -165,7 +165,7 @@ class FileCache extends Service implements Cache
      * @param string $key 要查找的缓存键
      * @return bool 如果键存在,则返回true,否则返回false
      */
-    public function exist($key)
+    public function exists($key)
     {
         $cacheFile = $this->cacheFile($key);
         return @filemtime($cacheFile) > time();
