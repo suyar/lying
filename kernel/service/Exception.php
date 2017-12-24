@@ -87,12 +87,12 @@ class Exception
     ];
 
     /**
-     * @var boolean 是否允许错误
+     * @var bool 是否允许错误
      */
     private $err = true;
 
     /**
-     * 注册错误/异常处理函数
+     * 注册错误&异常处理函数
      */
     public function register()
     {
@@ -102,7 +102,7 @@ class Exception
     }
 
     /**
-     * 卸载错误/异常处理函数
+     * 卸载错误&异常处理函数
      */
     public function unregister()
     {
@@ -128,11 +128,11 @@ class Exception
     
     /**
      * 错误处理函数
-     * @param integer $errno 错误的级别
+     * @param int $errno 错误的级别
      * @param string $errstr 错误的信息
      * @param string $errfile 发生错误的文件名
-     * @param integer $errline 错误发生的行号
-     * @return null|boolean 是否继续执行默认的错误处理
+     * @param int $errline 错误发生的行号
+     * @return null|bool 是否继续执行默认的错误处理
      * @throws \ErrorException 抛出一个错误异常
      */
     public function errorHandler($errno, $errstr, $errfile, $errline)
