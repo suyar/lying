@@ -25,22 +25,22 @@ class Logger extends Service
     protected $file = 'lying';
 
     /**
-     * @var integer 单个日志文件的最大值(kb)
+     * @var int 单个日志文件的最大值(kb)
      */
     protected $maxSize = 10240;
 
     /**
-     * @var integer 最大的日志文件个数
+     * @var int 最大的日志文件个数
      */
     protected $maxFile = 5;
 
     /**
-     * @var integer 要开始记录的日志等级
+     * @var int 要开始记录的日志等级
      */
     protected $level = 3;
 
     /**
-     * @var integer 最大存储条数,默认500
+     * @var int 最大存储条数,默认500
      */
     protected $maxItem = 500;
 
@@ -74,7 +74,7 @@ class Logger extends Service
     /**
      * 格式化数据
      * @param mixed $data 要格式化的数据
-     * @param integer $level 数组的第几层
+     * @param int $level 数组的第几层
      * @return string 返回格式化后的字符串
      */
     private function formatData($data, $level = 1)
@@ -104,7 +104,7 @@ class Logger extends Service
     /**
      * 打印
      * @param mixed $data 日志内容
-     * @param integer $level 日志等级,默认5
+     * @param int $level 日志等级,默认5
      */
     public function record($data, $level = 5)
     {
@@ -122,9 +122,7 @@ class Logger extends Service
                 PHP_EOL,
                 PHP_EOL,
             ]);
-            if (count($this->container) >= $this->maxItem) {
-                $this->flush();
-            }
+            count($this->container) >= $this->maxItem && $this->flush();
         }
     }
 
@@ -134,11 +132,9 @@ class Logger extends Service
     public function flush()
     {
         if ($this->container) {
-            if (is_file($this->file) && filesize($this->file) >= $this->maxSize * 1024) {
-                $this->cycleFile();
-            }
+            is_file($this->file) && @filesize($this->file) >= $this->maxSize * 1024 && $this->cycleFile();
             clearstatcache();
-            @file_put_contents($this->file, $this->container, FILE_APPEND|LOCK_EX);
+            @file_put_contents($this->file, $this->container, FILE_APPEND | LOCK_EX);
             $this->container = [];
         }
     }
