@@ -21,9 +21,9 @@ class CacheCtrl extends Controller
     public function init()
     {
         parent::init();
-        //$cacheId = 'cache';
+        $cacheId = 'cache';
         //$cacheId = 'apcu';
-        $cacheId = 'memcached';
+        //$cacheId = 'memcached';
         $this->cache = \Lying::$maker->cache($cacheId);
     }
 
@@ -36,7 +36,7 @@ class CacheCtrl extends Controller
             'mset' => url('mset'),
             'get' => url('get'),
             'mget' => url('mget'),
-            'exist' => url('exist'),
+            'exists' => url('exists'),
             'del' => url('del'),
             'flush' => url('flush'),
         ];
@@ -81,9 +81,9 @@ class CacheCtrl extends Controller
         var_dump($result);
     }
 
-    public function exist()
+    public function exists()
     {
-        $result = $this->cache->exist('username');
+        $result = $this->cache->exists('username');
         var_dump($result);
     }
 

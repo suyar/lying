@@ -90,7 +90,7 @@ class ApcuCache extends Service implements Cache
      * @param string $key 要查找的缓存键
      * @return bool 如果键存在,则返回true,否则返回false
      */
-    public function exist($key)
+    public function exists($key)
     {
         return apcu_exists($key);
     }

@@ -23,8 +23,8 @@ class Session
     }
 
     /**
-     * SESSION是否启用
-     * @return boolean 已启用返回true,未启用返回false
+     * 判断SESSION是否启用
+     * @return bool 已启用返回true,未启用返回false
      */
     public function isActive()
     {
@@ -33,7 +33,7 @@ class Session
 
     /**
      * 启用SESSION
-     * @return boolean 成功返回true,失败返回false
+     * @return bool 成功返回true,失败返回false
      */
     public function start()
     {
@@ -42,7 +42,7 @@ class Session
 
     /**
      * 设置SESSION
-     * @param string $name SESSION键名
+     * @param string $name SESSION键
      * @param mixed $value SESSION值
      */
     public function set($name, $value)
@@ -63,7 +63,7 @@ class Session
     /**
      * SESSION是否存在
      * @param string $name SESSION键名
-     * @return boolean 存在返回true,失败返回false
+     * @return bool 存在返回true,失败返回false
      */
     public function exists($name)
     {
@@ -73,7 +73,7 @@ class Session
     /**
      * 移除SESSION
      * @param string $name 放空移除整个SESSION数组
-     * @return boolean 成功返回true,失败返回false
+     * @return bool 成功返回true,失败返回false
      */
     public function remove($name = null)
     {
@@ -89,7 +89,7 @@ class Session
 
     /**
      * 销毁SESSION,销毁后要重新start才能再次使用
-     * @return boolean 成功返回true,失败返回false
+     * @return bool 成功返回true,失败返回false
      */
     public function destroy()
     {
