@@ -9,8 +9,8 @@
  * ```
  * @param string $path 要生成的相对路径
  * @param array $params 要生成的参数,一个关联数组,如果有路由规则,参数中必须包含rule中的参数才能反解析
- * @param boolean $host 是否携带完整域名,包括协议头
- * @param boolean $normal 是否把参数设置成?a=1&b=2
+ * @param bool $host 是否携带完整域名,包括协议头
+ * @param bool $normal 是否把参数设置成?a=1&b=2
  * @return string 返回生成的URL
  */
 function url($path, $params = [], $host = true, $normal = false)
