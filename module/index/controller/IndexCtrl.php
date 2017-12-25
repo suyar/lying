@@ -1,11 +1,4 @@
 <?php
-/**
- * @author carolkey <su@revoke.cc>
- * @link https://github.com/carolkey/lying
- * @copyright 2018 Lying
- * @license MIT
- */
-
 namespace module\index\controller;
 
 use lying\service\Controller;
@@ -20,7 +13,6 @@ class IndexCtrl extends Controller
     
     public function index()
     {
-        $this->redirect('user/info/name', ['a'=>1, 'id'=>123, 'name'=>'susu']);
-        //return $this->render('index');
+        return $this->render('index');
     }
 }
