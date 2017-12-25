@@ -12,7 +12,6 @@ return [
         'module' => 'index',
         'controller' => 'index',
         'action' => 'index',
-        'pathinfo' => false,
         'suffix' => '.html',
         'rule' => [
             'blog/<id:\d+>/<name>$' => ['admin/blog/get', '.htm'],

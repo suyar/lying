@@ -24,6 +24,7 @@ REQUIREMENTS
 > * pdo : *
 > * apcu : *（可选）
 > * memcached : *（可选）
+> * redis : (可选)
 
 DOCUMENTATION
 -------------
@@ -44,7 +45,7 @@ FEATURES
 * PDO实现的MySQL QueryBuilder + ActiveRecord支持，数据库支持主从分离。
 * Apcu/Memcached/File/Redis多种缓存实现。
 * 高性能FileLog日志实现。
-* 支持pathinfo模式和rewrite模式的路由，路由支持正反向解析。
+* 路由支持正反向解析（路由仅支持rewrite模式，如果服务器不支持，请移步其他框架）。
 * 完善的CLI制度。
 * 模块<->域名绑定，让你快速实现前后台分离。
 * 工厂`\Lying::$maker`简便使用服务类。

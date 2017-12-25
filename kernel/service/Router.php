@@ -15,7 +15,7 @@ namespace lying\service;
 class Router extends Service
 {
     /**
-     * @var boolean 是否绑定模块
+     * @var bool 是否绑定模块
      */
     protected $binding;
 
@@ -38,11 +38,6 @@ class Router extends Service
      * @var string 默认方法
      */
     protected $action = 'index';
-
-    /**
-     * @var boolean 是否PATHINFO
-     */
-    protected $pathinfo = false;
 
     /**
      * @var string 后缀
@@ -213,8 +208,7 @@ class Router extends Service
         $uri = $request->isCli() ? $request->getArgv(1, '/') : $request->uri();
         $parse = parse_url($uri);
         isset($parse['query']) && parse_str($parse['query'], $_GET);
-        $path = preg_replace('/^\/index\.php/i', '', $parse['path'], 1);
-        $path = trim($path, '/');
+        $path = trim($parse['path'], '/');
         $path && $this->parseRule($path) || $this->parseNormal($path);
         $request->load();
     }
@@ -223,7 +217,7 @@ class Router extends Service
      * 把横线分割的小写字母转换为驼峰
      * @param string $str 要转换的字符串
      * @param string $delimiter 分隔符
-     * @param boolean $ucfirst 首字母是否大写
+     * @param bool $ucfirst 首字母是否大写
      * @return string 返回转换后的字符串
      */
     private function str2hump($str, $delimiter, $ucfirst = false)
