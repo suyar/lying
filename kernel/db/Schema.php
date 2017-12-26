@@ -54,7 +54,7 @@ class Schema
         $this->cache = $cache ? \Lying::$maker->cache($cache) : null;
         if ($cache) {
             $this->cache = \Lying::$maker->cache($cache);
-            if ($this->cache->exist($this->cacheKey)) {
+            if ($this->cache->exists($this->cacheKey)) {
                 $this->tables = $this->cache->get($this->cacheKey);
             }
         }
