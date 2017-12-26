@@ -85,4 +85,16 @@ return [
         'select' => 0,
         'prefix' => 'lying',
     ],
+    //全局事件
+    'hook' => [
+        'class' => 'lying\service\Hook',
+        'events' => [
+            /*'APP_INIT' => [
+                function() {var_dump(microtime(true));},
+                function() {echo 666;},
+                [function(\lying\service\Event $event) {var_dump($event->_data);}, 'HAHA']
+            ],
+            'APP_END' => function() {var_dump(microtime(true));},*/
+        ],
+    ],
 ];

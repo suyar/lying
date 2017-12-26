@@ -49,6 +49,8 @@ class Lying
         self::$maker->exception()->register();
 
         date_default_timezone_set(self::config('timezone', 'Asia/Shanghai'));
+
+        self::$maker->hook()->trigger('APP_INIT');
     }
 
     /**

@@ -41,6 +41,7 @@ class Dispatch extends Service
                     $event->response = $response;
                     $instance->trigger($instance::EVENT_AFTER_ACTION, $event);
                     echo $response;
+                    \Lying::$maker->hook()->trigger('APP_END');
                     exit(0);
                 }
             }

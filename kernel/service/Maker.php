@@ -20,6 +20,7 @@ use lying\db\Connection;
  * @method Connection db(string $id = 'db')
  * @method Dispatch dispatch()
  * @method Exception exception()
+ * @method Hook hook()
  * @method Logger logger(string $id = 'logger')
  * @method Request request()
  * @method Redis redis(string $id = 'redis')
@@ -48,6 +49,7 @@ class Maker
             'cookie' => 'lying\service\Cookie',
             'dispatch' => 'lying\service\Dispatch',
             'exception' => 'lying\service\Exception',
+            'hook' => 'lying\service\Hook',
             'request' => 'lying\service\Request',
             'router' => 'lying\service\Router',
             'session' => 'lying\service\Session',

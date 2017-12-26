@@ -35,6 +35,17 @@ class Event
     private static $_events = [];
 
     /**
+     * Event constructor.
+     * @param array $attr
+     */
+    public function __construct(array $attr = [])
+    {
+        foreach ($attr as $key => $value) {
+            $this->$key = $value;
+        }
+    }
+
+    /**
      * 绑定一个函数到某个事件
      * @param string $class 绑定的完整类名
      * @param string $id 事件ID
