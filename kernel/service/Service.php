@@ -40,7 +40,7 @@ class Service
      * 绑定一个函数到某个事件
      * @param string $id 事件的ID
      * @param callable $callback 绑定的函数
-     * @param mixed $data 传递到事件触发器的data
+     * @param mixed $data 传递到事件触发器的数据
      */
     final public function hook($id, callable $callback, $data = null)
     {
@@ -50,7 +50,7 @@ class Service
     /**
      * 触发一个事件,如果事件返回false的话就不再继续执行后面绑定的事件了
      * @param string $id 事件的ID
-     * @param Event|null $event
+     * @param Event|null $event 事件实例
      */
     final public function trigger($id, Event $event = null)
     {
@@ -65,6 +65,7 @@ class Service
                 }
             }
         }
+        Event::trigger($this, $id, $event);
     }
 
     /**
