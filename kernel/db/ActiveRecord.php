@@ -8,6 +8,7 @@
 
 namespace lying\db;
 
+use lying\event\ActiveRecordEvent;
 use lying\service\Service;
 
 /**
@@ -203,8 +204,9 @@ class ActiveRecord extends Service
      */
     public function insert()
     {
-        $this->trigger(self::EVENT_BEFORE_INSERT);
-        $this->trigger(self::EVENT_BEFORE_SAVE);
+        $event = new ActiveRecordEvent();
+        $this->trigger(self::EVENT_BEFORE_INSERT, $event);
+        $this->trigger(self::EVENT_BEFORE_SAVE, $event);
         $rows = self::find()->insert(static::table(), $this->attr);
         if (false !== $rows) {
             $autoIncrement = static::db()->schema()->getTableSchema(static::table())->autoIncrement;
@@ -212,9 +214,10 @@ class ActiveRecord extends Service
                 $this->attr[$autoIncrement] = static::db()->lastInsertId();
             }
             $this->reload();
-            $this->trigger(self::EVENT_AFTER_INSERT, [$rows]);
-            $this->trigger(self::EVENT_AFTER_SAVE, [$rows]);
         }
+        $event->rows = $rows;
+        $this->trigger(self::EVENT_AFTER_INSERT, $event);
+        $this->trigger(self::EVENT_AFTER_SAVE, $event);
         return $rows;
     }
 
@@ -244,14 +247,16 @@ class ActiveRecord extends Service
      */
     public function update()
     {
-        $this->trigger(self::EVENT_BEFORE_UPDATE);
-        $this->trigger(self::EVENT_BEFORE_SAVE);
+        $event = new ActiveRecordEvent();
+        $this->trigger(self::EVENT_BEFORE_UPDATE, $event);
+        $this->trigger(self::EVENT_BEFORE_SAVE, $event);
         $rows = self::find()->update(static::table(), $this->attr, $this->oldCondition());
         if (false !== $rows) {
             $this->reload();
-            $this->trigger(self::EVENT_AFTER_UPDATE, [$rows]);
-            $this->trigger(self::EVENT_AFTER_SAVE, [$rows]);
         }
+        $event->rows = $rows;
+        $this->trigger(self::EVENT_AFTER_UPDATE, $event);
+        $this->trigger(self::EVENT_AFTER_SAVE, $event);
         return $rows;
     }
 
@@ -262,12 +267,14 @@ class ActiveRecord extends Service
      */
     public function delete()
     {
-        $this->trigger(self::EVENT_BEFORE_DELETE);
+        $event = new ActiveRecordEvent();
+        $this->trigger(self::EVENT_BEFORE_DELETE, $event);
         $rows = self::find()->delete(static::table(), $this->oldCondition());
         if (false !== $rows) {
             $this->oldAttr = null;
-            $this->trigger(self::EVENT_AFTER_DELETE, [$rows]);
         }
+        $event->rows = $rows;
+        $this->trigger(self::EVENT_AFTER_DELETE, $event);
         return $rows;
     }
     

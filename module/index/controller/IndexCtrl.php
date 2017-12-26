@@ -10,7 +10,11 @@ use lying\service\Controller;
 class IndexCtrl extends Controller
 {
     public $layout = 'layout';
-    
+
+    /**
+     * @return string
+     * @throws \Exception
+     */
     public function index()
     {
         return $this->render('index');
