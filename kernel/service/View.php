@@ -63,12 +63,12 @@ class View
         require $file;
         return ob_get_clean();
     }
-    
+
     /**
      * 查找视图文件的路径
      * @param string $view 视图文件名称
-     * @throws \Exception 视图文件不存在抛出异常
      * @return string 返回视图文件的绝对路径
+     * @throws \Exception
      */
     private function findViewPath($view)
     {

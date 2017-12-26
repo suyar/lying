@@ -40,6 +40,8 @@ class ModelTool extends BaseTool
                 '<?php',
                 'namespace ' . $namespace . ';',
                 '',
+                'use lying\db\ActiveRecord;',
+                '',
                 '/**',
                 ' * Class ' . $modelName,
                 ' * @package ' . $namespace,
@@ -50,7 +52,7 @@ class ModelTool extends BaseTool
             }
             $content .= implode(PHP_EOL, [
                 ' */',
-                'class ' . $modelName . ' extends \lying\db\ActiveRecord',
+                'class ' . $modelName . ' extends ActiveRecord',
                 '{',
                 '',
                 '}',

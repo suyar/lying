@@ -8,6 +8,8 @@
 
 namespace lying\service;
 
+use lying\event\ControllerEvent;
+
 /**
  * Class Dispatch
  * @package lying\service
@@ -24,14 +26,21 @@ class Dispatch extends Service
         $moduleNamespace = php_sapi_name() === 'cli' ? 'console' : 'module';
         $class = "$moduleNamespace\\$m\\controller\\$c";
         if (class_exists($class)) {
+            /** @var Controller $instance */
             $instance = new $class();
+            $instance->request = \Lying::$maker->request();
+            $instance->hook($instance::EVENT_BEFORE_ACTION, [$instance, 'beforeAction']);
+            $instance->hook($instance::EVENT_AFTER_ACTION, [$instance, 'afterAction']);
             if (method_exists($instance, $a)) {
                 $method = new \ReflectionMethod($instance, $a);
                 if ($method->isPublic() && $this->checkAccess($instance->deny, $a)) {
-                    $instance->trigger($instance::EVENT_BEFORE_ACTION, [$a]);
+                    $event = new ControllerEvent();
+                    $event->action = $a;
+                    $instance->trigger($instance::EVENT_BEFORE_ACTION, $event);
                     $response = call_user_func_array([$instance, $a], $this->parseArgs($method->getParameters()));
-                    $instance->trigger($instance::EVENT_AFTER_ACTION, [$a, $response]);
-                    echo (is_string($response) || is_numeric($response) || is_null($response) || is_bool($response)) ? $response : json_encode($response);
+                    $event->response = $response;
+                    $instance->trigger($instance::EVENT_AFTER_ACTION, $event);
+                    echo $response;
                     exit(0);
                 }
             }

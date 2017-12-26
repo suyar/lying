@@ -8,6 +8,8 @@
 
 namespace lying\service;
 
+use lying\event\ControllerEvent;
+
 /**
  * Class Controller
  * @package lying\service
@@ -27,17 +29,17 @@ class Controller extends Service
     /**
      * @var string 布局文件
      */
-    protected $layout = false;
+    public $layout = false;
 
     /**
      * @var View 视图实例
      */
-    private $view;
+    public $view;
 
     /**
      * @var Request 请求类
      */
-    protected $request;
+    public $request;
     
     /**
      * @var array 设置不被访问的方法,用正则匹配,此属性必须设置为public
@@ -45,21 +47,11 @@ class Controller extends Service
     public $deny = [];
 
     /**
-     * 绑定事件,子类需要在init方法里的首行调用parent::init();
-     */
-    protected function init()
-    {
-        $this->request = \Lying::$maker->request();
-        $this->hook(self::EVENT_BEFORE_ACTION, [$this, 'beforeAction']);
-        $this->hook(self::EVENT_AFTER_ACTION, [$this, 'afterAction']);
-    }
-
-    /**
      * 在执行action之前执行
-     * @param string $action 执行的方法名称
+     * @param ControllerEvent $event 执行事件
      * @throws \Exception 当CSRF验证未通过的时候抛出400
      */
-    public function beforeAction($action) {
+    public function beforeAction(ControllerEvent $event) {
         if ($this->request->validateCsrfToken() === false) {
             throw new \Exception('Unable to verify your data submission.', 400);
         }
@@ -67,10 +59,9 @@ class Controller extends Service
     
     /**
      * 在执行action之后执行
-     * @param string $action 执行的方法名称
-     * @param mixed $response action执行后的返回值,可能会是一个页面
+     * @param ControllerEvent $event 执行的方法名称
      */
-    public function afterAction($action, $response) {}
+    public function afterAction(ControllerEvent $event) {}
 
     /**
      * 重定向
@@ -130,6 +121,7 @@ class Controller extends Service
      * @param string $view 视图文件名称
      * @param string|bool $layout 布局文件
      * @return string 渲染的HTML代码
+     * @throws \Exception
      */
     final public function render($view, $layout = false)
     {
