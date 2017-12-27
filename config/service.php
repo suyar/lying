@@ -23,7 +23,6 @@ return [
                 'module' => 'admin',
                 'controller' => 'index',
                 'action' => 'index',
-                'pathinfo' => false,
                 'suffix' => '.html',
                 'rule' => [
                     'user/<id>$' => ['index/user', '.html'],
