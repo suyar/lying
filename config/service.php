@@ -36,6 +36,7 @@ return [
         'dsn' => 'mysql:host=127.0.0.1;dbname=lying;charset=utf8',
         'user' => 'root',
         'pass' => 'root',
+        'options' => [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_SILENT],
         'prefix' => 'b_',
         'cache' => false,
         'slave' => [

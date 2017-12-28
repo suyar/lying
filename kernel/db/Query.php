@@ -607,7 +607,7 @@ class Query
     {
         $pdo = $this->isRead($statement) ? $this->conn->slavePdo() : $this->conn->masterPdo();
         $this->sth = $pdo->prepare($statement);
-        return $this->sth->execute($params);
+        return $this->sth && $this->sth->execute($params);
     }
 
     /**
@@ -620,7 +620,7 @@ class Query
     {
         list($statement, $params) = $this->build();
         $res = $this->execute($statement, $params) ? call_user_func_array([$this->sth, $method], $args) : false;
-        $this->sth->closeCursor();
+        $this->sth && $this->sth->closeCursor();
         return $res;
     }
 

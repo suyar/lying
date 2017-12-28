@@ -38,6 +38,11 @@ class Connection extends Service
     protected $prefix = '';
 
     /**
+     * @var array 额外的PDO选项
+     */
+    protected $options = [];
+
+    /**
      * @var string 将要使用的CacheID
      */
     protected $cache;
@@ -79,11 +84,15 @@ class Connection extends Service
     protected function pdo()
     {
         if ($this->dbh === null) {
-            $this->dbh = new \PDO($this->dsn, $this->user, $this->pass, [
+            $options = [
                 \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
                 \PDO::ATTR_EMULATE_PREPARES => false,
                 \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
-            ]);
+            ];
+            if ($this->options && is_array($this->options)) {
+                $options = [\PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC] + $this->options + $options;
+            }
+            $this->dbh = new \PDO($this->dsn, $this->user, $this->pass, $options);
         }
         return $this->dbh;
     }
@@ -99,6 +108,7 @@ class Connection extends Service
         } elseif ($this->master) {
             shuffle($this->master);
             $this->_master = new self(array_shift($this->master));
+            $this->_master->options = $this->options;
         } else {
             $this->_master = $this;
         }
@@ -116,6 +126,7 @@ class Connection extends Service
         } elseif ($this->slave) {
             shuffle($this->slave);
             $this->_slave = new self(array_shift($this->slave));
+            $this->_slave->options = $this->options;
         } else {
             $this->_slave = $this;
         }
