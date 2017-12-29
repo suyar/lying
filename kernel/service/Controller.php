@@ -35,11 +35,6 @@ class Controller extends Service
      * @var View 视图实例
      */
     public $view;
-
-    /**
-     * @var Request 请求类
-     */
-    public $request;
     
     /**
      * @var array 设置不被访问的方法,用正则匹配,此属性必须设置为public
@@ -52,7 +47,7 @@ class Controller extends Service
      * @throws \Exception 当CSRF验证未通过的时候抛出400
      */
     public function beforeAction(ControllerEvent $event) {
-        if ($this->request->validateCsrfToken() === false) {
+        if (\Lying::$maker->request()->validateCsrfToken() === false) {
             throw new \Exception('Unable to verify your data submission.', 400);
         }
     }
@@ -87,9 +82,9 @@ class Controller extends Service
 
         while (ob_get_level() !== 0) ob_end_clean();
         http_response_code(302);
-        if ($this->request->isPjax()) {
+        if (\Lying::$maker->request()->isPjax()) {
             header("X-Pjax-Url: $url");
-        } else if ($this->request->isAjax()) {
+        } else if (\Lying::$maker->request()->isAjax()) {
             header("X-Redirect: $url");
         } else {
             header("Location: $url");

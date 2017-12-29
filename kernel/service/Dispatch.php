@@ -28,7 +28,6 @@ class Dispatch extends Service
         if (class_exists($class)) {
             /** @var Controller $instance */
             $instance = new $class();
-            $instance->request = \Lying::$maker->request();
             $instance->hook($instance::EVENT_BEFORE_ACTION, [$instance, 'beforeAction']);
             $instance->hook($instance::EVENT_AFTER_ACTION, [$instance, 'afterAction']);
             if (method_exists($instance, $a)) {
