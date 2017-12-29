@@ -121,7 +121,6 @@ class Controller extends Service
      * @param string $view 视图文件名称
      * @param string|bool $layout 布局文件
      * @return string 渲染的HTML代码
-     * @throws \Exception
      */
     final public function render($view, $layout = false)
     {
