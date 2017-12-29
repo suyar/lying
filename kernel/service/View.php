@@ -38,7 +38,6 @@ class View
      * @param string $view 视图文件名称
      * @param string|bool $layout 布局文件
      * @return string 返回渲染后的HTML
-     * @throws \Exception
      */
     public function render($view, $layout = false)
     {

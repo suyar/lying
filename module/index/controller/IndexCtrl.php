@@ -12,8 +12,8 @@ class IndexCtrl extends Controller
     public $layout = 'layout';
 
     /**
+     * 首页
      * @return string
-     * @throws \Exception
      */
     public function index()
     {
