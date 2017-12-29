@@ -41,6 +41,15 @@ class Session
     }
 
     /**
+     * 获取当前sessionid,如果session没激活,返回空字符串
+     * @return string
+     */
+    public function getId()
+    {
+        return session_id();
+    }
+
+    /**
      * 设置SESSION
      * @param string $name SESSION键
      * @param mixed $value SESSION值
