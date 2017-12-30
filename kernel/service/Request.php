@@ -34,7 +34,7 @@ class Request
      */
     public function load()
     {
-        $this->data === null || ($this->data = ['get' => $_GET, 'post' => $_POST]);
+        $this->data === null && ($this->data = ['get' => $_GET, 'post' => $_POST]);
     }
 
     /**
