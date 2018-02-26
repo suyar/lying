@@ -68,7 +68,11 @@ class Logger extends Service
         empty($this->dir) && ($this->dir = DIR_RUNTIME . DS . 'log');
         !is_dir($this->dir) && @mkdir($this->dir, 0777, true);
         $this->file = $this->dir . DS . $this->file . ".log";
-        register_shutdown_function([$this, 'flush']);
+        register_shutdown_function(function () {
+            $this->flush();
+            register_shutdown_function([$this, 'flush'], true);
+        });
+        //register_shutdown_function([$this, 'flush']);
     }
     
     /**
