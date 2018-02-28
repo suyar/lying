@@ -8,7 +8,8 @@
 
 namespace lying\service;
 
-use lying\event\ControllerEvent;
+use lying\event\ActionEvent;
+use lying\exception\InvalidRouteException;
 
 /**
  * Class Dispatch
@@ -18,34 +19,57 @@ class Dispatch extends Service
 {
     /**
      * 程序执行入口
-     * @throws \Exception 页面不存在抛出404错误
+     * @param array|string $route 要调度的路由
+     * @param array $params 传控方法的参数,若果放空则自动从GET参数获取
+     * @return mixed 返回调度结果
+     * @throws InvalidRouteException 路由无法解析抛出异常
      */
-    public function run()
+    public function run($route, array $params = [])
     {
-        list($m, $c, $a) = \Lying::$maker->router()->resolve();
-        $moduleNamespace = php_sapi_name() === 'cli' ? 'console' : 'module';
-        $class = "$moduleNamespace\\$m\\controller\\$c";
-        if (class_exists($class)) {
-            /** @var Controller $instance */
-            $instance = new $class();
-            $instance->hook($instance::EVENT_BEFORE_ACTION, [$instance, 'beforeAction']);
-            $instance->hook($instance::EVENT_AFTER_ACTION, [$instance, 'afterAction']);
-            if (method_exists($instance, $a)) {
+        if ($route = $this->resolve($route)) {
+            list($m, $c, $a) = $route;
+            $moduleNamespace = PHP_SAPI === 'cli' ? 'console' : 'module';
+            $class = "$moduleNamespace\\$m\\controller\\$c";
+            if (method_exists($class, $a)) {
+                /** @var Controller $instance */
+                $instance = new $class;
+                $instance->hook($instance::EVENT_BEFORE_ACTION, [$instance, 'beforeAction']);
+                $instance->hook($instance::EVENT_AFTER_ACTION, [$instance, 'afterAction']);
                 $method = new \ReflectionMethod($instance, $a);
                 if ($method->isPublic() && $this->checkAccess($instance->deny, $a)) {
-                    $event = new ControllerEvent();
-                    $event->action = $a;
-                    $instance->trigger($instance::EVENT_BEFORE_ACTION, $event);
-                    $response = call_user_func_array([$instance, $a], $this->parseArgs($method->getParameters()));
-                    $event->response = $response;
-                    $instance->trigger($instance::EVENT_AFTER_ACTION, $event);
-                    echo $response;
-                    \Lying::$maker->hook()->trigger('APP_END');
-                    exit(0);
+                    $instance->trigger($instance::EVENT_BEFORE_ACTION, new ActionEvent(['action'=>$a]));
+                    $response = call_user_func_array([$instance, $a], $this->parseArgs($method->getParameters(), $params));
+                    $instance->trigger($instance::EVENT_AFTER_ACTION, new ActionEvent(['action'=>$a, 'response'=>$response]));
+                    return $response;
                 }
             }
         }
-        throw new \Exception('Not Found (#404)', 404);
+
+        throw new InvalidRouteException('Unable to resolve the request');
+    }
+
+    /**
+     * 检查要执行的路由
+     * @param array|string $route 路由
+     * @return array|false
+     */
+    private function resolve($route)
+    {
+        if (is_array($route)) {
+            if (count($route) < 3) {
+                return false;
+            } else {
+                $route = array_slice(array_values($route), 0, 3);
+                return [
+                    $this->str2hump($route[0]),
+                    $this->str2hump($route[1], true) . 'Ctrl',
+                    $this->str2hump($route[2]),
+                ];
+            }
+        } elseif (is_string($route) && strpos($route, '/')) {
+            return $this->resolve(explode('/', $route));
+        }
+        return false;
     }
     
     /**
@@ -68,13 +92,14 @@ class Dispatch extends Service
     /**
      * 返回方法所带的GET参数数组
      * @param \ReflectionParameter[] $params 一个\ReflectionParameter的数组
+     * @param array $ext 外部带入的方法参数
      * @return array 返回要带入执行方法的GET参数
      */
-    private function parseArgs($params)
+    private function parseArgs($params, $ext)
     {
         $args = [];
         foreach ($params as $param) {
-            $arg = \Lying::$maker->request()->get($param->name);
+            $arg = isset($ext[$param->name]) ? $ext[$param->name] : \Lying::$maker->request()->get($param->name);
             if ($arg !== null) {
                 $args[] = $arg;
             } elseif ($param->isDefaultValueAvailable()) {
@@ -82,5 +107,17 @@ class Dispatch extends Service
             }
         }
         return $args;
+    }
+
+    /**
+     * 把横线分割的小写字母转换为驼峰
+     * @param string $str 要转换的字符串
+     * @param bool $ucfirst 首字母是否大写
+     * @return string 返回转换后的字符串
+     */
+    private function str2hump($str, $ucfirst = false)
+    {
+        $str = str_replace(' ', '', ucwords(str_replace('-', ' ', $str)));
+        return $ucfirst ? $str : lcfirst($str);
     }
 }
