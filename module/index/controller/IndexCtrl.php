@@ -19,4 +19,9 @@ class IndexCtrl extends Controller
     {
         return $this->render('index');
     }
+
+    public static function t()
+    {
+        echo 't';
+    }
 }

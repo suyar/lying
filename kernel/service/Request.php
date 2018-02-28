@@ -15,60 +15,76 @@ namespace lying\service;
 class Request
 {
     /**
-     * @var array 请求的GET/POST数据
+     * @var array GET数组
      */
-    private $data;
+    private $_getParams;
+
+    /**
+     * @var array POST数组
+     */
+    private $_postParams;
+
+    /**
+     * @var array 当前请求的路由
+     */
+    private $_route;
 
     /**
      * @var string 原生请求数据
      */
-    private $rawPost;
+    private $_rawPost;
 
     /**
-     * @var string CSRF
+     * @var string CSRF校验码
      */
-    private $csrfToken;
+    private $_csrfToken;
 
     /**
-     * 装载GET/POST数据,此函数第一次执行有效
+     * 获取当前请求的路由
+     * @return array
      */
-    public function load()
+    public function resolve()
     {
-        $this->data === null && ($this->data = ['get' => $_GET, 'post' => $_POST]);
+        if ($this->_getParams === null) {
+            $this->_getParams = $_GET;
+            $this->_postParams = $_POST;
+            $this->_route = [\Lying::$maker->router()->module(), \Lying::$maker->router()->controller(), \Lying::$maker->router()->action()];
+        }
+        return $this->_route;
     }
 
     /**
      * 返回GET参数,如果不设置$name,则返回整个GET数组
-     * @param string|null $name 参数名
+     * @param string|null $name 参数名,放空则返回整个GET数组
      * @param mixed $defaultValue 参数不存在的时候,返回的默认值
-     * @return array|mixed
+     * @return array|mixed 返回请求的GET参数
      */
     public function get($name = null, $defaultValue = null)
     {
         if ($name === null) {
-            return $this->data['get'];
+            return $this->_getParams;
         } else {
-            return isset($this->data['get'][$name]) ? $this->data['get'][$name] : $defaultValue;
+            return isset($this->_getParams[$name]) ? $this->_getParams[$name] : $defaultValue;
         }
     }
 
     /**
      * 返回POST参数,如果不设置$name,则返回整个POST数组
-     * @param string|null $name 参数名
+     * @param string|null $name 参数名,放空则返回整个POST数组
      * @param mixed $defaultValue 参数不存在的时候,返回的默认值
-     * @return array|mixed
+     * @return array|mixed 返回请求的POST参数
      */
     public function post($name = null, $defaultValue = null)
     {
         if ($name === null) {
-            return $this->data['post'];
+            return $this->_postParams;
         } else {
-            return isset($this->data['post'][$name]) ? $this->data['post'][$name] : $defaultValue;
+            return isset($this->_postParams[$name]) ? $this->_postParams[$name] : $defaultValue;
         }
     }
 
     /**
-     * 返回请求方法:GET/POST/HEAD/PUT/PATCH/DELETE/OPTIONS/TRACE
+     * 返回请求方法,如:GET/POST/HEAD/PUT/PATCH/DELETE/OPTIONS/TRACE
      * @return string
      */
     public function method()
@@ -118,12 +134,15 @@ class Request
      */
     public function rawBody()
     {
-        return $this->rawPost ?: ($this->rawPost = file_get_contents('php://input'));
+        if ($this->_rawPost === null) {
+            $this->_rawPost = file_get_contents('php://input');
+        }
+        return $this->_rawPost;
     }
 
     /**
-     * 是否为HTTPS
-     * @return boolean
+     * 是否为HTTPS请求
+     * @return bool
      */
     public function isHttps()
     {
@@ -136,22 +155,22 @@ class Request
      */
     public function isCli()
     {
-        return php_sapi_name() === 'cli';
+        return PHP_SAPI === 'cli';
     }
 
     /**
-     * 获取CLI下的参数
-     * @param int $offect 参数下标,0为脚本名称,1为参数1,不存在返回null
+     * 获取CLI下的参数,不填写返回所有参数数组
+     * @param int $offset 参数下标,0为脚本名称,1为参数1,以此类推,不存在返回$defaultValue
      * @param mixed $defaultValue 值不存在时的默认值
-     * @return null|string
+     * @return null|string|array
      */
-    public function getArgv($offect = null, $defaultValue = null)
+    public function getArgv($offset = null, $defaultValue = null)
     {
         if (isset($_SERVER['argv'])) {
-            if ($offect === null) {
+            if ($offset === null) {
                 return $_SERVER['argv'];
-            } else if (isset($_SERVER['argv'][$offect])) {
-                return $_SERVER['argv'][$offect];
+            } else if (isset($_SERVER['argv'][$offset])) {
+                return $_SERVER['argv'][$offset];
             }
         }
         return $defaultValue;
@@ -159,11 +178,11 @@ class Request
 
     /**
      * 返回服务器端口
-     * @return int
+     * @return string
      */
     public function serverPort()
     {
-        return isset($_SERVER['SERVER_PORT']) ? (integer)$_SERVER['SERVER_PORT'] : 80;
+        return isset($_SERVER['SERVER_PORT']) ? $_SERVER['SERVER_PORT'] : '80';
     }
 
     /**
@@ -256,12 +275,12 @@ class Request
 
     /**
      * 返回请求开始时间
-     * @param bool $millisecond 是否毫秒级
+     * @param bool $milli 是否毫秒级
      * @return string|null
      */
-    public function time($millisecond = false)
+    public function time($milli = false)
     {
-        if ($millisecond) {
+        if ($milli) {
             if (isset($_SERVER['REQUEST_TIME_FLOAT'])) {
                 return $_SERVER['REQUEST_TIME_FLOAT'] * 1000;
             } else {
@@ -278,7 +297,7 @@ class Request
      */
     public function getCsrfToken()
     {
-        if ($this->csrfToken === null) {
+        if ($this->_csrfToken === null) {
             $cookie = \Lying::$maker->cookie();
             $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-.';
             if (($token = $cookie->get('_csrf')) === false) {
@@ -286,9 +305,9 @@ class Request
                 $cookie->set('_csrf', $token);
             }
             $mask = substr(str_shuffle($chars), 0, 8);
-            $this->csrfToken = $mask . hash_hmac('sha256', $token, $mask);
+            $this->_csrfToken = $mask . hash_hmac('sha256', $token, $mask);
         }
-        return $this->csrfToken;
+        return $this->_csrfToken;
     }
 
     /**

@@ -22,7 +22,7 @@ class Cookie extends Service
     /**
      * @var int 密钥长度
      */
-    private $keyLen;
+    private $_keyLen;
 
     /**
      * 初始化密钥
@@ -30,7 +30,7 @@ class Cookie extends Service
     public function init()
     {
         $this->key = strtoupper(sha1($this->key . 'Lying'));
-        $this->keyLen = strlen($this->key);
+        $this->_keyLen = strlen($this->key);
     }
 
     /**
@@ -95,7 +95,7 @@ class Cookie extends Service
         $str .= hash_hmac('sha256', $str, $this->key, true) . sprintf('%010d', $expire);
         $result = '';
         for ($i = 0, $strLen = strlen($str); $i < $strLen; $i++) {
-            $result .= chr(ord($str[$i]) ^ ord($this->key[$i % $this->keyLen]));
+            $result .= chr(ord($str[$i]) ^ ord($this->key[$i % $this->_keyLen]));
         }
         return base64_encode($result);
     }
@@ -110,7 +110,7 @@ class Cookie extends Service
         $str = base64_decode($str);
         $result = '';
         for ($i = 0, $strLen = strlen($str); $i < $strLen; $i++) {
-            $result .= chr(ord($str[$i]) ^ ord($this->key[$i % $this->keyLen]));
+            $result .= chr(ord($str[$i]) ^ ord($this->key[$i % $this->_keyLen]));
         }
         $expire = substr($result, -10);
         if ($expire === '0000000000' || $expire >= time()) {

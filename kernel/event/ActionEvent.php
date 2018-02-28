@@ -11,18 +11,18 @@ namespace lying\event;
 use lying\service\Event;
 
 /**
- * Class ControllerEvent
+ * Class ActionEvent
  * @package lying\event
  */
-class ControllerEvent extends Event
+class ActionEvent extends Event
 {
     /**
-     * @var string
+     * @var string 方法名
      */
     public $action;
 
     /**
-     * @var string
+     * @var mixed 执行结果
      */
     public $response;
 }

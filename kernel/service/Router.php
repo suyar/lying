@@ -22,7 +22,7 @@ class Router extends Service
     /**
      * @var array 存当前路由[module, controller, action]
      */
-    private $router;
+    private $_router;
 
     /**
      * @var string 默认模块
@@ -156,7 +156,7 @@ class Router extends Service
 
             //分发路由
             $routerArr = explode('/', $rule['router']);
-            $this->router = [
+            $this->_router = [
                 strtolower($this->binding ? $this->module : array_shift($routerArr)),
                 strtolower(array_shift($routerArr)),
                 strtolower(array_shift($routerArr)),
@@ -182,7 +182,7 @@ class Router extends Service
 
         //分发路由
         $pathArr = explode('/', $path);
-        $this->router = [
+        $this->_router = [
             strtolower($this->binding ? $this->module : (urldecode(array_shift($pathArr)) ?: $this->module)),
             strtolower(urldecode(array_shift($pathArr)) ?: $this->controller),
             strtolower(urldecode(array_shift($pathArr)) ?: $this->action),
@@ -210,33 +210,6 @@ class Router extends Service
         isset($parse['query']) && parse_str($parse['query'], $_GET);
         $path = trim($parse['path'], '/');
         $path && $this->parseRule($path) || $this->parseNormal($path);
-        $request->load();
-    }
-
-    /**
-     * 把横线分割的小写字母转换为驼峰
-     * @param string $str 要转换的字符串
-     * @param string $delimiter 分隔符
-     * @param bool $ucfirst 首字母是否大写
-     * @return string 返回转换后的字符串
-     */
-    private function str2hump($str, $delimiter, $ucfirst = false)
-    {
-        $str = str_replace(' ', '', ucwords(str_replace($delimiter, ' ', $str)));
-        return $ucfirst ? $str : lcfirst($str);
-    }
-
-    /**
-     * 返回可供调度器使用的数组
-     * @return array
-     */
-    public function resolve()
-    {
-        return [
-            $this->str2hump($this->router[0], '-'),
-            $this->str2hump($this->router[1], '-', true) . 'Ctrl',
-            $this->str2hump($this->router[2], '-'),
-        ];
     }
 
     /**
@@ -245,7 +218,7 @@ class Router extends Service
      */
     public function module()
     {
-        return $this->router[0];
+        return $this->_router[0];
     }
 
     /**
@@ -254,7 +227,7 @@ class Router extends Service
      */
     public function controller()
     {
-        return $this->router[1];
+        return $this->_router[1];
     }
 
     /**
@@ -263,7 +236,7 @@ class Router extends Service
      */
     public function action()
     {
-        return $this->router[2];
+        return $this->_router[2];
     }
 
     /**
@@ -297,7 +270,7 @@ class Router extends Service
                     $routeArr = [$this->module(), $this->controller(), $pathArr[0]];
                     break;
                 default:
-                    $routeArr = $this->router;
+                    $routeArr = $this->_router;
             }
             $this->binding && array_shift($routeArr);
             $requestUri = $this->buildRule($routeArr, $params, $normal) ?: $this->buildNormal($routeArr, $params, $normal);

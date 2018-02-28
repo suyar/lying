@@ -12,6 +12,16 @@
 class Lying
 {
     /**
+     * 请求开始事件
+     */
+    const EVENT_BEFORE_REQUEST = 'beforeRequest';
+
+    /**
+     * 请求结束事件
+     */
+    const EVENT_AFTER_REQUEST = 'afterRequest';
+
+    /**
      * @var array 全局配置数组
      */
     private static $config;
@@ -24,13 +34,36 @@ class Lying
     /**
      * 启动框架
      * @param array $config 配置数组
-     * @throws Exception
+     * @throws \Exception
+     * @throws \lying\exception\HttpException
      */
     public static function run($config)
     {
         if (self::$maker === null) {
             self::boot($config);
-            self::$maker->dispatch()->run();
+
+            self::$maker->hook()->trigger(self::EVENT_BEFORE_REQUEST);
+
+            $route = self::$maker->request()->resolve();
+
+            try {
+                $response = self::$maker->dispatch()->run($route);
+            } catch (\lying\exception\InvalidRouteException $exception) {
+                throw new \lying\exception\HttpException('Page not found.', 404);
+            }
+
+            if (is_array($response)) {
+                throw new \Exception('Response content must not be an array.');
+            } elseif (is_object($response)) {
+                if (method_exists($response, '__toString')) {
+                    $response = $response->__toString();
+                } else {
+                    throw new \Exception('Response content must be a string or an object implementing __toString().');
+                }
+            }
+            echo $response;
+
+            self::$maker->hook()->trigger(self::EVENT_AFTER_REQUEST);
         }
     }
 
@@ -44,20 +77,18 @@ class Lying
 
         spl_autoload_register([self::class, 'autoload']);
 
-        self::$maker = new \lying\service\Maker(self::config('service'));
-
-        self::$maker->exception()->register();
+        (new \lying\service\Exception())->register();
 
         date_default_timezone_set(self::config('timezone', 'Asia/Shanghai'));
 
-        self::$maker->hook()->trigger('APP_INIT');
+        self::$maker = new \lying\service\Maker(self::config('service'));
     }
 
     /**
-     * 获取配置
-     * @param string $key 配置键名,支持'user.name'形式的键名
-     * @param mixed $default 配置不存在时的默认值
-     * @return mixed 成功返回配置值,配置不存在返回null
+     * 获取配置项
+     * @param string $key 配置键名,支持'user.name'形式的读取方式
+     * @param mixed $default 配置不存在时的默认值,默认为null
+     * @return mixed 成功返回配置值,配置不存在返回默认值
      */
     public static function config($key, $default = null)
     {

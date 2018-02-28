@@ -8,7 +8,7 @@
 
 namespace lying\service;
 
-use lying\event\ControllerEvent;
+use lying\event\ActionEvent;
 
 /**
  * Class Controller
@@ -43,10 +43,10 @@ class Controller extends Service
 
     /**
      * 在执行action之前执行
-     * @param ControllerEvent $event 执行事件
+     * @param ActionEvent $event 执行事件
      * @throws \Exception 当CSRF验证未通过的时候抛出400
      */
-    public function beforeAction(ControllerEvent $event) {
+    public function beforeAction(ActionEvent $event) {
         if (\Lying::$maker->request()->validateCsrfToken() === false) {
             throw new \Exception('Unable to verify your data submission.', 400);
         }
@@ -54,9 +54,9 @@ class Controller extends Service
     
     /**
      * 在执行action之后执行
-     * @param ControllerEvent $event 执行的方法名称
+     * @param ActionEvent $event 执行的方法名称
      */
-    public function afterAction(ControllerEvent $event) {}
+    public function afterAction(ActionEvent $event) {}
 
     /**
      * 重定向
