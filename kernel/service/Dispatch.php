@@ -55,17 +55,13 @@ class Dispatch extends Service
      */
     private function resolve($route)
     {
-        if (is_array($route)) {
-            if (count($route) < 3) {
-                return false;
-            } else {
-                $route = array_slice(array_values($route), 0, 3);
-                return [
-                    $this->str2hump($route[0]),
-                    $this->str2hump($route[1], true) . 'Ctrl',
-                    $this->str2hump($route[2]),
-                ];
-            }
+        if (is_array($route) && count($route) === 3) {
+            $route = array_values($route);
+            return [
+                $this->str2hump($route[0]),
+                $this->str2hump($route[1], true) . 'Ctrl',
+                $this->str2hump($route[2]),
+            ];
         } elseif (is_string($route) && strpos($route, '/')) {
             return $this->resolve(explode('/', $route));
         }

@@ -33,14 +33,15 @@ class Lying
 
     /**
      * 启动框架
-     * @param array $config 配置数组
+     * @param array $config 全局数组
      * @throws \Exception
      * @throws \lying\exception\HttpException
      */
-    public static function run($config)
+    public static function run(array $config)
     {
         if (self::$maker === null) {
-            self::boot($config);
+
+            self::init($config);
 
             self::$maker->hook()->trigger(self::EVENT_BEFORE_REQUEST);
 
@@ -71,7 +72,7 @@ class Lying
      * 初始化启动参数
      * @param array $config 全局配置数组
      */
-    private static function boot($config)
+    private static function init($config)
     {
         self::$config = $config;
 

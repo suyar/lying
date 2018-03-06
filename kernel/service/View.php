@@ -38,6 +38,7 @@ class View
      * @param string $view 视图文件名称
      * @param string|bool $layout 布局文件
      * @return string 返回渲染后的HTML
+     * @throws \Exception
      */
     public function render($view, $layout = false)
     {
@@ -76,14 +77,14 @@ class View
         if (strncmp($view, '/', 1) === 0) {
             $file .= $router->module() . DS . 'view' . str_replace('/', DS, rtrim($view, '/')) . '.php';
         } else {
-            $view = trim($view, '/');
-            $viewArr = explode('/', $view);
+            $cview = trim($view, '/');
+            $viewArr = explode('/', $cview);
             switch (count($viewArr)) {
                 case 1:
-                    $file .= $router->module() . DS . 'view' . DS . $router->controller() . DS . $view . '.php';
+                    $file .= $router->module() . DS . 'view' . DS . $router->controller() . DS . $cview . '.php';
                     break;
                 case 2:
-                    $file .= $router->module() . DS . 'view' . DS . str_replace('/', DS, $view) . '.php';
+                    $file .= $router->module() . DS . 'view' . DS . str_replace('/', DS, $cview) . '.php';
                     break;
                 case 3:
                     $file .= $viewArr[0] . DS . 'view' . DS . $viewArr[1] . DS . $viewArr[2] . '.php';
@@ -93,7 +94,7 @@ class View
         if (file_exists($file)) {
             return $file;
         } else {
-            throw new \Exception("View file not found: $file", 500);
+            throw new \Exception("Unable to resolve view file for view '$view'.");
         }
     }
 }

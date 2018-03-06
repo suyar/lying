@@ -17,7 +17,7 @@ class Exception
     /**
      * @var array HTTP返回码
      */
-    private static $httpCode = [
+    private static $_httpCode = [
         100 => 'Continue',
         101 => 'Switching Protocols',
         102 => 'Processing',
@@ -85,23 +85,6 @@ class Exception
         510 => 'Not Extended',
         511 => 'Network Authentication Required',
     ];
-
-    /**
-     * @var Logger 错误日志
-     */
-    private $logger;
-
-    /**
-     * Exception constructor.
-     * @param array $attr
-     */
-    public function __construct($attr = [])
-    {
-        $this->logger = new Logger([
-            'file' => 'error',
-            'level' => 5,
-        ]);
-    }
 
     /**
      * 注册错误&异常处理函数
@@ -196,7 +179,6 @@ class Exception
             foreach ($trace as $frame) {
                 if ($frame['function'] === '__toString') {
                     $this->exceptionHandler($exception);
-                    exit(1);
                 }
             }
             throw $exception;
@@ -231,10 +213,7 @@ class Exception
      */
     private function logException($exception, $flush = false)
     {
-        if ($this->logger) {
-            $this->logger->record((string)$exception);
-            $flush && $this->logger->flush();
-        }
+
     }
 
     /**

@@ -15,14 +15,14 @@ namespace lying\service;
 class Router extends Service
 {
     /**
-     * @var bool 是否绑定模块
-     */
-    protected $binding;
-
-    /**
      * @var array 存当前路由[module, controller, action]
      */
     private $_router;
+
+    /**
+     * @var bool 是否绑定模块
+     */
+    protected $binding;
 
     /**
      * @var string 默认模块
