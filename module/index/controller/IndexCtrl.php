@@ -14,14 +14,10 @@ class IndexCtrl extends Controller
     /**
      * 首页
      * @return string
+     * @throws \Exception
      */
     public function index()
     {
         return $this->render('index');
-    }
-
-    public static function t()
-    {
-        echo 't';
     }
 }

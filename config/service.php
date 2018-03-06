@@ -90,15 +90,11 @@ return [
         'class' => 'lying\service\Hook',
         'events' => [
             Lying::EVENT_BEFORE_REQUEST => function () {
-                echo 'start';
+
             },
-            Lying::EVENT_AFTER_REQUEST => ['module\index\controller\IndexCtrl', 't'],
-            /*'APP_INIT' => [
-                function() {var_dump(microtime(true));},
-                function() {echo 666;},
-                [function(\lying\service\Event $event) {var_dump($event->_data);}, 'HAHA']
-            ],
-            'APP_END' => function() {var_dump(microtime(true));},*/
+            Lying::EVENT_AFTER_REQUEST => function () {
+
+            },
         ],
     ],
 ];

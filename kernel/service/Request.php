@@ -45,10 +45,11 @@ class Request
      */
     public function resolve()
     {
-        if ($this->_getParams === null) {
+        if ($this->_route === null) {
+            $router = \Lying::$maker->router();
+            $this->_route = [$router->module(), $router->controller(), $router->action()];
             $this->_getParams = $_GET;
             $this->_postParams = $_POST;
-            $this->_route = [\Lying::$maker->router()->module(), \Lying::$maker->router()->controller(), \Lying::$maker->router()->action()];
         }
         return $this->_route;
     }
@@ -56,36 +57,36 @@ class Request
     /**
      * 返回GET参数,如果不设置$name,则返回整个GET数组
      * @param string|null $name 参数名,放空则返回整个GET数组
-     * @param mixed $defaultValue 参数不存在的时候,返回的默认值
-     * @return array|mixed 返回请求的GET参数
+     * @param mixed $default 参数不存在的时候,返回的默认值
+     * @return array|mixed|null 返回请求的GET参数
      */
-    public function get($name = null, $defaultValue = null)
+    public function get($name = null, $default = null)
     {
         if ($name === null) {
             return $this->_getParams;
         } else {
-            return isset($this->_getParams[$name]) ? $this->_getParams[$name] : $defaultValue;
+            return isset($this->_getParams[$name]) ? $this->_getParams[$name] : $default;
         }
     }
 
     /**
      * 返回POST参数,如果不设置$name,则返回整个POST数组
      * @param string|null $name 参数名,放空则返回整个POST数组
-     * @param mixed $defaultValue 参数不存在的时候,返回的默认值
-     * @return array|mixed 返回请求的POST参数
+     * @param mixed $default 参数不存在的时候,返回的默认值
+     * @return array|mixed|null 返回请求的POST参数
      */
-    public function post($name = null, $defaultValue = null)
+    public function post($name = null, $default = null)
     {
         if ($name === null) {
             return $this->_postParams;
         } else {
-            return isset($this->_postParams[$name]) ? $this->_postParams[$name] : $defaultValue;
+            return isset($this->_postParams[$name]) ? $this->_postParams[$name] : $default;
         }
     }
 
     /**
      * 返回请求方法,如:GET/POST/HEAD/PUT/PATCH/DELETE/OPTIONS/TRACE
-     * @return string
+     * @return string 返回大写的请求方式
      */
     public function method()
     {
@@ -129,7 +130,7 @@ class Request
     }
 
     /**
-     * 返回请求的原始数据
+     * 返回请求的原始数据php://input
      * @return bool|string
      */
     public function rawBody()
@@ -160,11 +161,11 @@ class Request
 
     /**
      * 获取CLI下的参数,不填写返回所有参数数组
-     * @param int $offset 参数下标,0为脚本名称,1为参数1,以此类推,不存在返回$defaultValue
-     * @param mixed $defaultValue 值不存在时的默认值
+     * @param int $offset 参数下标,0为脚本名称,1为参数1,以此类推,不存在返回$default
+     * @param mixed $default 值不存在时的默认值
      * @return null|string|array
      */
-    public function getArgv($offset = null, $defaultValue = null)
+    public function getArgv($offset = null, $default = null)
     {
         if (isset($_SERVER['argv'])) {
             if ($offset === null) {
@@ -173,7 +174,16 @@ class Request
                 return $_SERVER['argv'][$offset];
             }
         }
-        return $defaultValue;
+        return $default;
+    }
+
+    /**
+     * 令行模式下传递给该脚本的参数的数目
+     * @return int 不存在返回0
+     */
+    public function getArgc()
+    {
+        return isset($_SERVER['argc']) ? $_SERVER['argc'] : 0;
     }
 
     /**
@@ -182,21 +192,21 @@ class Request
      */
     public function serverPort()
     {
-        return isset($_SERVER['SERVER_PORT']) ? $_SERVER['SERVER_PORT'] : '80';
+        return isset($_SERVER['SERVER_PORT']) ? $_SERVER['SERVER_PORT'] : '';
     }
 
     /**
      * 返回服务器IP
-     * @return string|null
+     * @return string
      */
     public function serverIP()
     {
-        return isset($_SERVER['SERVER_ADDR']) ? $_SERVER['SERVER_ADDR'] : null;
+        return isset($_SERVER['SERVER_ADDR']) ? $_SERVER['SERVER_ADDR'] : '';
     }
 
     /**
      * 返回HOST
-     * @param bool $schema 是否显示协议头http(s)://
+     * @param bool $schema 是否显示协议头http(s)://,默认为false不显示
      * @return string
      */
     public function host($schema = false)
@@ -234,17 +244,17 @@ class Request
     }
 
     /**
-     * 返回UA
-     * @return string|null
+     * 返回请求的UA
+     * @return string
      */
     public function userAgent()
     {
-        return isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : null;
+        return isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : '';
     }
 
     /**
-     * 返回客户端真实IP
-     * @return string|null
+     * 返回客户端真实IP,失败返回空字符串
+     * @return string
      */
     public function userIP()
     {
@@ -260,35 +270,72 @@ class Request
         } elseif (isset($_SERVER['REMOTE_ADDR'])) {
             return $_SERVER['REMOTE_ADDR'];
         } else {
-            return null;
+            return '';
         }
     }
 
     /**
      * 返回客户端端口
-     * @return string|null
+     * @return string
      */
     public function userPort()
     {
-        return isset($_SERVER['REMOTE_PORT']) ? $_SERVER['REMOTE_PORT'] : null;
+        return isset($_SERVER['REMOTE_PORT']) ? $_SERVER['REMOTE_PORT'] : '';
     }
 
     /**
      * 返回请求开始时间
      * @param bool $milli 是否毫秒级
-     * @return string|null
+     * @return int|null 获取失败返回null
      */
     public function time($milli = false)
     {
         if ($milli) {
             if (isset($_SERVER['REQUEST_TIME_FLOAT'])) {
-                return $_SERVER['REQUEST_TIME_FLOAT'] * 1000;
+                return intval($_SERVER['REQUEST_TIME_FLOAT'] * 1000);
             } else {
-                return isset($_SERVER['REQUEST_TIME']) ? $_SERVER['REQUEST_TIME'] * 1000 : null;
+                return isset($_SERVER['REQUEST_TIME']) ? intval($_SERVER['REQUEST_TIME'] * 1000) : null;
             }
         } else {
-            return isset($_SERVER['REQUEST_TIME']) ? $_SERVER['REQUEST_TIME'] : null;
+            return isset($_SERVER['REQUEST_TIME']) ? intval($_SERVER['REQUEST_TIME']) : null;
         }
+    }
+
+    /**
+     * 重定向
+     * ```
+     * redirect('get', ['id' => 100]);跳转到[当前模块/当前控制器/get]
+     * redirect('admin/post', ['id' => 100]);跳转到[当前模块/admin/post]
+     * redirect('lying/index/name', ['id' => 100]);跳转到[lying/index/name],参见URL生成
+     * redirect('https://www.baidu.com') 必须带协议头,跳转到百度
+     * ```
+     * @param string $url 跳转的地址
+     * @param array $params 要携带的参数,为一个关联数组
+     * @param bool $normal 是否把参数设置成?a=1&b=2,默认否,优先pathinfo(此参数对完整的URL无效)
+     */
+    public function redirect($url,array $params = [], $normal = false)
+    {
+        if (preg_match('/^https?:\/\/\S+\.\S+/i', $url)) {
+            $query = http_build_query($params, '', '&', PHP_QUERY_RFC3986);
+            $url = rtrim($url, '?&');
+            empty($query) || ($url .= (strpos($url, '?') === false ? "?$query" : "&$query"));
+        } else {
+            $url = \Lying::$maker->router()->createUrl($url, $params, true, $normal);
+        }
+
+        while (ob_get_level() !== 0) {
+            @ob_end_clean() || ob_clean();
+        }
+
+        http_response_code(302);
+        if ($this->isPjax()) {
+            header("X-Pjax-Url: $url");
+        } else if ($this->isAjax()) {
+            header("X-Redirect: $url");
+        } else {
+            header("Location: $url");
+        }
+        exit(0);
     }
 
     /**
