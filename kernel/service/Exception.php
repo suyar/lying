@@ -8,6 +8,9 @@
 
 namespace lying\service;
 
+use lying\exception\HttpException;
+use lying\exception\InvalidRouteException;
+
 /**
  * Class Exception
  * @package lying\service
@@ -91,6 +94,7 @@ class Exception
      */
     public function register()
     {
+        ini_set('display_errors', 0);
         set_exception_handler([$this, 'exceptionHandler']);
         set_error_handler([$this, 'errorHandler']);
         register_shutdown_function([$this, 'shutdownHandler']);
@@ -150,13 +154,22 @@ class Exception
      * @param \Exception $previousException 抛出异常的异常
      */
     private function handleFallbackExceptionMessage($exception, $previousException) {
+        http_response_code(500);
         $msg = "An Error occurred while handling another error:\n";
         $msg .= (string) $exception;
         $msg .= "\nPrevious exception:\n";
         $msg .= (string) $previousException;
-        $msg .= "\n\$_SERVER = " . var_export($_SERVER, true);
+        if (\Lying::config('debug', false)) {
+            if (PHP_SAPI === 'cli') {
+                echo $msg . "\n";
+            } else {
+                echo '<pre>' . htmlspecialchars($msg, ENT_QUOTES, 'UTF-8') . '</pre>';
+            }
+        } else {
+            echo 'An internal server error occurred.';
+        }
+        $msg .= "\n\$_SERVER = " . \Lying::$maker->helper()->export($_SERVER);
         error_log($msg);
-        echo 'An internal server error occurred.';
         exit(1);
     }
     
@@ -201,9 +214,41 @@ class Exception
         }
     }
 
+    /**
+     * 渲染错误页面
+     * @param \Exception $exception 异常
+     */
     private function renderException($exception)
     {
-        var_dump($exception);
+        $errcode = $exception->getCode();
+        if ($exception instanceof HttpException && isset(self::$_httpCode[$errcode])) {
+            http_response_code(intval($errcode));
+        } else {
+            http_response_code(500);
+        }
+
+        if (PHP_SAPI === 'cli') {
+            $err = "[Error Code] :" . $exception->getCode() . "\n";
+            $err .= "[Error Info] :" . $exception->getMessage() . "\n";
+            $err .= "[Error File] :" . $exception->getFile() . "\n";
+            $err .= "[Error Line] :" . $exception->getLine() . "\n";
+            foreach (explode("\n", $exception->getTraceAsString()) as $t) {
+                $err .= "$t\n";
+            }
+            fwrite(STDERR, $err);
+        } else {
+            try {
+                list($m, $c, $a) = \Lying::$maker->request()->resolve();
+                $errorAction = [$m, 'error', 'index'];
+                echo \Lying::$maker->dispatch()->run($errorAction, ['exception'=>$exception]);
+            } catch (InvalidRouteException $e) {
+                ob_start();
+                ob_implicit_flush(false);
+                extract(['exception'=>$exception], EXTR_OVERWRITE);
+                require DIR_KERNEL . DS . 'view' . DS . 'error.php';
+                echo ob_get_clean();
+            }
+        }
     }
 
     /**
@@ -214,34 +259,5 @@ class Exception
     private function logException($exception, $flush = false)
     {
 
-    }
-
-    /**
-     * 渲染错误页面
-     * @param array $info [message, file, line, code]
-     * @param array $trace
-     */
-    private function renderView($info, $trace = [])
-    {
-        list($msg, $file, $line, $code) = $info;
-        while (ob_get_level() !== 0) ob_end_clean();
-        http_response_code(isset(self::$httpCode[$code]) ? $code : 500);
-        ob_start();
-        ob_implicit_flush(false);
-        if (php_sapi_name() === 'cli') {
-            $err = "[root@lying ~]Error Code:$code" . PHP_EOL;
-            $err .= "[root@lying ~]Error Info:$msg" . PHP_EOL;
-            $err .= "[root@lying ~]Error File:$file" . PHP_EOL;
-            $err .= "[root@lying ~]Error Line:$line" . PHP_EOL;
-            foreach ($trace as $t) {
-                $err .= "[root@lying ~]$t" . PHP_EOL;
-            }
-            fwrite(STDERR, $err);
-        } else {
-            require DIR_KERNEL . DS . 'view' . DS . 'error.php';
-        }
-        ob_end_flush();
-        flush();
-        exit(1);
     }
 }

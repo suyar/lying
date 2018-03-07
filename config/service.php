@@ -97,4 +97,6 @@ return [
             },
         ],
     ],
+
+    'helper' => 'lying\service\Helper',
 ];

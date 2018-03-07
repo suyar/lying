@@ -20,6 +20,7 @@ use lying\db\Connection;
  * @method Connection db(string $id = 'db')
  * @method Dispatch dispatch()
  * @method Exception exception()
+ * @method Helper helper()
  * @method Hook hook()
  * @method Logger logger(string $id = 'logger')
  * @method Request request()
