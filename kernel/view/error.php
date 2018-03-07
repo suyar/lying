@@ -1,9 +1,18 @@
+<?php
+/** @var \Exception $exception */
+$code = $exception->getCode();
+$msg = $exception->getMessage();
+$file = $exception->getFile();
+$line = $exception->getLine();
+$trace = explode("\n", $exception->getTraceAsString());
+?>
+
 <!DOCTYPE html>
 <html>
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-	<title>Error</title>
+	<title><?= $msg ;?></title>
 	<style>
 		body { font-family: "Consolas"; }
 		.trace { width: 100%;border: 1px solid #000; }
@@ -17,13 +26,13 @@
 		<ul>
 			<li>Lying Framework [Version 2.0]. Copyright (c) 2017 Lying. All rights reserved.</li>
 			<li>Copyright (c) 2017 Lying. All rights reserved.</li>
-			<li>[root@lying ~] Error Code：<?= $code ?></li>
-			<li>[root@lying ~] Error Info：<?= $msg ?></li>
-			<li>[root@lying ~] Error File：<?= $file ?></li>
-			<li>[root@lying ~] Error Line：<?= $line ?></li>
+			<li>[Error Code] ：<?= $code; ?></li>
+			<li>[Error Info] ：<?= $msg; ?></li>
+			<li>[Error File] ：<?= $file; ?></li>
+			<li>[Error Line] ：<?= $line; ?></li>
 			<li>&nbsp;</li>
 			<?php foreach ($trace as $t): ?>
-			<li>[root@lying ~] <?= $t ?></li>
+			<li><?= var_export($t, true) ?></li>
 			<?php endforeach; ?>
 		</ul>
 	</div>
