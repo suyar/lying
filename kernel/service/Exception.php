@@ -90,11 +90,18 @@ class Exception
     ];
 
     /**
+     * @var bool 是否调试模式
+     */
+    private $_debug;
+
+    /**
      * 注册错误&异常处理函数
      */
     public function register()
     {
-        ini_set('display_errors', 0);
+        $this->_debug = \Lying::config('debug', false);
+
+        ini_set('display_errors', false);
         set_exception_handler([$this, 'exceptionHandler']);
         set_error_handler([$this, 'errorHandler']);
         register_shutdown_function([$this, 'shutdownHandler']);
@@ -159,7 +166,7 @@ class Exception
         $msg .= (string) $exception;
         $msg .= "\nPrevious exception:\n";
         $msg .= (string) $previousException;
-        if (\Lying::config('debug', false)) {
+        if ($this->_debug) {
             if (PHP_SAPI === 'cli') {
                 echo $msg . "\n";
             } else {
@@ -222,8 +229,10 @@ class Exception
     {
         $errcode = $exception->getCode();
         if ($exception instanceof HttpException && isset(self::$_httpCode[$errcode])) {
+            $message = self::$_httpCode[$errcode];
             http_response_code(intval($errcode));
         } else {
+            $message = 'An internal server error occurred.';
             http_response_code(500);
         }
 
@@ -240,12 +249,12 @@ class Exception
             try {
                 list($m, $c, $a) = \Lying::$maker->request()->resolve();
                 $errorAction = [$m, 'error', 'index'];
-                echo \Lying::$maker->dispatch()->run($errorAction, ['exception'=>$exception]);
+                echo \Lying::$maker->dispatch()->run($errorAction, ['exception'=>$exception, 'message'=>$message]);
             } catch (InvalidRouteException $e) {
                 ob_start();
                 ob_implicit_flush(false);
-                extract(['exception'=>$exception], EXTR_OVERWRITE);
-                require DIR_KERNEL . DS . 'view' . DS . 'error.php';
+                extract(['exception'=>$exception, 'message'=>$message], EXTR_OVERWRITE);
+                require DIR_KERNEL . DS . 'view' . DS . ($this->_debug ? 'exception.php' : 'error.php');
                 echo ob_get_clean();
             }
         }
