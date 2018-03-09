@@ -1,40 +1,58 @@
 <?php
 /** @var \Exception $exception */
 $code = $exception->getCode();
-$msg = $exception->getMessage();
-$file = $exception->getFile();
-$line = $exception->getLine();
-$trace = explode("\n", $exception->getTraceAsString());
+$title = "Error (#$code)";
 ?>
 
 <!DOCTYPE html>
 <html>
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-	<title><?= $msg ;?></title>
-	<style>
-		body { font-family: "Consolas"; }
-		.trace { width: 100%;border: 1px solid #000; }
-		.trace h1 { margin: 0;padding: 5px 10px;font-size: 14px;border-bottom: 1px solid #000; }
-		.trace ul { list-style: none;padding: 5px 10px;margin: 0;font-size: 13px;background-color: #000;color: #fff; }
-	</style>
+    <meta charset="utf-8" />
+    <title><?= $title; ?></title>
+    <style>
+        body {
+            font: normal 9pt "Verdana";
+            color: #000;
+            background: #fff;
+        }
+        h1 {
+            font: normal 18pt "Verdana";
+            color: #f00;
+            margin-bottom: .5em;
+        }
+        h2 {
+            font: normal 14pt "Verdana";
+            color: #800000;
+            margin-bottom: .5em;
+        }
+        h3 {
+            font: bold 11pt "Verdana";
+        }
+        p {
+            font: normal 9pt "Verdana";
+            color: #000;
+        }
+        .version {
+            color: gray;
+            font-size: 8pt;
+            border-top: 1px solid #aaa;
+            padding-top: 1em;
+            margin-bottom: 1em;
+        }
+    </style>
 </head>
 <body>
-	<div class="trace">
-		<h1>An error occurred while Lying running.</h1>
-		<ul>
-			<li>Lying Framework [Version 2.0]. Copyright (c) 2017 Lying. All rights reserved.</li>
-			<li>Copyright (c) 2017 Lying. All rights reserved.</li>
-			<li>[Error Code] ：<?= $code; ?></li>
-			<li>[Error Info] ：<?= $msg; ?></li>
-			<li>[Error File] ：<?= $file; ?></li>
-			<li>[Error Line] ：<?= $line; ?></li>
-			<li>&nbsp;</li>
-			<?php foreach ($trace as $t): ?>
-			<li><?= var_export($t, true) ?></li>
-			<?php endforeach; ?>
-		</ul>
-	</div>
+<h1><?= $title; ?></h1>
+<h2><?= nl2br(htmlspecialchars($message, ENT_QUOTES, 'UTF-8')) ?></h2>
+<p>
+    The above error occurred while the Web server was processing your request.
+</p>
+<p>
+    Please contact us if you think this is a server error. Thank you.
+</p>
+<div class="version">
+    <?= date('Y-m-d H:i:s', time()) ?>
+</div>
 </body>
 </html>
+

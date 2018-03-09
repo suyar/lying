@@ -15,9 +15,9 @@ namespace lying\service;
 class Helper
 {
     /**
-     * 格式化打印变量
-     * @param mixed $var 要打印的变量
-     * @return string
+     * 返回一个变量的字符串表示,其返回的表示是合法的 PHP 代码
+     * @param mixed $var 要导出的变量
+     * @return string 返回变量的字符串表示
      */
     public function export($var)
     {
@@ -25,10 +25,10 @@ class Helper
     }
 
     /**
-     * 格式化打印变量
-     * @param mixed $var 变量
+     * 递归返回一个变量的字符串表示,其返回的表示是合法的 PHP 代码
+     * @param mixed $var 要导出的变量
      * @param int $level 层级
-     * @return string
+     * @return string 返回变量的字符串表示
      */
     private function exportInternal($var, $level)
     {
@@ -74,9 +74,9 @@ class Helper
     }
 
     /**
-     * 输出匿名函数实例
+     * 导出匿名函数的字符串表示
      * @param \Closure $closure 匿名函数实例
-     * @return string
+     * @return string 返回匿名函数的字符串表示
      */
     private function exportClosure(\Closure $closure)
     {
@@ -120,10 +120,10 @@ class Helper
     }
 
     /**
-     * 打印变量
-     * @param mixed $var
-     * @param bool $highlight
-     * @return string
+     * 返回变量的相关信息
+     * @param mixed $var 要打印的变量
+     * @param bool $highlight 是否高亮代码
+     * @return string 返回要打印的变量
      */
     public function dump($var, $highlight = false)
     {
@@ -136,11 +136,12 @@ class Helper
     }
 
     /**
-     * 打印变量
+     * 递归返回变量打印信息
      * @param mixed $var 要打印的变量
      * @param int $level 变量层级
      * @param array $objects 相同的对象
      * @return string 返回打印的字符串
+     * @throws \Exception __debuginfo返回非数组的时候抛出异常
      */
     private function dumpInternal($var, $level, &$objects = [])
     {
@@ -183,8 +184,7 @@ class Helper
                     if ('__PHP_Incomplete_Class' !== get_class($var) && method_exists($var, '__debugInfo')) {
                         $dumpValues = $var->__debugInfo();
                         if (!is_array($dumpValues)) {
-                            //throw new \Exception('__debuginfo() must return an array');
-                            $dumpValues = [];
+                            throw new \Exception('__debuginfo() must return an array');
                         }
                     } else {
                         $dumpValues = (array) $var;
