@@ -95,11 +95,17 @@ class Exception
     private $_debug;
 
     /**
+     * @var string|array 自定义错误处理控制器
+     */
+    private $_errorAction;
+
+    /**
      * 注册错误&异常处理函数
      */
     public function register()
     {
         $this->_debug = \Lying::config('debug', false);
+        $this->_errorAction = \Lying::config('errorAction', ['error', 'index', 'index']);
 
         ini_set('display_errors', false);
         set_exception_handler([$this, 'exceptionHandler']);
@@ -248,8 +254,9 @@ class Exception
         } else {
             try {
                 list($m, $c, $a) = \Lying::$maker->request()->resolve();
-                $errorAction = [$m, 'error', 'index'];
-                echo \Lying::$maker->dispatch()->run($errorAction, ['exception'=>$exception, 'message'=>$message]);
+                $errorAction = ['error', 'index', 'index'];
+                $res = \Lying::$maker->dispatch()->run($errorAction, ['exception'=>$exception, 'message'=>$message]);
+                var_dump($res);die;
             } catch (InvalidRouteException $e) {
                 ob_start();
                 ob_implicit_flush(false);
