@@ -1,6 +1,6 @@
 !.gitignore
-.idea/
+.idea
 .buildpath
 .project
-.settings/
-.svn/
+.settings
+.svn
