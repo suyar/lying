@@ -24,12 +24,15 @@ class Hook extends Service
      */
     protected function init()
     {
-        foreach ($this->events as $id => $event) {
-            if (is_callable($event)) {
-                $this->hook($id, $event);
-            } elseif (is_array($event)) {
-                foreach ($event as $e) {
-                    is_callable($e) && $this->hook($id, $e);
+        foreach ($this->events as $event) {
+            if (is_array($event)) {
+                $event = array_values($event);
+                $count = count($event);
+                if ($count >= 2) {
+                    list($name, $handler, $data) = $event;
+                    if (is_string($name) && is_callable($handler)) {
+                        $this->on($name, $handler, $data);
+                    }
                 }
             }
         }

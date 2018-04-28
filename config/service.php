@@ -89,12 +89,8 @@ return [
     'hook' => [
         'class' => 'lying\service\Hook',
         'events' => [
-            Lying::EVENT_BEFORE_REQUEST => function () {
-
-            },
-            Lying::EVENT_AFTER_REQUEST => function () {
-
-            },
+            [Lying::EVENT_BEFORE_REQUEST, function () {}, 'before'],
+            [Lying::EVENT_AFTER_REQUEST, function () {}, 'after'],
         ],
     ],
 
