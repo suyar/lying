@@ -91,6 +91,7 @@ return [
         'events' => [
             [Lying::EVENT_BEFORE_REQUEST, function () {}, 'before'],
             [Lying::EVENT_AFTER_REQUEST, function () {}, 'after'],
+            ['app_init', function () {}]
         ],
     ],
 
