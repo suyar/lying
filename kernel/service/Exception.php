@@ -153,7 +153,6 @@ class Exception
             $this->logException($exception);
             $this->clearOutput();
             $this->renderException($exception);
-            exit(1);
         } catch (\Exception $e) {
             $this->handleFallbackExceptionMessage($e, $exception);
         } catch (\Throwable $e) {

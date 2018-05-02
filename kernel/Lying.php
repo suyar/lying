@@ -12,16 +12,6 @@
 class Lying
 {
     /**
-     * 请求开始事件
-     */
-    const EVENT_BEFORE_REQUEST = 'beforeRequest';
-
-    /**
-     * 请求结束事件
-     */
-    const EVENT_AFTER_REQUEST = 'afterRequest';
-
-    /**
      * @var array 全局配置数组
      */
     private static $_config;
@@ -43,7 +33,7 @@ class Lying
 
             self::init($config);
 
-            self::$maker->hook()->trigger(self::EVENT_BEFORE_REQUEST);
+            //self::$maker->hook()->trigger(self::EVENT_BEFORE_REQUEST);
 
             $route = self::$maker->request()->resolve();
 
@@ -64,7 +54,7 @@ class Lying
             }
             echo $response;
 
-            self::$maker->hook()->trigger(self::EVENT_AFTER_REQUEST);
+            //self::$maker->hook()->trigger(self::EVENT_AFTER_REQUEST);
         }
     }
 
