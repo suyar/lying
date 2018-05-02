@@ -10,6 +10,7 @@ namespace lying\service;
 
 use lying\cache\Cache;
 use lying\db\Connection;
+use lying\exception\InvalidConfigException;
 
 /**
  * Class Maker
@@ -19,7 +20,6 @@ use lying\db\Connection;
  * @method Cookie cookie()
  * @method Connection db(string $id = 'db')
  * @method Dispatch dispatch()
- * @method Exception exception()
  * @method Helper helper()
  * @method Hook hook()
  * @method Logger logger(string $id = 'logger')
@@ -33,53 +33,73 @@ class Maker
     /**
      * @var array 服务类实例容器
      */
-    private static $instances = [];
+    private static $_instances = [];
+
+    /**
+     * @var array 核心组件,类名不可被覆盖,但是配置可以被覆盖
+     */
+    private static $_cores = [
+        'cookie' => ['class' => 'lying\service\Cookie'],
+        'dispatch' => ['class' => 'lying\service\Dispatch'],
+        'hook' => ['class' => 'lying\service\Hook'],
+        'request' => ['class' => 'lying\service\Request'],
+        'router' => ['class' => 'lying\service\Router'],
+        'session' => ['class' => 'lying\service\Session'],
+    ];
+
+    /**
+     * @var array 默认扩展组件,可被重新定义的服务
+     */
+    private static $_extends = [
+        'cache' => ['class' => 'lying\cache\FileCache'],
+    ];
     
     /**
      * @var array 注册的服务
      */
-    private static $service = [];
+    private static $_service = [];
     
     /**
-     * 按需注册服务,服务类可以一样,服务ID不能重复
-     * @param array $service 服务配置数组
+     * 注册服务
+     * @param array $services 服务配置数组
      */
-    public function __construct($service)
+    public function __construct(array $services)
     {
-        $core = [
-            'cookie' => 'lying\service\Cookie',
-            'dispatch' => 'lying\service\Dispatch',
-            'exception' => 'lying\service\Exception',
-            'hook' => 'lying\service\Hook',
-            'request' => 'lying\service\Request',
-            'router' => 'lying\service\Router',
-            'session' => 'lying\service\Session',
-        ];
-        self::$service = array_merge($core, $service);
-        (php_sapi_name() === 'cli') && (self::$service['router'] = 'lying\service\Router');
+        self::$_service = array_merge(self::$_extends, self::$_cores);
+        foreach ($services as $id => $service) {
+            if (isset(self::$_cores[$id])) {
+                if (is_array($service)) {
+                    $service['class'] = self::$_cores[$id]['class'];
+                    self::$_service[$id] = $service;
+                }
+            } elseif (isset(self::$_extends[$id]) && is_array($service) && !isset($service['class'])) {
+                $service['class'] = self::$_extends[$id]['class'];
+                self::$_service[$id] = $service;
+            } elseif (is_array($service) && isset($service['class']) && is_subclass_of($service['class'], Service::class)) {
+                self::$_service[$id] = $service;
+            } elseif (is_string($service) && is_subclass_of($service, Service::class)) {
+                self::$_service[$id] = ['class' => $service];
+            }
+        }
     }
 
     /**
      * 根据ID返回注册的服务
      * @param string $id 服务ID
      * @return Service 返回所实例化的服务类
-     * @throws \Exception 服务不存在抛出异常
+     * @throws InvalidConfigException 当服务ID不存在的时候抛出异常
      */
-    public function createService($id)
+    public function get($id)
     {
-        if (isset(self::$instances[$id])) {
-            return self::$instances[$id];
-        } elseif (isset(self::$service[$id])) {
-            if (is_array(self::$service[$id])) {
-                $class = self::$service[$id]['class'];
-                unset(self::$service[$id]['class']);
-                self::$instances[$id] = new $class(self::$service[$id]);
-            } else {
-                self::$instances[$id] = new self::$service[$id]();
-            }
-            return self::$instances[$id];
+        if (isset(self::$_instances[$id])) {
+            return self::$_instances[$id];
+        } elseif (isset(self::$_service[$id])) {
+            $class = self::$_service[$id]['class'];
+            unset(self::$_service[$id]['class']);
+            self::$_instances[$id] = new $class(self::$_service[$id]);
+            return self::$_instances[$id];
         } else {
-            throw new \Exception("Unkonw service ID: $id", 500);
+            throw new InvalidConfigException("Unknown component ID: $id");
         }
     }
 
@@ -88,10 +108,21 @@ class Maker
      * @param string $name 方法名
      * @param array $arguments 方法参数
      * @return Service 返回方法对应的服务类
-     * @throws \Exception
+     * @throws InvalidConfigException 当服务ID不存在的时候抛出异常
      */
     public function __call($name, $arguments)
     {
-        return $this->createService(isset($arguments[0]) ? $arguments[0] : $name);
+        return $this->get(isset($arguments[0]) ? $arguments[0] : $name);
+    }
+
+    /**
+     * 获取对应服务组件
+     * @param string $name 服务ID
+     * @return Service 返回所实例化的服务类
+     * @throws InvalidConfigException 当服务ID不存在的时候抛出异常
+     */
+    public function __get($name)
+    {
+        return $this->get($name);
     }
 }

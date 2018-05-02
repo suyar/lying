@@ -26,7 +26,7 @@ class Service
     final public function __construct(array $config = [])
     {
         foreach ($config as $name => $value) {
-            $this->$name = $value;
+            property_exists($this, $name) && ($this->$name = $value);
         }
         $this->init();
     }

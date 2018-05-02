@@ -24,7 +24,7 @@ class Lying
     /**
      * @var array 全局配置数组
      */
-    private static $config;
+    private static $_config;
 
     /**
      * @var \lying\service\Maker 工厂实例
@@ -33,13 +33,13 @@ class Lying
 
     /**
      * 启动框架
-     * @param array $config 全局数组
+     * @param array $config 全局配置数组
      * @throws \Exception
      * @throws \lying\exception\HttpException
      */
     public static function run(array $config)
     {
-        if (self::$maker === null) {
+        if (self::$_config === null) {
 
             self::init($config);
 
@@ -74,7 +74,7 @@ class Lying
      */
     private static function init($config)
     {
-        self::$config = $config;
+        self::$_config = $config;
 
         spl_autoload_register([self::class, 'autoload']);
 
@@ -93,7 +93,7 @@ class Lying
      */
     public static function config($key, $default = null)
     {
-        $config = self::$config;
+        $config = self::$_config;
         foreach (explode('.', $key) as $k) {
             if (isset($config[$k])) {
                 $config = $config[$k];
