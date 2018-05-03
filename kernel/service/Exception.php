@@ -95,19 +95,15 @@ class Exception
     private $_debug;
 
     /**
-     * @var string|array 自定义错误处理控制器
-     */
-    private $_errorAction;
-
-    /**
      * 注册错误&异常处理函数
      */
     public function register()
     {
-        $this->_debug = \Lying::config('debug', false);
-        $this->_errorAction = \Lying::config('errorAction', ['error', 'index', 'index']);
+        if ($this->_debug = \Lying::config('debug', false)) {
+            error_reporting(-1);
+            ini_set('display_errors', 'On');
+        }
 
-        ini_set('display_errors', false);
         set_exception_handler([$this, 'exceptionHandler']);
         set_error_handler([$this, 'errorHandler']);
         register_shutdown_function([$this, 'shutdownHandler']);
@@ -134,12 +130,12 @@ class Exception
 
     /**
      * 判断该错误是否为致命错误
-     * @param array $error error_get_last()返回的错误
+     * @param int $type error_get_last()返回的错误类型
      * @return bool
      */
-    private function isFatalError($error)
+    private function isFatalError($type)
     {
-        return isset($error['type']) && in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_CORE_WARNING, E_COMPILE_ERROR, E_COMPILE_WARNING]);
+        return in_array($type, [E_ERROR, E_PARSE, E_CORE_ERROR, E_CORE_WARNING, E_COMPILE_ERROR, E_COMPILE_WARNING]);
     }
     
     /**
@@ -158,6 +154,7 @@ class Exception
         } catch (\Throwable $e) {
             $this->handleFallbackExceptionMessage($e, $exception);
         }
+        exit(1);
     }
 
     /**
@@ -191,7 +188,7 @@ class Exception
      * @param string $errstr 错误的信息
      * @param string $errfile 发生错误的文件名
      * @param int $errline 错误发生的行号
-     * @return null|bool 是否继续执行默认的错误处理
+     * @return bool 是否继续执行默认的错误处理
      * @throws \ErrorException 抛出一个错误异常
      */
     public function errorHandler($errno, $errstr, $errfile, $errline)
@@ -208,7 +205,7 @@ class Exception
             }
             throw $exception;
         }
-        return true;
+        return false;
     }
     
     /**
@@ -216,13 +213,9 @@ class Exception
      */
     public function shutdownHandler()
     {
-        $error = error_get_last();
-        if ($this->isFatalError($error)) {
+        if (($error = error_get_last()) && $this->isFatalError($error['type'])) {
             $exception = new \ErrorException($error['message'], $error['type'], $error['type'], $error['file'], $error['line']);
-            $this->logException($exception, true);
-            $this->clearOutput();
-            $this->renderException($exception);
-            exit(1);
+            $this->exceptionHandler($exception);
         }
     }
 
@@ -269,9 +262,8 @@ class Exception
     /**
      * 记录错误日志
      * @param \Exception $exception 异常
-     * @param bool $flush 是否立即刷新日志
      */
-    private function logException($exception, $flush = false)
+    private function logException($exception)
     {
 
     }
