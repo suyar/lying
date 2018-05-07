@@ -27,6 +27,8 @@ use lying\exception\InvalidConfigException;
  * @method Redis redis(string $id = 'redis')
  * @method Router router()
  * @method Session session()
+ * 
+ * @property Hook $hook
  */
 class Maker
 {
@@ -75,9 +77,9 @@ class Maker
             } elseif (isset(self::$_extends[$id]) && is_array($service) && !isset($service['class'])) {
                 $service['class'] = self::$_extends[$id]['class'];
                 self::$_service[$id] = $service;
-            } elseif (is_array($service) && isset($service['class']) && is_subclass_of($service['class'], Service::class)) {
+            } elseif (is_array($service) && isset($service['class'])) {
                 self::$_service[$id] = $service;
-            } elseif (is_string($service) && is_subclass_of($service, Service::class)) {
+            } elseif (is_string($service)) {
                 self::$_service[$id] = ['class' => $service];
             }
         }

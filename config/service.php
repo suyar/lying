@@ -87,9 +87,8 @@ return [
     ],
     //全局事件
     'hook' => [
-        'class' => 'lying\service\Hook',
         'events' => [
-            ['app_init', function () {}]
+            //['app_init', function () {}]
         ],
     ],
 

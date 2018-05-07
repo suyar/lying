@@ -8,8 +8,7 @@
 
 namespace lying\service;
 
-use lying\exception\HttpException;
-use lying\exception\InvalidRouteException;
+use lying\event\ExceptionEvent;
 
 /**
  * Class Exception
@@ -17,6 +16,11 @@ use lying\exception\InvalidRouteException;
  */
 class Exception
 {
+    /**
+     * 错误事件
+     */
+    const EVENT_FRAMEWORK_ERROR = 'frameworkError';
+
     /**
      * @var array HTTP返回码
      */
@@ -104,6 +108,10 @@ class Exception
             ini_set('display_errors', 'On');
         }
 
+        \Lying::$maker->hook->on(self::EVENT_FRAMEWORK_ERROR, function (ExceptionEvent $e) {
+            return $this->renderException($e);
+        });
+
         set_exception_handler([$this, 'exceptionHandler']);
         set_error_handler([$this, 'errorHandler']);
         register_shutdown_function([$this, 'shutdownHandler']);
@@ -146,9 +154,10 @@ class Exception
     {
         $this->unregister();
         try {
-            $this->logException($exception);
             $this->clearOutput();
-            $this->renderException($exception);
+            $event = new ExceptionEvent();
+            $event->e = $exception;
+            \Lying::$maker->hook->trigger(self::EVENT_FRAMEWORK_ERROR, $event);
         } catch (\Exception $e) {
             $this->handleFallbackExceptionMessage($e, $exception);
         } catch (\Throwable $e) {
@@ -213,12 +222,15 @@ class Exception
     }
 
     /**
-     * 渲染错误页面
-     * @param \Exception $exception 异常
+     * 默认的异常处理
+     * @param ExceptionEvent $event 异常事件
+     * @return void|bool
      */
-    private function renderException($exception)
+    private function renderException($event)
     {
-        $errcode = $exception->getCode();
+        $exception = $event->e;
+        var_dump($exception);
+        /*$errcode = $exception->getCode();
         if ($exception instanceof HttpException && isset(self::$_httpCode[$errcode])) {
             $message = self::$_httpCode[$errcode];
             http_response_code(intval($errcode));
@@ -249,15 +261,6 @@ class Exception
                 require DIR_KERNEL . DS . 'view' . DS . ($this->_debug ? 'exception.php' : 'error.php');
                 echo ob_get_clean();
             }
-        }
-    }
-
-    /**
-     * 记录错误日志
-     * @param \Exception $exception 异常
-     */
-    private function logException($exception)
-    {
-
+        }*/
     }
 }

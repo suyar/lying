@@ -68,11 +68,11 @@ class Lying
 
         spl_autoload_register([self::class, 'autoload']);
 
+        self::$maker = new \lying\service\Maker(self::config('service'));
+
         (new \lying\service\Exception())->register();
 
         date_default_timezone_set(self::config('timezone', 'Asia/Shanghai'));
-
-        self::$maker = new \lying\service\Maker(self::config('service'));
     }
 
     /**
