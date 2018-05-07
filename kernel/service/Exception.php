@@ -17,11 +17,6 @@ use lying\event\ExceptionEvent;
 class Exception
 {
     /**
-     * 错误事件
-     */
-    const EVENT_FRAMEWORK_ERROR = 'frameworkError';
-
-    /**
      * @var array HTTP返回码
      */
     private static $_httpCode = [
@@ -108,7 +103,8 @@ class Exception
             ini_set('display_errors', 'On');
         }
 
-        \Lying::$maker->hook->on(self::EVENT_FRAMEWORK_ERROR, function (ExceptionEvent $e) {
+        //默认的错误渲染
+        \Lying::$maker->hook->on(\Lying::EVENT_FRAMEWORK_ERROR, function (ExceptionEvent $e) {
             return $this->renderException($e);
         });
 
