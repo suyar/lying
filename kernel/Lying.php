@@ -12,6 +12,26 @@
 class Lying
 {
     /**
+     * 框架开始执行事件
+     */
+    const EVENT_FRAMEWORK_BEGIN = 'frameworkBegin';
+
+    /**
+     * 框架执行结束事件
+     */
+    const EVENT_FRAMEWORK_END = 'frameworkEnd';
+
+    /**
+     * TICK事件
+     */
+    const EVENT_FRAMEWORK_TICK = 'frameworkTick';
+
+    /**
+     * 错误处理事件
+     */
+    const EVENT_FRAMEWORK_ERROR = 'frameworkError';
+
+    /**
      * @var array 全局配置数组
      */
     private static $_config;
@@ -33,7 +53,8 @@ class Lying
 
             self::init($config);
 
-            //self::$maker->hook()->trigger(self::EVENT_BEFORE_REQUEST);
+            self::$maker->hook->trigger(self::EVENT_FRAMEWORK_BEGIN);
+            self::$maker->hook->trigger(self::EVENT_FRAMEWORK_TICK);
 
             $route = self::$maker->request()->resolve();
 
@@ -54,7 +75,8 @@ class Lying
             }
             echo $response;
 
-            //self::$maker->hook()->trigger(self::EVENT_AFTER_REQUEST);
+            self::$maker->hook->trigger(self::EVENT_FRAMEWORK_END);
+            self::$maker->hook->trigger(self::EVENT_FRAMEWORK_TICK);
         }
     }
 
