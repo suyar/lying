@@ -6,6 +6,9 @@
  * @license MIT
  */
 
+use lying\exception\InvalidRouteException;
+use lying\exception\HttpException;
+
 /**
  * Class Lying
  */
@@ -71,9 +74,9 @@ class Lying
         $route = self::$maker->request->resolve();
 
         try {
-            $response = self::$maker->dispatch()->run($route);
-        } catch (\lying\exception\InvalidRouteException $exception) {
-            throw new \lying\exception\HttpException('Page not found.', 404);
+            $response = self::$maker->dispatch->run($route);
+        } catch (InvalidRouteException $exception) {
+            throw new HttpException('Page not found.', 404);
         }
 
         if (is_array($response)) {
