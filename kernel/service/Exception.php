@@ -104,9 +104,7 @@ class Exception
         }
 
         //默认的错误渲染
-        \Lying::$maker->hook->on(\Lying::EVENT_FRAMEWORK_ERROR, function (ExceptionEvent $e) {
-            return $this->renderException($e);
-        });
+        \Lying::$maker->hook->on(\Lying::EVENT_FRAMEWORK_ERROR, [$this, 'renderException']);
 
         set_exception_handler([$this, 'exceptionHandler']);
         set_error_handler([$this, 'errorHandler']);
@@ -222,7 +220,7 @@ class Exception
      * @param ExceptionEvent $event 异常事件
      * @return void|bool
      */
-    private function renderException($event)
+    public function renderException($event)
     {
         $exception = $event->e;
         var_dump($exception);

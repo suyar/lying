@@ -74,7 +74,7 @@ class Lying
         $route = self::$maker->request->resolve();
 
         try {
-            $response = self::$maker->dispatch->run($route);
+            $response = self::$maker->dispatch->run($route, self::$maker->request->get());
         } catch (InvalidRouteException $exception) {
             throw new HttpException('Page not found.', 404);
         }
