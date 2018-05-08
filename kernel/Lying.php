@@ -42,49 +42,10 @@ class Lying
     public static $maker;
 
     /**
-     * 启动框架
-     * @param array $config 全局配置数组
-     * @throws \Exception
-     * @throws \lying\exception\HttpException
-     */
-    public static function run(array $config)
-    {
-        if (self::$_config === null) {
-
-            self::init($config);
-
-            self::$maker->hook->trigger(self::EVENT_FRAMEWORK_BEGIN);
-            self::$maker->hook->trigger(self::EVENT_FRAMEWORK_TICK);
-
-            $route = self::$maker->request->resolve();
-
-            try {
-                $response = self::$maker->dispatch()->run($route);
-            } catch (\lying\exception\InvalidRouteException $exception) {
-                throw new \lying\exception\HttpException('Page not found.', 404);
-            }
-
-            if (is_array($response)) {
-                throw new \Exception('Response content must not be an array.');
-            } elseif (is_object($response)) {
-                if (method_exists($response, '__toString')) {
-                    $response = $response->__toString();
-                } else {
-                    throw new \Exception('Response content must be a string or an object implementing __toString().');
-                }
-            }
-            echo $response;
-
-            self::$maker->hook->trigger(self::EVENT_FRAMEWORK_END);
-            self::$maker->hook->trigger(self::EVENT_FRAMEWORK_TICK);
-        }
-    }
-
-    /**
-     * 初始化启动参数
+     * Lying constructor.
      * @param array $config 全局配置数组
      */
-    private static function init($config)
+    public function __construct(array $config)
     {
         self::$_config = $config;
 
@@ -95,6 +56,39 @@ class Lying
         (new \lying\service\Exception())->register();
 
         date_default_timezone_set(self::config('timezone', 'Asia/Shanghai'));
+    }
+
+    /**
+     * 启动框架
+     * @throws \Exception
+     * @throws \lying\exception\HttpException
+     */
+    public function run()
+    {
+        self::$maker->hook->trigger(self::EVENT_FRAMEWORK_BEGIN);
+        self::$maker->hook->trigger(self::EVENT_FRAMEWORK_TICK);
+
+        $route = self::$maker->request->resolve();
+
+        try {
+            $response = self::$maker->dispatch()->run($route);
+        } catch (\lying\exception\InvalidRouteException $exception) {
+            throw new \lying\exception\HttpException('Page not found.', 404);
+        }
+
+        if (is_array($response)) {
+            throw new \Exception('Response content must not be an array.');
+        } elseif (is_object($response)) {
+            if (method_exists($response, '__toString')) {
+                $response = $response->__toString();
+            } else {
+                throw new \Exception('Response content must be a string or an object implementing __toString().');
+            }
+        }
+        echo $response;
+
+        self::$maker->hook->trigger(self::EVENT_FRAMEWORK_END);
+        self::$maker->hook->trigger(self::EVENT_FRAMEWORK_TICK);
     }
 
     /**
