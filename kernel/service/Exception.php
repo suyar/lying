@@ -153,7 +153,7 @@ class Exception
             $this->clearOutput();
             $event = new ExceptionEvent();
             $event->e = $exception;
-            \Lying::$maker->hook->trigger(self::EVENT_FRAMEWORK_ERROR, $event);
+            \Lying::$maker->hook->trigger(\Lying::EVENT_FRAMEWORK_ERROR, $event);
         } catch (\Exception $e) {
             $this->handleFallbackExceptionMessage($e, $exception);
         } catch (\Throwable $e) {

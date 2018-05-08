@@ -12,7 +12,7 @@ namespace lying\service;
  * Class Request
  * @package lying\service
  */
-class Request
+class Request extends Service
 {
     /**
      * @var array GET数组
@@ -46,7 +46,7 @@ class Request
     public function resolve()
     {
         if ($this->_route === null) {
-            $router = \Lying::$maker->router();
+            $router = \Lying::$maker->router;
             $this->_route = [$router->module(), $router->controller(), $router->action()];
             $this->_getParams = $_GET;
             $this->_postParams = $_POST;
@@ -320,7 +320,7 @@ class Request
             $url = rtrim($url, '?&');
             empty($query) || ($url .= (strpos($url, '?') === false ? "?$query" : "&$query"));
         } else {
-            $url = \Lying::$maker->router()->createUrl($url, $params, true, $normal);
+            $url = \Lying::$maker->router->createUrl($url, $params, true, $normal);
         }
 
         while (ob_get_level() !== 0) {
@@ -345,7 +345,7 @@ class Request
     public function getCsrfToken()
     {
         if ($this->_csrfToken === null) {
-            $cookie = \Lying::$maker->cookie();
+            $cookie = \Lying::$maker->cookie;
             $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-.';
             if (($token = $cookie->get('_csrf')) === false) {
                 $token = str_pad(uniqid('_csrf', true), 32, substr(str_shuffle($chars), 0, 4));
@@ -370,7 +370,7 @@ class Request
         $csrfToken ||
         ($csrfToken = $this->post('_csrf')) ||
         ($csrfToken = isset($_SERVER['HTTP_X_CSRF_TOKEN']) ? $_SERVER['HTTP_X_CSRF_TOKEN'] : null);
-        if ($csrfToken && ($cookieToken = \Lying::$maker->cookie()->get('_csrf'))) {
+        if ($csrfToken && ($cookieToken = \Lying::$maker->cookie->get('_csrf'))) {
             $mask = substr($csrfToken, 0, 8);
             $token = substr($csrfToken, 8);
             return hash_hmac('sha256', $cookieToken, $mask) === $token;

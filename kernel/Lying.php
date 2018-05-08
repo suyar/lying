@@ -56,7 +56,7 @@ class Lying
             self::$maker->hook->trigger(self::EVENT_FRAMEWORK_BEGIN);
             self::$maker->hook->trigger(self::EVENT_FRAMEWORK_TICK);
 
-            $route = self::$maker->request()->resolve();
+            $route = self::$maker->request->resolve();
 
             try {
                 $response = self::$maker->dispatch()->run($route);

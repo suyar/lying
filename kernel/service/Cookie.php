@@ -17,20 +17,14 @@ class Cookie extends Service
     /**
      * @var string COOKIE加密密钥
      */
-    protected $key = '';
-
-    /**
-     * @var int 密钥长度
-     */
-    private $_keyLen;
+    protected $key;
 
     /**
      * 初始化密钥
      */
     public function init()
     {
-        $this->key = strtoupper(sha1($this->key . 'Lying'));
-        $this->_keyLen = strlen($this->key);
+        $this->key .= self::class;
     }
 
     /**
@@ -46,7 +40,7 @@ class Cookie extends Service
      */
     public function set($name, $value, $expire = 0, $path = '/', $domain = '', $secure = false, $httpOnly = false)
     {
-        $value = $this->encrypt(serialize($value), $expire);
+        $value = \Lying::$maker->encrypter->xorEncrypt($value, $this->key, $expire);
         return setcookie($name, $value, $expire, $path, $domain, $secure, $httpOnly);
     }
 
@@ -67,7 +61,7 @@ class Cookie extends Service
      */
     public function get($name)
     {
-        return $this->exists($name) ? unserialize($this->decrypt($_COOKIE[$name])) : false;
+        return $this->exists($name) ? \Lying::$maker->encrypter->xorDecrypt($_COOKIE[$name], $this->key) : false;
     }
 
     /**
@@ -82,45 +76,5 @@ class Cookie extends Service
     public function remove($name, $path = '/', $domain = '', $secure = false, $httpOnly = false)
     {
         return $this->set($name, '', time() - 31536000, $path, $domain, $secure, $httpOnly);
-    }
-
-    /**
-     * 加密
-     * @param string $str 要加密的字符串
-     * @param int $expire 有效时间戳
-     * @return string 加密后的字符串
-     */
-    private function encrypt($str, $expire = 0)
-    {
-        $str .= hash_hmac('sha256', $str, $this->key, true) . sprintf('%010d', $expire);
-        $result = '';
-        for ($i = 0, $strLen = strlen($str); $i < $strLen; $i++) {
-            $result .= chr(ord($str[$i]) ^ ord($this->key[$i % $this->_keyLen]));
-        }
-        return base64_encode($result);
-    }
-
-    /**
-     * 解密
-     * @param string $str 要解密的字符串
-     * @return string|bool 成功返回解密后的字符串
-     */
-    private function decrypt($str)
-    {
-        $str = base64_decode($str);
-        $result = '';
-        for ($i = 0, $strLen = strlen($str); $i < $strLen; $i++) {
-            $result .= chr(ord($str[$i]) ^ ord($this->key[$i % $this->_keyLen]));
-        }
-        $expire = substr($result, -10);
-        if ($expire === '0000000000' || $expire >= time()) {
-            $result = substr($result, 0, -10);
-            $content = substr($result, 0, -32);
-            $hash = substr($result, -32);
-            if (strcmp(hash_hmac('sha256', $content, $this->key, true), $hash) === 0) {
-                return $content;
-            }
-        }
-        return false;
     }
 }
