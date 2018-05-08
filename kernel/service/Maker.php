@@ -29,6 +29,10 @@ use lying\exception\InvalidConfigException;
  * @method Session session()
  * 
  * @property Hook $hook
+ * @property Request $request
+ * @property Router $router
+ * @property Cookie $cookie
+ * @property Encrypter $encrypter
  */
 class Maker
 {
@@ -41,11 +45,14 @@ class Maker
      * @var array 核心组件,类名不可被覆盖,但是配置可以被覆盖
      */
     private static $_cores = [
-        'cookie' => ['class' => 'lying\service\Cookie'],
-        'dispatch' => ['class' => 'lying\service\Dispatch'],
         'hook' => ['class' => 'lying\service\Hook'],
         'request' => ['class' => 'lying\service\Request'],
         'router' => ['class' => 'lying\service\Router'],
+        'cookie' => ['class' => 'lying\service\Cookie'],
+        'encrypter' => ['class' => 'lying\service\Encrypter'],
+
+
+        'dispatch' => ['class' => 'lying\service\Dispatch'],
         'session' => ['class' => 'lying\service\Session'],
     ];
 

@@ -59,7 +59,7 @@ class Router extends Service
      */
     protected function init()
     {
-        $host = \Lying::$maker->request()->host();
+        $host = \Lying::$maker->request->host();
         if (isset($this->host[$host])) {
             foreach ($this->host[$host] as $name => $value) {
                 $this->$name = $value;
@@ -204,7 +204,7 @@ class Router extends Service
      */
     private function parse()
     {
-        $request = \Lying::$maker->request();
+        $request = \Lying::$maker->request;
         $uri = $request->isCli() ? $request->getArgv(1, '/') : $request->uri();
         $parse = parse_url($uri);
         isset($parse['query']) && parse_str($parse['query'], $_GET);
@@ -249,7 +249,7 @@ class Router extends Service
      */
     public function createUrl($path, array $params = [], $host = true, $normal = false)
     {
-        $host = $host ? \Lying::$maker->request()->host(true) : '';
+        $host = $host ? \Lying::$maker->request->host(true) : '';
         if (strncmp($path, '/', 1) === 0 || !$path) {
             $path = rtrim($path, '?&');
             strpos($path, '.') || ($path = rtrim($path, '/') . '/');
