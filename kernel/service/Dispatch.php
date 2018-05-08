@@ -9,6 +9,7 @@
 namespace lying\service;
 
 use lying\event\ActionEvent;
+use lying\exception\HttpException;
 use lying\exception\InvalidRouteException;
 
 /**
@@ -18,11 +19,18 @@ use lying\exception\InvalidRouteException;
 class Dispatch extends Service
 {
     /**
+     * @var Controller[] 实例化的控制器数组
+     */
+    private $_controllers = [];
+
+    /**
      * 程序执行入口
      * @param array|string $route 要调度的路由
      * @param array $params 传控方法的参数,若果放空则自动从GET参数获取
-     * @return mixed 返回调度结果
+     * @return mixed 返回执行结果
      * @throws InvalidRouteException 路由无法解析抛出异常
+     * @throws HttpException 缺少参数抛出异常
+     * @throws \ReflectionException 反射类异常
      */
     public function run($route, array $params = [])
     {
@@ -30,11 +38,15 @@ class Dispatch extends Service
             list($m, $c, $a) = $route;
             $moduleNamespace = PHP_SAPI === 'cli' ? 'console' : 'module';
             $class = "$moduleNamespace\\$m\\controller\\$c";
-            if (method_exists($class, $a)) {
+            if (isset($this->_controllers[$class]) && method_exists($this->_controllers[$class], $a)) {
+                $instance = $this->_controllers[$class];
+            } elseif (is_subclass_of($class, 'lying\service\Controller') && method_exists($class, $a)) {
                 /** @var Controller $instance */
-                $instance = new $class;
-                $instance->hook($instance::EVENT_BEFORE_ACTION, [$instance, 'beforeAction']);
-                $instance->hook($instance::EVENT_AFTER_ACTION, [$instance, 'afterAction']);
+                $instance = $this->_controllers[$class] = new $class;
+                $instance->on($instance::EVENT_BEFORE_ACTION, [$instance, 'beforeAction']);
+                $instance->on($instance::EVENT_AFTER_ACTION, [$instance, 'afterAction']);
+            }
+            if (isset($instance)) {
                 $method = new \ReflectionMethod($instance, $a);
                 if ($method->isPublic() && $this->checkAccess($instance->deny, $a)) {
                     $instance->trigger($instance::EVENT_BEFORE_ACTION, new ActionEvent(['action'=>$a]));
@@ -51,7 +63,7 @@ class Dispatch extends Service
     /**
      * 检查要执行的路由
      * @param array|string $route 路由
-     * @return array|false
+     * @return array|bool 成功返回数组,失败返回false
      */
     private function resolve($route)
     {
@@ -89,17 +101,19 @@ class Dispatch extends Service
      * 返回方法所带的GET参数数组
      * @param \ReflectionParameter[] $params 一个\ReflectionParameter的数组
      * @param array $ext 外部带入的方法参数
-     * @return array 返回要带入执行方法的GET参数
+     * @return array 返回要带入执行方法的参数
+     * @throws HttpException 缺少参数的时候抛出异常
      */
     private function parseArgs($params, $ext)
     {
         $args = [];
         foreach ($params as $param) {
-            $arg = isset($ext[$param->name]) ? $ext[$param->name] : \Lying::$maker->request()->get($param->name);
-            if ($arg !== null) {
-                $args[] = $arg;
+            if (array_key_exists($param->name, $ext)) {
+                $args[] = $ext[$param->name];
             } elseif ($param->isDefaultValueAvailable()) {
                 $args[] = $param->getDefaultValue();
+            } else {
+                throw new HttpException("Missing required parameter: {$param->name}", 400);
             }
         }
         return $args;
