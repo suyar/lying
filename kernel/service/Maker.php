@@ -33,6 +33,7 @@ use lying\exception\InvalidConfigException;
  * @property Router $router
  * @property Cookie $cookie
  * @property Encrypter $encrypter
+ * @property Dispatch $dispatch
  */
 class Maker
 {
