@@ -8,6 +8,7 @@
 
 use lying\exception\InvalidRouteException;
 use lying\exception\HttpException;
+use lying\service\Response;
 
 /**
  * Class Lying
@@ -74,21 +75,19 @@ class Lying
         $route = self::$maker->request->resolve();
 
         try {
-            $response = self::$maker->dispatch->run($route, self::$maker->request->get());
+            $result = self::$maker->dispatch->run($route, self::$maker->request->get());
         } catch (InvalidRouteException $exception) {
             throw new HttpException('Page not found.', 404);
         }
 
-        if (is_array($response)) {
-            throw new \Exception('Response content must not be an array.');
-        } elseif (is_object($response)) {
-            if (method_exists($response, '__toString')) {
-                $response = $response->__toString();
-            } else {
-                throw new \Exception('Response content must be a string or an object implementing __toString().');
-            }
+        if ($result instanceof Response) {
+            $response = $result;
+        } else {
+            $response = self::$maker->response;
+            $response->setContent($result);
         }
-        echo $response;
+
+        $response->send();
 
         self::$maker->hook->trigger(self::EVENT_FRAMEWORK_END);
         self::$maker->hook->trigger(self::EVENT_FRAMEWORK_TICK);
