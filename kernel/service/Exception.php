@@ -218,9 +218,8 @@ class Exception
     /**
      * 默认的异常处理
      * @param ExceptionEvent $event 异常事件
-     * @return void|bool
      */
-    public function renderException($event)
+    public function renderException(ExceptionEvent $event)
     {
         $exception = $event->e;
         var_dump($exception);

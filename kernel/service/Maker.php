@@ -34,6 +34,7 @@ use lying\exception\InvalidConfigException;
  * @property Cookie $cookie
  * @property Encrypter $encrypter
  * @property Dispatch $dispatch
+ * @property Response $response
  */
 class Maker
 {
@@ -51,9 +52,11 @@ class Maker
         'router' => ['class' => 'lying\service\Router'],
         'cookie' => ['class' => 'lying\service\Cookie'],
         'encrypter' => ['class' => 'lying\service\Encrypter'],
-
-
         'dispatch' => ['class' => 'lying\service\Dispatch'],
+        'response' => ['class' => 'lying\service\Response'],
+
+
+
         'session' => ['class' => 'lying\service\Session'],
     ];
 
