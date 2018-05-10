@@ -1,15 +1,19 @@
 <?php
-header('HTTP/1.1 200 OK');
-var_dump(headers_list());
-//ob_end_flush();
+class A
+{
+    protected $name = 'su';
+}
 
-//headers_sent($file, $line);
-//var_dump($file,$line);
+class B extends A{
 
+    public function getName()
+    {
+        return $this->name;
+    }
+}
 
+$b = new B();
 
-//header('X-Bar: bar');
-//header('X-Far: far');
 
 
 

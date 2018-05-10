@@ -64,8 +64,8 @@ class Lying
 
     /**
      * 启动框架
-     * @throws \Exception
-     * @throws \lying\exception\HttpException
+     * @throws \Exception 其他错误抛出异常
+     * @throws \lying\exception\HttpException 路由解析错误抛出404
      */
     public function run()
     {
