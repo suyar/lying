@@ -40,8 +40,11 @@ class Cookie extends Service
      */
     public function set($name, $value, $expire = 0, $path = '/', $domain = '', $secure = false, $httpOnly = false)
     {
-        $value = \Lying::$maker->encrypter->xorEncrypt($value, $this->key, $expire);
-        return headers_sent() || setcookie($name, $value, $expire, $path, $domain, $secure, $httpOnly);
+        if (!headers_sent()) {
+            $value = \Lying::$maker->encrypter->xorEncrypt($value, $this->key, $expire);
+            return setcookie($name, $value, $expire, $path, $domain, $secure, $httpOnly);
+        }
+        return false;
     }
 
     /**
