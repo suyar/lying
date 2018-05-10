@@ -28,6 +28,21 @@ class Controller extends Service
     const EVENT_AFTER_ACTION = 'afterAction';
 
     /**
+     * @var string 所属模块,用户不应该修改此变量
+     */
+    protected $module;
+
+    /**
+     * @var string 此控制器ID,用户不应该修改此变量
+     */
+    protected $id;
+
+    /**
+     * @var string 当前被执行的方法,用户不应该修改此变量
+     */
+    protected $action;
+
+    /**
      * @var View 视图实例
      */
     private $_view;
@@ -48,6 +63,7 @@ class Controller extends Service
      * @throws \Exception 当CSRF验证未通过的时候抛出400
      */
     public function beforeAction(ActionEvent $event) {
+        $this->action = $event->action;
         if (\Lying::$maker->request()->validateCsrfToken() === false) {
             throw new HttpException('Unable to verify your data submission.', 400);
         }

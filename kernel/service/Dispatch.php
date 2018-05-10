@@ -31,27 +31,32 @@ class Dispatch extends Service
      * @throws InvalidRouteException 路由无法解析抛出异常
      * @throws HttpException 缺少参数抛出异常
      * @throws \ReflectionException 反射类异常
+     * @throws \Exception 控制器未继承基础控制器抛出异常
      */
     public function run($route, array $params = [])
     {
-        if ($route = $this->resolve($route)) {
+        if ($route = $this->resolve($route,$raw)) {
             list($m, $c, $a) = $route;
             $moduleNamespace = PHP_SAPI === 'cli' ? 'console' : 'module';
             $class = "$moduleNamespace\\$m\\controller\\$c";
             if (isset($this->_controllers[$class]) && method_exists($this->_controllers[$class], $a)) {
                 $instance = $this->_controllers[$class];
-            } elseif (is_subclass_of($class, 'lying\service\Controller') && method_exists($class, $a)) {
-                /** @var Controller $instance */
-                $instance = $this->_controllers[$class] = new $class;
-                $instance->on($instance::EVENT_BEFORE_ACTION, [$instance, 'beforeAction']);
-                $instance->on($instance::EVENT_AFTER_ACTION, [$instance, 'afterAction']);
+            } elseif (is_subclass_of($class, 'lying\service\Controller')) {
+                if (method_exists($class, $a)) {
+                    /** @var Controller $instance */
+                    $instance = $this->_controllers[$class] = new $class(['module'=>$raw[0], 'id'=>$raw[1]]);
+                    $instance->on($instance::EVENT_BEFORE_ACTION, [$instance, 'beforeAction']);
+                    $instance->on($instance::EVENT_AFTER_ACTION, [$instance, 'afterAction']);
+                }
+            } else {
+                throw new \Exception('Controller class must extend from \\lying\\service\\Controller.');
             }
             if (isset($instance)) {
                 $method = new \ReflectionMethod($instance, $a);
                 if ($method->isPublic() && $this->checkAccess($instance->deny, $a)) {
-                    $instance->trigger($instance::EVENT_BEFORE_ACTION, new ActionEvent(['action'=>$a]));
+                    $instance->trigger($instance::EVENT_BEFORE_ACTION, new ActionEvent(['action'=>$raw[2]]));
                     $response = call_user_func_array([$instance, $a], $this->parseArgs($method->getParameters(), $params));
-                    $instance->trigger($instance::EVENT_AFTER_ACTION, new ActionEvent(['action'=>$a, 'response'=>$response]));
+                    $instance->trigger($instance::EVENT_AFTER_ACTION, new ActionEvent(['action'=>$raw[2], 'response'=>$response]));
                     return $response;
                 }
             }
@@ -63,19 +68,20 @@ class Dispatch extends Service
     /**
      * 检查要执行的路由
      * @param array|string $route 路由
+     * @param array $raw 没有经过处理的模块/控制器/方法
      * @return array|bool 成功返回数组,失败返回false
      */
-    private function resolve($route)
+    private function resolve($route, &$raw = [])
     {
         if (is_array($route) && count($route) === 3) {
-            $route = array_values($route);
+            $route = $raw = array_values($route);
             return [
                 $this->str2hump($route[0]),
                 $this->str2hump($route[1], true) . 'Ctrl',
                 $this->str2hump($route[2]),
             ];
         } elseif (is_string($route) && strpos($route, '/')) {
-            return $this->resolve(explode('/', $route));
+            return $this->resolve(explode('/', $route), $raw);
         }
         return false;
     }
