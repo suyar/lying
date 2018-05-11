@@ -1,19 +1,5 @@
 <?php
-class A
-{
-    protected $name = 'su';
-}
 
-class B extends A{
+$options = 'Any-Latin; Latin-ASCII; NFD; [:Nonspacing Mark:] Remove; NFC;';
 
-    public function getName()
-    {
-        return $this->name;
-    }
-}
-
-$b = new B();
-
-
-
-
+echo transliterator_transliterate($options, "你好啊");
