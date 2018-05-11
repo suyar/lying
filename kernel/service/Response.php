@@ -1076,6 +1076,22 @@ class Response extends Service
     ];
 
     /**
+     * @var array 默认转义映射表
+     */
+    private static $_transliteration = [
+        'À' => 'A', 'Á' => 'A', 'Â' => 'A', 'Ã' => 'A', 'Ä' => 'A', 'Å' => 'A', 'Æ' => 'AE', 'Ç' => 'C',
+        'È' => 'E', 'É' => 'E', 'Ê' => 'E', 'Ë' => 'E', 'Ì' => 'I', 'Í' => 'I', 'Î' => 'I', 'Ï' => 'I',
+        'Ð' => 'D', 'Ñ' => 'N', 'Ò' => 'O', 'Ó' => 'O', 'Ô' => 'O', 'Õ' => 'O', 'Ö' => 'O', 'Ő' => 'O',
+        'Ø' => 'O', 'Ù' => 'U', 'Ú' => 'U', 'Û' => 'U', 'Ü' => 'U', 'Ű' => 'U', 'Ý' => 'Y', 'Þ' => 'TH',
+        'ß' => 'ss',
+        'à' => 'a', 'á' => 'a', 'â' => 'a', 'ã' => 'a', 'ä' => 'a', 'å' => 'a', 'æ' => 'ae', 'ç' => 'c',
+        'è' => 'e', 'é' => 'e', 'ê' => 'e', 'ë' => 'e', 'ì' => 'i', 'í' => 'i', 'î' => 'i', 'ï' => 'i',
+        'ð' => 'd', 'ñ' => 'n', 'ò' => 'o', 'ó' => 'o', 'ô' => 'o', 'õ' => 'o', 'ö' => 'o', 'ő' => 'o',
+        'ø' => 'o', 'ù' => 'u', 'ú' => 'u', 'û' => 'u', 'ü' => 'u', 'ű' => 'u', 'ý' => 'y', 'þ' => 'th',
+        'ÿ' => 'y',
+    ];
+
+    /**
      * @var array 要发送的头
      */
     private $_headers = [];
@@ -1094,6 +1110,11 @@ class Response extends Service
      * @var mixed 要发送的数据
      */
     private $_content;
+
+    /**
+     * @var resource 要发送的文件句柄
+     */
+    private $_stream;
 
     /**
      * 设置要发送的头
@@ -1152,15 +1173,17 @@ class Response extends Service
      * 预处理输出内容
      * @throws \Exception 发送的内容格式不正确时抛出异常
      */
-    public function prepare()
+    private function prepare()
     {
-        if (is_array($this->_content)) {
-            throw new \Exception('Response content must not be an array.');
-        } elseif (is_object($this->_content)) {
-            if (method_exists($this->_content, '__toString')) {
-                $this->_content = $this->_content->__toString();
-            } else {
-                throw new \Exception('Response content must be a string or an object implementing __toString().');
+        if ($this->_stream === null) {
+            if (is_array($this->_content)) {
+                throw new \Exception('Response content must not be an array.');
+            } elseif (is_object($this->_content)) {
+                if (method_exists($this->_content, '__toString')) {
+                    $this->_content = $this->_content->__toString();
+                } else {
+                    throw new \Exception('Response content must be a string or an object implementing __toString().');
+                }
             }
         }
     }
@@ -1170,7 +1193,17 @@ class Response extends Service
      */
     private function sendContent()
     {
-        echo $this->_content;
+        if ($this->_stream === null) {
+            echo $this->_content;
+        } else {
+            set_time_limit(0);
+            $chunkSize = 8 * 1024 * 1024;
+            while (!feof($this->_stream)) {
+                echo fread($this->_stream, $chunkSize);
+                flush();
+            }
+            fclose($this->_stream);
+        }
     }
 
     /**
@@ -1187,14 +1220,22 @@ class Response extends Service
         }
     }
 
-    public function sendFile($filePath, $attachmentName, $mime = null, $inline = false)
+    /**
+     * 发送文件
+     * @param string $filePath 文件的路径
+     * @param string $attachmentName 要保存的文件名,如果没写则使用原来的的文件名
+     * @param string $mime 文件的mime,不写的话根据文件后缀去判断,否则就是application/octet-stream
+     * @param bool $inline 文件的输出类型是否是inline,否则是attachment
+     * @return $this
+     */
+    public function sendFile($filePath, $attachmentName = null, $mime = null, $inline = false)
     {
         if (!$mime) {
             $ext = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
             $mime = isset(self::$_mimeTypes[$ext]) ? self::$_mimeTypes[$ext] : 'application/octet-stream';
         }
 
-        if ($attachmentName === null) {
+        if (!$attachmentName) {
             $attachmentName = basename($filePath);
         }
 
@@ -1205,9 +1246,41 @@ class Response extends Service
 
         $this->setDownloadHeaders($attachmentName, $mime, $inline, $fileSize);
 
+        $this->_stream = $handle;
 
+        $this->setStatusCode(200);
+
+        return $this;
     }
 
+    /**
+     * 发送字符串当做文件内容
+     * @param string $content 文件内容
+     * @param string $attachmentName 要保存的文件名
+     * @param string $mime 文件的mime,不写的话就是application/octet-stream
+     * @param bool $inline 文件的输出类型是否是inline,否则是attachment
+     * @return $this
+     */
+    public function sendContentAsFile($content, $attachmentName, $mime = null, $inline = false)
+    {
+        $mime || ($mime = 'application/octet-stream');
+
+        $fileSize = mb_strlen($content, '8bit');
+
+        $this->setDownloadHeaders($attachmentName, $mime, $inline, $fileSize);
+
+        $this->setStatusCode(200);
+
+        return $this;
+    }
+
+    /**
+     * 设置发送的文件头
+     * @param string $attachmentName 要保存的文件名
+     * @param string $mime 文件的MIME
+     * @param bool $inline 是否inline
+     * @param int $fileSize 文件字节数
+     */
     private function setDownloadHeaders($attachmentName, $mime, $inline, $fileSize)
     {
         $disposition = $inline ? 'inline' : 'attachment';
@@ -1220,8 +1293,58 @@ class Response extends Service
             ->setHeader('Content-Disposition', $this->getDispositionHeaderValue($disposition, $attachmentName));
     }
 
+    /**
+     * 返回Content-Disposition的值
+     * @param string $disposition inline或者attachment
+     * @param string $attachmentName 文件名
+     * @return string 返回转义后的Content-Disposition值
+     */
     private function getDispositionHeaderValue($disposition, $attachmentName)
     {
-        
+        if (extension_loaded('intl')) {
+            $fallbackName = transliterator_transliterate('Any-Latin; Latin-ASCII; [\u0080-\uffff] remove', $attachmentName);
+        } else {
+            $fallbackName = strtr($attachmentName, static::$_transliteration);
+        }
+        $fallbackName = str_replace(['%', '/', '\\', '"'], ['_', '_', '_', '\\"'], $fallbackName);
+
+        $utfName = rawurlencode(str_replace(['%', '/', '\\'], '', $attachmentName));
+
+        $dispositionHeader = "{$disposition}; filename=\"{$fallbackName}\"";
+
+        if ($utfName !== $fallbackName) {
+            $dispositionHeader .= "; filename*=utf-8''{$utfName}";
+        }
+
+        return $dispositionHeader;
+    }
+
+    /**
+     * 使用X-Sendfile下载文件
+     * @param string $filePath 文件路径
+     * @param string $attachmentName 要保存的文件名
+     * @param string $mime 文件的mime,不写的话根据文件后缀去判断,否则就是application/octet-stream
+     * @param bool $inline 文件的输出类型是否是inline,否则是attachment
+     * @param string $xHeader 使用的HTTP头,默认为nginx的X-Accel-Redirect,apache用X-Sendfile
+     * @return $this
+     */
+    public function xSendFile($filePath, $attachmentName = null, $mime = null, $inline = false, $xHeader = 'X-Accel-Redirect')
+    {
+        if (!$mime) {
+            $ext = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+            $mime = isset(self::$_mimeTypes[$ext]) ? self::$_mimeTypes[$ext] : 'application/octet-stream';
+        }
+
+        if (!$attachmentName) {
+            $attachmentName = basename($filePath);
+        }
+
+        $disposition = $inline ? 'inline' : 'attachment';
+
+        $this->setHeader($xHeader, $filePath)
+            ->setHeader('Content-Type', $mime)
+            ->setHeader('Content-Disposition', $this->getDispositionHeaderValue($disposition, $attachmentName));
+
+        return $this;
     }
 }
