@@ -1118,13 +1118,20 @@ class Response extends Service
 
     /**
      * 设置要发送的头
-     * @param string $name header名
+     * @param string|array $name header名,如果此参数是一个数组,则会判断为一个header数组,value无效
      * @param string $value header值
      * @return $this
      */
-    public function setHeader($name, $value)
+    public function setHeader($name, $value = null)
     {
-        $this->_headers[strtolower($name)] = $value;
+        if (is_array($name)) {
+            foreach ($name as $k => $v) {
+                $this->setHeader($k, $v);
+            }
+        } else {
+            $this->_headers[strtolower($name)] = $value;
+        }
+
         return $this;
     }
 
