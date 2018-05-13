@@ -9,11 +9,10 @@ use lying\service\Controller;
  */
 class IndexCtrl extends Controller
 {
-    public $layout = 'layout';
-
     /**
      * 首页
      * @return string
+     * @throws \Exception
      * @throws \Throwable
      */
     public function index()
