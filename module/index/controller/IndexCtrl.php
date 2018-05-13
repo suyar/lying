@@ -14,6 +14,7 @@ class IndexCtrl extends Controller
     /**
      * 首页
      * @return string
+     * @throws \Throwable
      */
     public function index()
     {
