@@ -12,8 +12,14 @@ namespace lying\service;
  * Class Session
  * @package lying\service
  */
-class Session
+class Session extends Service
 {
+    protected function init()
+    {
+        parent::init();
+
+    }
+
     /**
      * 初始化SESSION
      */
