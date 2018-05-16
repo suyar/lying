@@ -22,7 +22,7 @@ class Logger extends Service
     /**
      * @var string 日志文件名
      */
-    protected $file = 'lying';
+    protected $file = 'runtime';
 
     /**
      * @var int 单个日志文件的最大值(kb)
@@ -47,12 +47,12 @@ class Logger extends Service
     /**
      * @var array 存储日志的容器
      */
-    private $container = [];
+    private $_container = [];
     
     /**
      * @var array 日志等级
      */
-    private static $levels = [
+    private static $_levels = [
         5 => 'debug',
         4 => 'info',
         3 => 'notice',
@@ -62,17 +62,24 @@ class Logger extends Service
 
     /**
      * 初始化文件路径
+     * @throws \Exception 文件夹创建失败抛出异常
      */
     protected function init()
     {
-        empty($this->dir) && ($this->dir = DIR_RUNTIME . DS . 'log');
-        !is_dir($this->dir) && @mkdir($this->dir, 0777, true);
-        $this->file = $this->dir . DS . $this->file . ".log";
+        if (empty($this->dir)) {
+            $this->dir = DIR_RUNTIME . DS . 'log';
+        }
+        if (!\Lying::$maker->helper->mkdir($this->dir)) {
+            throw new \Exception("Failed to create directory: {$this->dir}");
+        }
+        if (empty($this->file)) {
+            $this->file = 'runtime';
+        }
+        $this->file = $this->dir . DS . $this->file . '.log';
         register_shutdown_function(function () {
             $this->flush();
             register_shutdown_function([$this, 'flush'], true);
         });
-        //register_shutdown_function([$this, 'flush']);
     }
     
     /**
@@ -114,10 +121,10 @@ class Logger extends Service
     {
         if ($level <= $this->level) {
             $trace = current(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1));
-            $this->container[] = implode('', [
+            $this->_container[] = implode('', [
                 '[' . date('Y-m-d H:i:s') . ']',
                 '[' . $_SERVER['REMOTE_ADDR'] . ']',
-                '[' . self::$levels[$level] . ']',
+                '[' . self::$_levels[$level] . ']',
                 '[' . $_SERVER['REQUEST_URI'] . ']',
                 '[' . $trace['file'] . ']',
                 '[' . $trace['line'] . ']',
@@ -126,7 +133,7 @@ class Logger extends Service
                 PHP_EOL,
                 PHP_EOL,
             ]);
-            count($this->container) >= $this->maxItem && $this->flush();
+            count($this->_container) >= $this->maxItem && $this->flush();
         }
     }
 
@@ -135,11 +142,11 @@ class Logger extends Service
      */
     public function flush()
     {
-        if ($this->container) {
+        if ($this->_container) {
             is_file($this->file) && @filesize($this->file) >= $this->maxSize * 1024 && $this->cycleFile();
             clearstatcache();
-            @file_put_contents($this->file, $this->container, FILE_APPEND | LOCK_EX);
-            $this->container = [];
+            @file_put_contents($this->file, $this->_container, FILE_APPEND | LOCK_EX);
+            $this->_container = [];
         }
     }
 

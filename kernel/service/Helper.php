@@ -15,6 +15,30 @@ namespace lying\service;
 class Helper
 {
     /**
+     * 创建文件夹
+     * @param string $dir 文件夹
+     * @param int $mode 权限,默认0775
+     * @param bool $recursive 是否递归创建,默认是
+     * @return bool 创建成功返回true,失败返回false
+     */
+    public function mkdir($dir, $mode = 0775, $recursive = true)
+    {
+        if (!is_dir($dir)) {
+            @mkdir($dir, $mode, $recursive);
+            @chmod($dir, $mode);
+        }
+        return is_dir($dir);
+    }
+
+
+
+
+
+
+
+
+
+    /**
      * 返回一个变量的字符串表示,其返回的表示是合法的 PHP 代码
      * @param mixed $var 要导出的变量
      * @return string 返回变量的字符串表示
