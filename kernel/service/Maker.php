@@ -17,15 +17,20 @@ use lying\exception\InvalidConfigException;
  * @package lying\service
  *
  * @method Cache cache(string $id = 'cache')
- * @method Cookie cookie()
  * @method Connection db(string $id = 'db')
- * @method Dispatch dispatch()
  * @method Helper helper()
- * @method Hook hook()
  * @method Logger logger(string $id = 'logger')
- * @method Request request()
  * @method Redis redis(string $id = 'redis')
+ *
+ *
+ * @method Hook hook()
+ * @method Request request()
  * @method Router router()
+ * @method Cookie cookie()
+ * @method Encrypter encrypter()
+ * @method Dispatch dispatch()
+ * @method Response response()
+ * @method View view()
  * @method Session session()
  * 
  * @property Hook $hook
