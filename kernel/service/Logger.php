@@ -66,6 +66,12 @@ class Logger extends Service
      */
     protected function init()
     {
+        $this->maxFile < 1 && ($this->maxFile = 1);
+
+        $this->maxSize < 1 && ($this->maxSize = 10240);
+
+        $this->maxItem < 1 && ($this->maxItem = 500);
+
         if (empty($this->dir)) {
             $this->dir = DIR_RUNTIME . DS . 'log';
         }
@@ -85,30 +91,16 @@ class Logger extends Service
     /**
      * 格式化数据
      * @param mixed $data 要格式化的数据
-     * @param int $level 数组的第几层
      * @return string 返回格式化后的字符串
      */
-    private function formatData($data, $level = 1)
+    private function formatData($data)
     {
-        if (is_string($data) || is_int($data) || is_float($data)) {
+        if (is_string($data)) {
             return $data;
-        } elseif (is_array($data)) {
-            $tmp = '[' . PHP_EOL;
-            foreach ($data as $key => $value) {
-                $key = $this->formatData($key, $level + 1);
-                $value = $this->formatData($value, $level + 1);
-                $tmp .= str_repeat(' ', $level * 4) . "$key => $value," . PHP_EOL;
-            }
-            $tmp .= str_repeat(' ', ($level - 1) * 4) . ']';
-            return $tmp;
-        } elseif (is_null($data)) {
-            return 'null';
-        } elseif (is_bool($data)) {
-            return $data ? 'true' : 'false';
-        } elseif (is_object($data)) {
-            return '(' . get_class($data) . ')';
+        } elseif ($data instanceof \Throwable || $data instanceof \Exception) {
+            return (string)$data;
         } else {
-            return '(' . gettype($data) . ')';
+            return \Lying::$maker->helper->export($data);
         }
     }
     
@@ -121,11 +113,12 @@ class Logger extends Service
     {
         if ($level <= $this->level) {
             $trace = current(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1));
+            $request = \Lying::$maker->request;
             $this->_container[] = implode('', [
                 '[' . date('Y-m-d H:i:s') . ']',
-                '[' . $_SERVER['REMOTE_ADDR'] . ']',
-                '[' . self::$_levels[$level] . ']',
-                '[' . $_SERVER['REQUEST_URI'] . ']',
+                '[' . $request->userIP() . ']',
+                '[' . (isset(self::$_levels[$level]) ? self::$_levels[$level] : 'unknow') . ']',
+                '[' . $request->uri() . ']',
                 '[' . $trace['file'] . ']',
                 '[' . $trace['line'] . ']',
                 PHP_EOL,
@@ -139,14 +132,24 @@ class Logger extends Service
 
     /**
      * 刷新输出日志
+     * @throws \Exception 文件打开失败抛出异常
      */
     public function flush()
     {
         if ($this->_container) {
-            is_file($this->file) && @filesize($this->file) >= $this->maxSize * 1024 && $this->cycleFile();
+            $fp = @fopen($this->file, 'a');
+            if ($fp === false) {
+                throw new \Exception("Unable to append to log file: {$this->file}");
+            }
+            @flock($fp, LOCK_EX);
             clearstatcache();
-            @file_put_contents($this->file, $this->_container, FILE_APPEND | LOCK_EX);
+            if (@filesize($this->file) >  $this->maxSize * 1024) {
+                $this->cycleFile();
+            }
+            @fwrite($fp, implode('', $this->_container));
             $this->_container = [];
+            @flock($fp, LOCK_UN);
+            @fclose($fp);
         }
     }
 
@@ -162,7 +165,13 @@ class Logger extends Service
                     @unlink($backfile);
                     continue;
                 }
-                @rename($backfile, $this->file . '.bak' . ($i + 1));
+                @copy($backfile, $this->file . '.bak' . ($i + 1));
+                if ($i === 0) {
+                    if ($fp = @fopen($backfile, 'a')) {
+                        @ftruncate($fp, 0);
+                        @fclose($fp);
+                    }
+                }
             }
         }
     }

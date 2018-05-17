@@ -80,8 +80,6 @@ class Controller extends Service
      * 渲染页面
      * @param string $view 视图文件名称,默认为当前方法名
      * @return string 渲染后的HTML代码
-     * @throws \Exception 渲染出错抛出异常
-     * @throws \Throwable 渲染出错抛出异常
      */
     final public function render($view = '')
     {

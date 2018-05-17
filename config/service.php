@@ -52,9 +52,9 @@ return [
     'logger' => [
         'class' => 'lying\service\Logger',
         'dir' => DIR_RUNTIME . DS . 'log',
-        'file' => 'lying',
+        'file' => 'runtime',
         'maxItem' => 500,
-        'maxSize' => 1024,
+        'maxSize' => 10240,
         'maxFile' => 5,
         'level' => 5,
     ],
