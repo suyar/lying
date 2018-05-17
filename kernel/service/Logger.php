@@ -72,16 +72,16 @@ class Logger extends Service
 
         $this->maxItem < 1 && ($this->maxItem = 500);
 
-        if (empty($this->dir)) {
-            $this->dir = DIR_RUNTIME . DS . 'log';
-        }
+        empty($this->dir) && ($this->dir = DIR_RUNTIME . DS . 'log');
+
+        empty($this->file) && ($this->file = 'runtime');
+
         if (!\Lying::$maker->helper->mkdir($this->dir)) {
             throw new \Exception("Failed to create directory: {$this->dir}");
         }
-        if (empty($this->file)) {
-            $this->file = 'runtime';
-        }
+
         $this->file = $this->dir . DS . $this->file . '.log';
+
         register_shutdown_function(function () {
             $this->flush();
             register_shutdown_function([$this, 'flush'], true);
