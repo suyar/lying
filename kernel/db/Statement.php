@@ -99,7 +99,7 @@ class Statement extends Service
     }
 
     /**
-     * 获取SQL语句
+     * 获取SQL语句,这个语句只是参数替换的,不一定是PDO执行的语句
      * @param bool $raw 是否获取不替换参数的语句,默认否
      * @param array $params 引用返回绑定的参数
      * @return string 返回SQL语句
@@ -131,11 +131,10 @@ class Statement extends Service
                 }
             }
 
+            //PDO中,一条语句不能同时出现命名占位符和问号占位符
             if ($params_str) {
                 $sql = strtr($sql, $params_str);
-            }
-
-            if ($params_num) {
+            } elseif ($params_num) {
                 $sql = preg_replace_callback('/\?/', function ($matches) use (&$params_num, &$i) {
                     $i++;
                     return isset($params_num[$i]) ? $params_num[$i] : $matches[0];
