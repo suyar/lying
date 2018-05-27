@@ -193,28 +193,13 @@ class Connection extends Service
         }
         return $this->_schema;
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     
     /**
      * 创建查询构造器
      * @return Query
      */
-    public function createQuery()
+    public function query()
     {
-        return new Query($this);
+        return new Query(['db'=>$this]);
     }
 }
