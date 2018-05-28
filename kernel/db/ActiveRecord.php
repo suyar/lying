@@ -148,7 +148,6 @@ class ActiveRecord extends Service
      * @param string|int|array $condition 如果为字符串并且参数绑定为空匹配第一个主键,否则为正常查询条件
      * @param array $params 参数绑定,在查询条件为字符串的时候有效
      * @return static|false 返回查询结果,失败返回false
-     * @throws \Exception 主键不存在抛出异常
      */
     public static function findOne($condition, $params = [])
     {
@@ -223,7 +222,6 @@ class ActiveRecord extends Service
     /**
      * 返回旧数据的条件(主键键值对),用于更新数据
      * @return array 条件数组
-     * @throws \Exception 主键不存在抛出异常
      */
     private function oldCondition()
     {
@@ -242,7 +240,6 @@ class ActiveRecord extends Service
     /**
      * 更新当前数据
      * @return int|false 成功返回更新的行数,可能是0行,失败返回false
-     * @throws \Exception
      */
     public function update()
     {
@@ -262,7 +259,6 @@ class ActiveRecord extends Service
     /**
      * 删除本条数据
      * @return int|false 成功返回删除的行数,可能是0行,失败返回false
-     * @throws \Exception
      */
     public function delete()
     {
@@ -289,7 +285,6 @@ class ActiveRecord extends Service
     /**
      * 保存数据
      * @return int|false 成功返回保存的行数,失败返回false
-     * @throws \Exception
      */
     public function save()
     {
