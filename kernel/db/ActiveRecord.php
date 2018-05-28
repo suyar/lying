@@ -60,12 +60,12 @@ class ActiveRecord extends Service
     /**
      * @var array 新数据
      */
-    private $attr = [];
+    private $_attr = [];
     
     /**
      * @var array 旧数据
      */
-    private $oldAttr;
+    private $_oldAttr;
     
     /**
      * 设置默认数据库连接
@@ -73,7 +73,7 @@ class ActiveRecord extends Service
      */
     public static function db()
     {
-        return \Lying::$maker->db();
+        return \Lying::$maker->db;
     }
     
     /**
@@ -88,7 +88,7 @@ class ActiveRecord extends Service
     {
         $tmp = explode('\\', get_called_class());
         $table = preg_replace('/Model$/', '', array_pop($tmp));
-        return static::db()->prefix() . strtolower(preg_replace('/((?<=[a-z])(?=[A-Z]))/', '_', $table));
+        return '{{%' . strtolower(preg_replace('/((?<=[a-z])(?=[A-Z]))/', '_', $table)) . '}}';
     }
     
     /**
@@ -98,10 +98,7 @@ class ActiveRecord extends Service
      */
     public function __set($name, $value)
     {
-        $columns = static::db()->schema()->getTableSchema(static::table())->columns;
-        if (in_array($name, $columns)) {
-            $this->attr[$name] = $value;
-        }
+        $this->_attr[$name] = $value;
     }
     
     /**
@@ -111,7 +108,7 @@ class ActiveRecord extends Service
      */
     public function __get($name)
     {
-        return $this->__isset($name) ? $this->attr[$name] : null;
+        return $this->__isset($name) ? $this->_attr[$name] : null;
     }
     
     /**
@@ -121,7 +118,7 @@ class ActiveRecord extends Service
      */
     public function __isset($name)
     {
-        return isset($this->attr[$name]);
+        return isset($this->_attr[$name]);
     }
     
     /**
@@ -130,18 +127,20 @@ class ActiveRecord extends Service
      */
     public function __unset($name)
     {
-        if (isset($this->attr[$name])) {
-            unset($this->attr[$name]);
-        }
+        unset($this->_attr[$name]);
     }
-    
+
     /**
      * 查找数据
-     * @return ActiveRecordQuery
+     * @return ActiveQuery
      */
     public static function find()
     {
-        return (new ActiveRecordQuery(static::db(), get_called_class()))->from([static::table()]);
+        $query = new ActiveQuery([
+            'db' => static::db(),
+            'class' => get_called_class(),
+        ]);
+        return $query->from(static::table());
     }
 
     /**
@@ -153,7 +152,7 @@ class ActiveRecord extends Service
      */
     public static function findOne($condition, $params = [])
     {
-        if (!is_array($condition)) {
+        if (!is_array($condition) && empty($params)) {
             $primaryKeys = static::db()->schema()->getTableSchema(static::table())->primaryKeys;
             if ($primaryKeys) {
                 $condition = [reset($primaryKeys) => $condition];
@@ -207,11 +206,11 @@ class ActiveRecord extends Service
         $event = new ActiveRecordEvent();
         $this->trigger(self::EVENT_BEFORE_INSERT, $event);
         $this->trigger(self::EVENT_BEFORE_SAVE, $event);
-        $rows = self::find()->insert(static::table(), $this->attr);
+        $rows = self::find()->insert(static::table(), $this->_attr);
         if (false !== $rows) {
             $autoIncrement = static::db()->schema()->getTableSchema(static::table())->autoIncrement;
             if ($autoIncrement) {
-                $this->attr[$autoIncrement] = static::db()->lastInsertId();
+                $this->_attr[$autoIncrement] = static::db()->lastInsertId();
             }
             $this->reload();
         }
@@ -232,7 +231,7 @@ class ActiveRecord extends Service
         if ($primaryKeys) {
             $values = [];
             foreach ($primaryKeys as $primaryKey) {
-                $values[$primaryKey] = isset($this->oldAttr[$primaryKey]) ? $this->oldAttr[$primaryKey] : null;
+                $values[$primaryKey] = isset($this->_oldAttr[$primaryKey]) ? $this->_oldAttr[$primaryKey] : null;
             }
             return $values;
         } else {
@@ -250,7 +249,7 @@ class ActiveRecord extends Service
         $event = new ActiveRecordEvent();
         $this->trigger(self::EVENT_BEFORE_UPDATE, $event);
         $this->trigger(self::EVENT_BEFORE_SAVE, $event);
-        $rows = self::find()->update(static::table(), $this->attr, $this->oldCondition());
+        $rows = self::find()->update(static::table(), $this->_attr, $this->oldCondition());
         if (false !== $rows) {
             $this->reload();
         }
@@ -271,7 +270,7 @@ class ActiveRecord extends Service
         $this->trigger(self::EVENT_BEFORE_DELETE, $event);
         $rows = self::find()->delete(static::table(), $this->oldCondition());
         if (false !== $rows) {
-            $this->oldAttr = null;
+            $this->_oldAttr = null;
         }
         $event->rows = $rows;
         $this->trigger(self::EVENT_AFTER_DELETE, $event);
@@ -284,7 +283,7 @@ class ActiveRecord extends Service
      */
     public function isNewRecord()
     {
-        return $this->oldAttr === null;
+        return $this->_oldAttr === null;
     }
 
     /**
@@ -303,7 +302,7 @@ class ActiveRecord extends Service
      */
     public function reload()
     {
-        $this->oldAttr = $this->attr;
+        $this->_oldAttr = $this->_attr;
         return $this;
     }
 }
