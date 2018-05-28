@@ -1,10 +1,7 @@
 <?php
 return [
     //COOKIE组件
-    'cookie' => [
-        'class' => 'lying\service\Cookie',
-        'key' => '123456',
-    ],
+    'cookie' => ['key' => 'lying'],
     //路由组件
     'router' => [
         'class' => 'lying\service\Router',
@@ -19,7 +16,7 @@ return [
             'yoyo' => ['index/index/index'],
         ],
         'host' => [
-            'admin.lying.work:8080' => [
+            'admin.lying.work' => [
                 'module' => 'admin',
                 'controller' => 'index',
                 'action' => 'index',
@@ -36,8 +33,8 @@ return [
         'dsn' => 'mysql:host=127.0.0.1;dbname=lying;charset=utf8',
         'user' => 'root',
         'pass' => '',
-        'options' => [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_SILENT],
-        'prefix' => 'b_',
+        'options' => [],
+        'prefix' => '',
         'cache' => false,
         'slave' => [
             //['dsn' => 'mysql:host=127.0.0.1;dbname=lying;charset=utf8', 'user' => 'root', 'pass' => 'root'],
@@ -88,9 +85,8 @@ return [
     //全局事件
     'hook' => [
         'events' => [
-            //['app_init', function () {}]
+            ['frameworkBegin', function () {}],
+            ['frameworkEnd', function () {}],
         ],
     ],
-
-    'helper' => 'lying\service\Helper',
 ];

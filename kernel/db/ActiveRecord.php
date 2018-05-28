@@ -195,7 +195,23 @@ class ActiveRecord extends Service
     {
         return self::find()->update(static::table(), $datas, $condition, $params);
     }
-    
+
+    /**
+     * 过滤attr,返回表中有的字段的数据
+     * @return array
+     */
+    private function filterAttr()
+    {
+        $columns = static::db()->schema()->getTableSchema(static::table())->columns;
+        $attr = [];
+        foreach ($this->_attr as $name => $value) {
+            if (in_array($name, $columns)) {
+                $attr[$name] = $value;
+            }
+        }
+        return $attr;
+    }
+
     /**
      * 插入当前设置的数据
      * @return int|false 成功返回插入的行数,失败返回false
@@ -205,7 +221,7 @@ class ActiveRecord extends Service
         $event = new ActiveRecordEvent();
         $this->trigger(self::EVENT_BEFORE_INSERT, $event);
         $this->trigger(self::EVENT_BEFORE_SAVE, $event);
-        $rows = self::find()->insert(static::table(), $this->_attr);
+        $rows = self::find()->insert(static::table(), $this->filterAttr());
         if (false !== $rows) {
             $autoIncrement = static::db()->schema()->getTableSchema(static::table())->autoIncrement;
             if ($autoIncrement) {
@@ -246,7 +262,7 @@ class ActiveRecord extends Service
         $event = new ActiveRecordEvent();
         $this->trigger(self::EVENT_BEFORE_UPDATE, $event);
         $this->trigger(self::EVENT_BEFORE_SAVE, $event);
-        $rows = self::find()->update(static::table(), $this->_attr, $this->oldCondition());
+        $rows = self::find()->update(static::table(), $this->filterAttr(), $this->oldCondition());
         if (false !== $rows) {
             $this->reload();
         }

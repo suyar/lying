@@ -8,12 +8,35 @@
 
 namespace console\tool\controller;
 
+use lying\db\Connection;
+
 /**
  * Class ModelTool
  * @package console\tool\controller
  */
 class ModelTool extends BaseTool
 {
+    /**
+     * @var Connection
+     */
+    protected $db;
+
+    /**
+     * @var string
+     */
+    protected $dbName;
+
+    /**
+     * @inheritdoc
+     */
+    protected function init()
+    {
+        parent::init();
+        $this->stdOut('Enter the service name of db(the default is \'db\'):', false);
+        $this->dbName = $this->stdIn() ?: 'db';
+        $this->db = \Lying::$maker->db($this->dbName);
+    }
+
     /**
      * 创建数据库模型
      */
@@ -22,9 +45,9 @@ class ModelTool extends BaseTool
         $tableArr = $this->getInputTables();
         list($namespace, $dir) = $this->getInputNamespace();
 
-        $prefix = \Lying::$maker->db()->prefix();
+        $prefix = \Lying::config('service.' . $this->dbName . '.prefix', '');
         foreach ($tableArr as $table) {
-            $tableName = preg_replace('/^'.preg_quote($prefix).'/', '', $table);
+            $tableName = preg_replace('/^' . preg_quote($prefix, '/') . '/', '', $table);
             $modelName = str_replace(' ', '', ucwords(str_replace('_', ' ', $tableName))) . 'Model';
             $modelFile = $dir . DS . $modelName . '.php';
             if (file_exists($modelFile)) {
@@ -35,7 +58,7 @@ class ModelTool extends BaseTool
                 }
             }
 
-            $cols = \Lying::$maker->db()->schema()->getTableSchema($table)->columns;
+            $cols = $this->db->schema()->getTableSchema($table)->columns;
             $content = implode(PHP_EOL, [
                 '<?php',
                 'namespace ' . $namespace . ';',
@@ -75,9 +98,9 @@ class ModelTool extends BaseTool
         $tableArr = $this->getInputTables();
         list($namespace, $dir) = $this->getInputNamespace(false);
 
-        $prefix = \Lying::$maker->db()->prefix();
+        $prefix = \Lying::config('service.' . $this->dbName . '.prefix', '');
         foreach ($tableArr as $table) {
-            $tableName = preg_replace('/^'.preg_quote($prefix).'/', '', $table);
+            $tableName = preg_replace('/^' . preg_quote($prefix, '/') . '/', '', $table);
             $modelName = str_replace(' ', '', ucwords(str_replace('_', ' ', $tableName))) . 'Model';
             $modelFile = $dir . DS . $modelName . '.php';
             if (!file_exists($modelFile)) {
@@ -85,7 +108,7 @@ class ModelTool extends BaseTool
                 continue;
             }
 
-            $cols = \Lying::$maker->db()->schema()->getTableSchema($table)->columns;
+            $cols = $this->db->schema()->getTableSchema($table)->columns;
             $content = implode(PHP_EOL, [
                 '/**',
                 ' * Class ' . $modelName,
@@ -117,8 +140,8 @@ class ModelTool extends BaseTool
      */
     private function getInputTables()
     {
-        $tables = \Lying::$maker->db()->schema()->getTableNames();
-        $this->stdOut('Enter the table name(split width | or just enter for all):', false);
+        $tables = $this->db->schema()->getTableNames();
+        $this->stdOut('Enter the table name(split width \'|\' or just enter for all):', false);
         $table = $this->stdIn();
         if ($table === '') {
             $tableArr = $tables;
@@ -140,7 +163,7 @@ class ModelTool extends BaseTool
     {
         $this->stdOut('Enter a namespace(use psr-0 with path `ROOT`):', false);
         $namespace = str_replace('/', '\\', trim($this->stdIn(), '/\\'));
-        $namespace || $this->stdErr('Unable to use empty or / for namespace');
+        $namespace || $this->stdErr('Unable to use \'\' or / for namespace');
         $this->stdOut("Use namespace `$namespace`");
         $dir = DIR_ROOT . DS . str_replace('\\', DS, $namespace);
         if (is_dir($dir)) {
