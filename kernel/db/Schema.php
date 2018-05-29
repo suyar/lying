@@ -212,12 +212,4 @@ class Schema extends Service
     {
         return is_string($str) ? $this->db->slavePdo()->quote($str) : $str;
     }
-
-
-
-
-
-
-
-
 }

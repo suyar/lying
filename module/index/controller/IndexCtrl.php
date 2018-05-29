@@ -2,6 +2,7 @@
 namespace module\index\controller;
 
 use lying\service\Controller;
+use module\index\model\UserModel;
 
 /**
  * Class IndexCtrl
