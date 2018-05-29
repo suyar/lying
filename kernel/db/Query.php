@@ -14,7 +14,7 @@ use lying\service\Service;
  * Class Query
  * @package lying\db
  */
-class Query extends Service
+class Query extends BaseActive
 {
     /**
      * @var array 要查询的字段

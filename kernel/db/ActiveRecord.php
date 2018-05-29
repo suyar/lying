@@ -15,7 +15,7 @@ use lying\service\Service;
  * Class ActiveRecord
  * @package lying\db
  */
-class ActiveRecord extends Service
+class ActiveRecord extends BaseActive
 {
     /**
      * @var string 插入前触发的事件ID
@@ -303,7 +303,7 @@ class ActiveRecord extends Service
      * 把新数据赋值给旧数据
      * @return $this
      */
-    public function reload()
+    protected function reload()
     {
         $this->_oldAttr = $this->_attr;
         return $this;
