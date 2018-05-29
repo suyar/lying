@@ -208,7 +208,7 @@ class ActiveRecord extends Service
      * 插入当前设置的数据
      * @return int|false 成功返回插入的行数,失败返回false
      */
-    public function insert()
+    private function insert()
     {
         $event = new ActiveRecordEvent();
         $this->trigger(self::EVENT_BEFORE_INSERT, $event);
@@ -249,7 +249,7 @@ class ActiveRecord extends Service
      * 更新当前数据
      * @return int|false 成功返回更新的行数,可能是0行,失败返回false
      */
-    public function update()
+    private function update()
     {
         $event = new ActiveRecordEvent();
         $this->trigger(self::EVENT_BEFORE_UPDATE, $event);
