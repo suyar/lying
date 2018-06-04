@@ -502,9 +502,11 @@ class Query extends BaseActive
         $place = $this->buildPlaceholders($val, $container);
         switch (strtoupper(trim($operation))) {
             case 'IN':
-                return "$field IN (" . implode(', ', $place) . ")";
+                $place = is_array($place) ? ('(' . implode(', ', $place) . ')') : $place;
+                return "$field IN $place";
             case 'NOT IN':
-                return "$field NOT IN (" . implode(', ', $place) . ")";
+                $place = is_array($place) ? ('(' . implode(', ', $place) . ')') : $place;
+                return "$field NOT IN $place";
             case 'BETWEEN':
                 list($p1, $p2) = $place;
                 return "$field BETWEEN $p1 AND $p2";
