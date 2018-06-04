@@ -45,8 +45,6 @@ class View extends Service
      * @param string $view 模板
      * @param array $context 上下文
      * @return string 返回渲染后的模板
-     * @throws \Exception 渲染出错抛出异常
-     * @throws \Throwable 渲染出错抛出异常
      */
     public function render($view, array $context = null)
     {
@@ -62,7 +60,6 @@ class View extends Service
      * @param string $file 模板文件
      * @param array $context 上下文
      * @return string 返回渲染后的模板
-     * @throws \Throwable 渲染出错抛出异常
      */
     public function renderFile($file, array $context = null)
     {
@@ -109,7 +106,6 @@ class View extends Service
      * @param string $view 解析的视图
      * @param array $context 上下文
      * @return string 返回视图文件的绝对路径
-     * @throws \Exception 视图参数错误抛出异常
      */
     public function inc($view, array $context = null)
     {
