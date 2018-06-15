@@ -1374,7 +1374,7 @@ class Response extends Service
         if (preg_match('/^https?:\/\/\S+/i', $url)) {
             $query = http_build_query($params, '', '&', PHP_QUERY_RFC3986);
             $url = rtrim($url, '?&');
-            if (empty($query)) {
+            if (!empty($query)) {
                 $url .= (strpos($url, '?') === false ? "?$query" : "&$query");
             }
         } else {
