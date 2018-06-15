@@ -20,9 +20,4 @@ class ExceptionEvent extends Event
      * @var \Exception|\Throwable
      */
     public $e;
-
-    /**
-     * @var bool
-     */
-    public $stop = true;
 }
