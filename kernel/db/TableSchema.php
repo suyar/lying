@@ -12,10 +12,10 @@ namespace lying\db;
  * Class TableSchema
  * @package lying\db
  *
- * @property string $name
- * @property array $columns
- * @property array $primaryKeys
- * @property string $autoIncrement
+ * @property string $name 表名
+ * @property array $columns 表中所有字段
+ * @property array $primaryKeys 所有的主键
+ * @property string $autoIncrement 自增的字段
  */
 class TableSchema
 {
@@ -66,5 +66,16 @@ class TableSchema
     public function __get($name)
     {
         return $this->$name;
+    }
+
+    /**
+     * 设置未知属性的值报错
+     * @param string $name 属性名
+     * @param mixed $value 属性值
+     * @throws \Exception
+     */
+    public function __set($name, $value)
+    {
+        throw new \Exception("Unable to reset property value: {$name}.");
     }
 }
