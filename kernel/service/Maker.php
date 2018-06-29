@@ -11,6 +11,7 @@ namespace lying\service;
 use lying\cache\Cache;
 use lying\db\Connection;
 use lying\exception\InvalidConfigException;
+use lying\upload\Upload;
 
 /**
  * Class Maker
@@ -30,6 +31,7 @@ use lying\exception\InvalidConfigException;
  * @method Cache cache(string $id = 'cache')
  * @method Redis redis(string $id = 'redis')
  * @method Connection db(string $id = 'db')
+ * @method Upload upload()
  * 
  * @property Hook $hook
  * @property Request $request
@@ -45,6 +47,7 @@ use lying\exception\InvalidConfigException;
  * @property Cache $cache
  * @property Redis $redis
  * @property Connection $db;
+ * @property Upload $upload
  */
 class Maker
 {
@@ -77,6 +80,7 @@ class Maker
         'cache' => ['class' => 'lying\cache\FileCache'],
         'redis' => ['class' => 'lying\service\Redis'],
         'db' => ['class' => 'lying\db\Connection'],
+        'upload' => ['class' => 'lying\upload\Upload'],
     ];
     
     /**
