@@ -241,8 +241,14 @@ class Router extends Service
 
     /**
      * URL生成
+     * ```php
+     * 路径[/index/blog/info],生成[/index/blog/info],使用此形式的时候请注意参数匹配,并且不会路由反解析
+     * 路径[post],生成[当前模块/当前控制器/post]
+     * 路径[post/index],生成[当前模块/post/index]
+     * 路径[admin/post/index],生成[admin/post/index],注意:此用法在模块绑定中会变成[post/index],模块绑定模式下,只需要最多到控制器就行
+     * ```
      * @param string $path 路径
-     * @param array $params 参数数组,不合法的参数将被剔除
+     * @param array $params 参数数组,不合法的参数将被剔除,如果有路由规则,参数中必须包含rule中的参数才能反解析
      * @param bool $host 是否携带完整域名,包含协议头,默认是
      * @param bool $normal 是否把参数设置成?a=1&b=2,默认否,优先pathinfo
      * @return string 返回生成的URL

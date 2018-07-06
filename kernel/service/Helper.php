@@ -130,4 +130,16 @@ class Helper
 
         return implode('', $closureTokens);
     }
+
+    /**
+     * 分页
+     * @param int $total 总条数
+     * @param int $page 页码
+     * @param int $limit 每页显示条数
+     * @return Pagination
+     */
+    public function paging($total, $page, $limit)
+    {
+        return new Pagination($total, $page, $limit);
+    }
 }
