@@ -113,6 +113,7 @@ class View extends Service
         $context && ($this->_context = $context);
         if ($this->_context) {
             list($m, $c, $a) = $this->_context;
+            $m = lcfirst(str_replace(' ', '', ucwords(str_replace('-', ' ', $m))));
             $path = DIR_MODULE . DS;
             if (strncmp($view, '/', 1) === 0) {
                 $path .= $m . DS . 'view' . str_replace('/', DS, rtrim($view, '/')) . '.php';
@@ -129,6 +130,7 @@ class View extends Service
                         $path .= $m . DS . 'view' . DS . str_replace('/', DS, $cview) . '.php';
                         break;
                     case 3:
+                        $viewArr[0] = lcfirst(str_replace(' ', '', ucwords(str_replace('-', ' ', $viewArr[0]))));
                         $path .= $viewArr[0] . DS . 'view' . DS . $viewArr[1] . DS . $viewArr[2] . '.php';
                         break;
                     default:
