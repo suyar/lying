@@ -93,7 +93,7 @@ class Lying
             $response = $result;
         } else {
             $response = self::$maker->response;
-            $response->setContent($result);
+            $result === null || $response->setContent($result);
         }
 
         $response->send();
