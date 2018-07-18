@@ -209,7 +209,7 @@ class Query extends BaseActive
      * @return $this
      * @see where()
      */
-    public function  andWhere($condition, $params = [])
+    public function andWhere($condition, $params = [])
     {
         if ($this->_where) {
             $this->_where[] = ['AND', $condition, $params];
@@ -692,7 +692,7 @@ class Query extends BaseActive
     {
         if (isset($this->_limit[1]) && $this->_limit[1] !== null) {
             return 'LIMIT ' . $this->_limit[0] . ', ' . $this->_limit[1];
-        } elseif (isset($this->limit[0])) {
+        } elseif (isset($this->_limit[0])) {
             return 'LIMIT ' . $this->_limit[0];
         } else {
             return '';
