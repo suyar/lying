@@ -25,6 +25,7 @@ class IndexCtrl extends Controller
   / /_/ // // // /\  // // /
  /____\_  //_//_/ /_/_\_  /
     /____/          \____/
+
 EOL;
         return $LOGO;
     }

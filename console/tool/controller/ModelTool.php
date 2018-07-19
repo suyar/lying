@@ -34,7 +34,7 @@ class ModelTool extends BaseTool
         parent::init();
         $this->stdOut('Enter the service name of db(the default is \'db\'):', false);
         $this->dbName = $this->stdIn() ?: 'db';
-        $this->db = \Lying::$maker->db($this->dbName);
+        $this->db = $this->maker->db($this->dbName);
     }
 
     /**
@@ -168,7 +168,7 @@ class ModelTool extends BaseTool
         $dir = DIR_ROOT . DS . str_replace('\\', DS, $namespace);
         if (is_dir($dir)) {
             $this->stdOut("Use directory `$dir`");
-        } else if ($cdir && @mkdir($dir, 0777, true)) {
+        } else if ($cdir && $this->maker->helper->mkdir($dir)) {
             $this->stdOut("Created directory `$dir`");
         } else if ($cdir) {
             $this->stdErr("Failed to create directory `$dir`");
