@@ -173,6 +173,9 @@ class Exception
             $content = 'An internal server error occurred.';
         }
 
-        \Lying::$maker->response->clear()->setStatusCode($httpCode)->setContent($content)->send();
+        \Lying::$maker->response->clear()
+            ->setStatusCode($httpCode)
+            ->setContent($content)
+            ->send();
     }
 }
