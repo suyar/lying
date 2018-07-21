@@ -9,6 +9,7 @@
 namespace lying\service;
 
 use lying\cache\Cache;
+use lying\captcha\Captcha;
 use lying\db\Connection;
 use lying\exception\InvalidConfigException;
 use lying\upload\Upload;
@@ -32,6 +33,7 @@ use lying\upload\Upload;
  * @method Redis redis(string $id = 'redis')
  * @method Connection db(string $id = 'db')
  * @method Upload upload()
+ * @method Captcha captcha()
  * 
  * @property Hook $hook
  * @property Request $request
@@ -48,6 +50,7 @@ use lying\upload\Upload;
  * @property Redis $redis
  * @property Connection $db;
  * @property Upload $upload
+ * @property Captcha $captcha
  */
 class Maker
 {
@@ -81,6 +84,7 @@ class Maker
         'redis' => ['class' => 'lying\service\Redis'],
         'db' => ['class' => 'lying\db\Connection'],
         'upload' => ['class' => 'lying\upload\Upload'],
+        'captcha' => ['class' => 'lying\captcha\Captcha'],
     ];
     
     /**
