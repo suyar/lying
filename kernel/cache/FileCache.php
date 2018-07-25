@@ -32,7 +32,7 @@ class FileCache extends Service implements Cache
      */
     protected function init()
     {
-        empty($this->dir) && ($this->dir = DIR_RUNTIME . DS . 'cache');
+        $this->dir = rtrim($this->dir, '/\\') ?: (DIR_RUNTIME . DS . 'cache');
 
         if (!\Lying::$maker->helper->mkdir($this->dir)) {
             throw new \Exception("Failed to create directory: {$this->dir}");

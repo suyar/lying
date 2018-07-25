@@ -72,7 +72,7 @@ class Logger extends Service
 
         $this->maxItem < 1 && ($this->maxItem = 500);
 
-        empty($this->dir) && ($this->dir = DIR_RUNTIME . DS . 'log');
+        $this->dir = rtrim($this->dir, '/\\') ?: (DIR_RUNTIME . DS . 'log');
 
         empty($this->file) && ($this->file = 'runtime');
 
