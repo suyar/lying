@@ -44,7 +44,7 @@ FEATURES
 * 完善的CLI制度。
 * 模块<->域名绑定。
 * 工厂`\Lying::$maker`简便使用服务类。
-* 原生PHP模板，渲染更快（实际上是懒得写模板引擎）。
+* 支持原生PHP模板，支持使用Smarty。
 * Apache，Nginx，IIS，虚拟主机简易部署。
 * And so on...
 

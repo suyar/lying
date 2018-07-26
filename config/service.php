@@ -110,4 +110,18 @@ return [
         'noisy' => 50, //噪点
         'expire' => 120, //验证码有效期
     ],
+    //视图设置
+    'view' => [
+        'suffix' => 'php',
+        'render' => [
+            'tpl' => [
+                'useBC' => false, //是否使用SmartyBC类
+                'compileDir' => DIR_RUNTIME . DS . 'cache' . DS . 'Smarty' . DS . 'compile', //编译模板的路径
+                'cacheDir' => DIR_RUNTIME. DS . 'cache' . DS . 'Smarty' . DS . 'cache', //缓存模板的路径
+                'options' => [], //Smarty额外的选项设置
+                'pluginsDirs' => [], //插件的绝对路径
+                'imports' => [], //默认注册到Smarty的类
+            ]
+        ],
+    ],
 ];

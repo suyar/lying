@@ -8,6 +8,7 @@
 
 namespace lying\view;
 
+use lying\service\Controller;
 use lying\service\Service;
 
 /**
@@ -20,7 +21,8 @@ abstract class Render extends Service
      * 模板渲染
      * @param string $file 要渲染的模板文件
      * @param array $params 渲染的参数
+     * @param Controller $context
      * @return string 返回渲染结果
      */
-    abstract public function render($file, $params);
+    abstract public function render($file, $params, Controller $context = null);
 }

@@ -8,6 +8,8 @@
 
 namespace lying\view;
 
+use lying\service\Controller;
+
 /**
  * Class Smarty
  * @package lying\view
@@ -20,7 +22,7 @@ class Smarty extends Render
     protected $useBC = false;
 
     /**
-     * @var string 编辑模板的路径
+     * @var string 编译模板的路径
      */
     protected $compileDir;
 
@@ -56,9 +58,9 @@ class Smarty extends Render
     {
         parent::init();
 
-        $this->compileDir = rtrim($this->compileDir, '/\\') ?: (DIR_ROOT . DS . 'Smarty' . DS . 'compile');
+        $this->compileDir = rtrim($this->compileDir, '/\\') ?: (DIR_RUNTIME . DS . 'cache' . DS . 'Smarty' . DS . 'compile');
 
-        $this->cacheDir = rtrim($this->cacheDir, '/\\') ?: (DIR_ROOT . DS . 'Smarty' . DS . 'cache');
+        $this->cacheDir = rtrim($this->cacheDir, '/\\') ?: (DIR_RUNTIME. DS . 'cache' . DS . 'Smarty' . DS . 'cache');
 
         $this->_smarty = $this->useBC ? new \SmartyBC() : new \Smarty();
 
@@ -80,10 +82,13 @@ class Smarty extends Render
     /**
      * @inheritDoc
      */
-    public function render($file, $params)
+    public function render($file, $params, Controller $context = null)
     {
-        //todo
-        $this->_smarty->setTemplateDir();
+        $tplDir = [dirname($file)];
+
+        $context && ($tplDir[] = $context->viewPath);
+
+        $this->_smarty->setTemplateDir($tplDir);
 
         $template = $this->_smarty->createTemplate($file, null, null, $params ?: null, null);
 

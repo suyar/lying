@@ -45,7 +45,13 @@ class Dispatch extends Service
                 if (is_subclass_of($class, 'lying\service\Controller')) {
                     if (method_exists($class, $a)) {
                         /** @var Controller $instance */
-                        $instance = $this->_controllers[$class] = new $class(['module'=>$raw[0], 'id'=>$raw[1], 'maker'=>\Lying::$maker]);
+                        $props = [
+                            'module' => $raw[0],
+                            'id' => $raw[1],
+                            'maker' => \Lying::$maker,
+                            'viewPath' => DIR_MODULE . DS . $m . DS . 'view',
+                        ];
+                        $instance = $this->_controllers[$class] = new $class($props);
                         $instance->on($instance::EVENT_BEFORE_ACTION, [$instance, 'beforeAction']);
                         $instance->on($instance::EVENT_AFTER_ACTION, [$instance, 'afterAction']);
                     }
