@@ -11,10 +11,10 @@ namespace console\tool\controller;
 use lying\db\Connection;
 
 /**
- * Class ModelTool
+ * Class ModelCtrl
  * @package console\tool\controller
  */
-class ModelTool extends BaseTool
+class ModelCtrl extends Std
 {
     /**
      * @var Connection

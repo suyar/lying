@@ -12,7 +12,7 @@ namespace console\tool\controller;
  * Class IndexCtrl
  * @package console\tool\controller
  */
-class IndexCtrl extends BaseTool
+class IndexCtrl extends Std
 {
     /**
      * LOGO
@@ -30,8 +30,8 @@ EOL;
      * @var array
      */
     private static $TOOLS = [
-        1 => ['Model Create', [ModelTool::class, 'create']],
-        2 => ['Model Update', [ModelTool::class, 'update']],
+        1 => ['Model Create', ['tool', 'model', 'create']],
+        2 => ['Model Update', ['tool', 'model', 'update']],
         0 => ['Exit'],
     ];
 
@@ -57,7 +57,7 @@ EOL;
         if ($toolId === '0') {
             exit(0);
         } if (isset(self::$TOOLS[$toolId])) {
-            call_user_func([new self::$TOOLS[$toolId][1][0](), self::$TOOLS[$toolId][1][1]]);
+            $this->maker->dispatch->run(self::$TOOLS[$toolId][1]);
         } else {
             $this->stdErr("Unknown tool");
         }

@@ -11,10 +11,10 @@ namespace console\tool\controller;
 use lying\service\Controller;
 
 /**
- * Class BaseTool
+ * Class Std
  * @package console\tool\controller
  */
-class BaseTool extends Controller
+class Std extends Controller
 {
     /**
      * 标准输入
@@ -41,7 +41,7 @@ class BaseTool extends Controller
      */
     protected function stdErr($err)
     {
-        fwrite(STDERR, 'ERROR: ' . $err);
+        fwrite(STDERR, 'Error: ' . $err . "\n");
         exit;
     }
 }
