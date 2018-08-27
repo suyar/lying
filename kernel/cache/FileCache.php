@@ -24,7 +24,17 @@ class FileCache extends Service implements Cache
     /**
      * @var float GC频率,数值为0到100之间,越小GC越频繁
      */
-    protected $gc = 100;
+    protected $gc = 50;
+
+    /**
+     * @var string 文件缓存的后缀名
+     */
+    protected $suffix = 'bin';
+
+    /**
+     * @var bool 是否对数据进行序列化
+     */
+    protected $serialize = true;
 
     /**
      * 初始化缓存文件夹
@@ -44,9 +54,9 @@ class FileCache extends Service implements Cache
      * @param string $key 键名
      * @return string 生成的文件名
      */
-    private function cacheFile($key)
+    public function cacheFile($key)
     {
-        return $this->dir . DS . md5($key) . '.bin';
+        return $this->dir . DS . md5($key) . '.' . $this->suffix;
     }
     
     /**
@@ -56,7 +66,7 @@ class FileCache extends Service implements Cache
     private function gc($all = false)
     {
         if ($all || mt_rand(0, 100) > $this->gc) {
-            foreach (glob($this->dir . DS . '*.bin') as $file) {
+            foreach (glob($this->dir . DS . '*.' . $this->suffix) as $file) {
                 if ($all) {
                     @unlink($file);
                 } elseif (@filemtime($file) < time()) {
@@ -107,7 +117,7 @@ class FileCache extends Service implements Cache
     {
         $this->gc();
         $cacheFile = $this->cacheFile($key);
-        if (@file_put_contents($cacheFile, serialize($value), LOCK_EX) !== false) {
+        if (@file_put_contents($cacheFile, $this->serialize ? serialize($value) : $value, LOCK_EX) !== false) {
             return @touch($cacheFile, time() + ($ttl > 0 ? $ttl : 31536000));
         }
         return false;
@@ -142,7 +152,8 @@ class FileCache extends Service implements Cache
             $fp = @fopen($cacheFile, 'r');
             if ($fp !== false) {
                 @flock($fp, LOCK_SH);
-                $value = @unserialize(stream_get_contents($fp));
+                $value = stream_get_contents($fp);
+                $this->serialize && ($value = @unserialize($value));
                 @flock($fp, LOCK_UN);
                 @fclose($fp);
                 return $value;

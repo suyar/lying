@@ -60,6 +60,8 @@ return [
         'class' => 'lying\cache\FileCache',
         'dir' => DIR_RUNTIME . DS . 'cache',
         'gc' => 50,
+        'suffix' => 'bin',
+        'serialize' => true,
     ],
     'apcu' => 'lying\cache\ApcuCache',
     'memcached' => [
@@ -113,15 +115,14 @@ return [
     //视图设置
     'view' => [
         'suffix' => 'php',
-        'render' => [
-            'tpl' => [
-                'useBC' => false, //是否使用SmartyBC类
-                'compileDir' => DIR_RUNTIME . DS . 'cache' . DS . 'Smarty' . DS . 'compile', //编译模板的路径
-                'cacheDir' => DIR_RUNTIME. DS . 'cache' . DS . 'Smarty' . DS . 'cache', //缓存模板的路径
-                'options' => [], //Smarty额外的选项设置
-                'pluginsDirs' => [], //插件的绝对路径
-                'imports' => [], //默认注册到Smarty的类
-            ]
-        ],
+        'cache' => 'tplCache',
+    ],
+    //缓存组件(用于模板缓存)
+    'tplCache' => [
+        'class' => 'lying\cache\FileCache',
+        'dir' => DIR_RUNTIME . DS . 'compile',
+        'gc' => 80,
+        'suffix' => 'php',
+        'serialize' => false,
     ],
 ];

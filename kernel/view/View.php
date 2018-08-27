@@ -20,30 +20,22 @@ class View extends Service
     /**
      * @var string 默认的模板文件后缀
      */
-    protected $suffix = 'php';
+    protected $suffix = 'html';
 
     /**
-     * @var array|Render[] 模板渲染引擎
-     * @todo twig support
+     * @var string 缓存组件ID
      */
-    protected $render = [
-        'tpl' => [],
-        //'twig' => [],
-    ];
-
-    /**
-     * @var array 后缀和类对应
-     * @todo twig support
-     */
-    protected $renderMap = [
-        'tpl' => 'lying\view\Smarty',
-        //'twig' => 'lying\view\Twig',
-    ];
+    protected $cache;
 
     /**
      * @var Controller 上下文,一般用于控制器中渲染
      */
     private $_context;
+
+    /**
+     * @var Template 模板解析类
+     */
+    private $_template;
 
     /**
      * 渲染模板
@@ -56,7 +48,7 @@ class View extends Service
     {
         $oldContext = $this->_context;
         $context && ($this->_context = $context);
-        $content = $this->renderFile($this->inc($view), $params);
+        $content = $this->renderFile($this->resovePath($view), $params);
         $this->_context = $oldContext;
         return $content;
     }
@@ -70,22 +62,14 @@ class View extends Service
      */
     public function renderFile($file, $params, Controller $context = null)
     {
-        if (false === is_file($file)) {
-            throw new \Exception("The view file does not exist: $file");
-        }
-
         $oldContext = $this->_context;
         $context && ($this->_context = $context);
 
-        if (isset($this->render[$this->suffix])) {
-            if (!$this->render[$this->suffix] instanceof Render) {
-                $opt = isset($this->render[$this->suffix]) && is_array($this->render[$this->suffix]) ? $this->render[$this->suffix] : [];
-                $this->render[$this->suffix] = new $this->renderMap[$this->suffix]($opt);
-            }
-            $render = $this->render[$this->suffix];
-            $content = $render->render($file, $params, $this->_context);
-        } else {
+        if ($this->suffix === 'php') {
             $content = $this->renderPhp($file, $params);
+        } else {
+            $this->_template || ($this->_template = new Template(['cache'=>$this->cache, 'view'=>$this]));
+            $content = $this->_template->render($file, $params);
         }
 
         $this->_context = $oldContext;
@@ -135,7 +119,7 @@ class View extends Service
      * @param Controller $context 上下文
      * @return string 返回视图文件的绝对路径
      */
-    public function inc($view, Controller $context = null)
+    public function resovePath($view, Controller $context = null)
     {
         $oldContext = $this->_context;
         $context && ($this->_context = $context);
@@ -152,6 +136,13 @@ class View extends Service
             $path = $view;
         }
         $this->_context = $oldContext;
-        return $path . '.' . $this->suffix;
+
+        $file = $path . '.' . $this->suffix;
+
+        if (is_file($file)) {
+            return $file;
+        }
+
+        throw new \Exception("The view file does not exist: {$file}");
     }
 }
