@@ -69,7 +69,7 @@ class View extends Service
             $content = $this->renderPhp($file, $params);
         } else {
             $this->_template || ($this->_template = new Template(['cache'=>$this->cache, 'view'=>$this]));
-            $content = $this->_template->render($file, $params);
+            $content = $this->_template->render($file, $params, $this->_context ? $this->_context->viewPath : '');
         }
 
         $this->_context = $oldContext;
@@ -83,7 +83,7 @@ class View extends Service
      * @return string 返回渲染结果
      * @throws \Throwable|\Exception
      */
-    private function renderPhp($file, $params)
+    public function renderPhp($file, $params)
     {
         //这一步是防止extract后变量名和$file冲突
         $fileHash = sha1($file);
@@ -118,6 +118,7 @@ class View extends Service
      * @param string $view 解析的视图
      * @param Controller $context 上下文
      * @return string 返回视图文件的绝对路径
+     * @throws \Exception 文件不存在抛出异常
      */
     public function resovePath($view, Controller $context = null)
     {

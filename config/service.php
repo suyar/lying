@@ -114,7 +114,7 @@ return [
     ],
     //视图设置
     'view' => [
-        'suffix' => 'php',
+        'suffix' => 'html',
         'cache' => 'tplCache',
     ],
     //缓存组件(用于模板缓存)

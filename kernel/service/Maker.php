@@ -118,6 +118,24 @@ class Maker
     }
 
     /**
+     * 手动注册服务,已经注册过的服务ID不会被修改
+     * @param string $id 服务ID
+     * @param array|string $service 服务配置
+     * @return Maker
+     */
+    public function register($id, $service = [])
+    {
+        if (!isset(self::$_service[$id]))  {
+            if (is_array($service) && isset($service['class'])) {
+                self::$_service[$id] = $service;
+            } elseif (is_string($service)) {
+                self::$_service[$id] = ['class' => $service];
+            }
+        }
+        return $this;
+    }
+
+    /**
      * 根据ID返回注册的服务
      * @param string $id 服务ID
      * @return Service 返回所实例化的服务类
