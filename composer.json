@@ -2,9 +2,9 @@
 	"name": "carolkey/lying",
 	"description": "PHP Framework",
 	"type": "project",
-	"keywords": ["lying", "framework"],
+	"keywords": ["Lying", "PHP", "Framework"],
 	"homepage": "https://github.com/carolkey/lying",
-	"time": "2018-07-26",
+	"time": "2018-08-29",
 	"license": "MIT",
 	"authors": [
 		{"name": "su", "email": "su@revoke.cc", "homepage": "https://github.com/carolkey", "role": "Developer"}
