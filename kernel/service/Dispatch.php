@@ -63,7 +63,8 @@ class Dispatch extends Service
                 $method = new \ReflectionMethod($instance, $a);
                 if ($method->isPublic() && $this->checkAccess($instance->deny, $a)) {
                     $response = null;
-                    $event = new ActionEvent(['action'=>$raw[2]]);
+                    $event = new ActionEvent();
+                    $event->action = $raw[2];
                     $instance->trigger($instance::EVENT_BEFORE_ACTION, $event);
                     if (!$event->return) {
                         $instance->action = $raw[2];
