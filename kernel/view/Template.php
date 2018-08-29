@@ -248,10 +248,57 @@ class Template extends Service
         }
     }
 
-
+    /**
+     * 编译普通标签
+     * @param string $content
+     */
     private function parseTags(&$content)
     {
+        $pattern = [
+            '/\{(\$\S+.*?)[ \t]*\}/',
+            '/\{:(\S+.*?)[ \t]*\}/',
+            '/\{if[ \t]+(\S+.*?)[ \t]*\}/',
+            '/\{else[ \t]*if[ \t]+(\S+.*?)[ \t]*\}/',
+            '/\{else\}/',
+            '/\{\/if\}/',
+            '/\{loop[ \t]+(\S+.*?)[ \t]+(\$[A-Za-z_]\w*?)[ \t]+(\$[A-Za-z_]\w*?)[ \t]*\}/',
+            '/\{loop[ \t]+(\S+.*?)[ \t]+(\$[A-Za-z_]\w*?)[ \t]*\}/',
+            '/\{\/loop\}/',
 
+            '/(\{)!(\$\S+.*?[ \t]*\})/',
+            '/(\{)!(:\S+.*?[ \t]*\})/',
+            '/(\{)!(if[ \t]+\S+.*?[ \t]*\})/',
+            '/(\{)!(else[ \t]*if[ \t]+\S+.*?[ \t]*\})/',
+            '/(\{)!(else\})/',
+            '/(\{)!(\/if\})/',
+            '/(\{)!(loop[ \t]+\S+.*?[ \t]+\$[A-Za-z_]\w*?[ \t]+\$[A-Za-z_]\w*?[ \t]*\})/',
+            '/(\{)!(loop[ \t]+\S+.*?[ \t]+\$[A-Za-z_]\w*?[ \t]*\})/',
+            '/(\{)!(\/loop\})/',
+        ];
+
+        $replace = [
+            '<?= htmlentities($1); ?>',
+            '<?= $1; ?>',
+            '<?php if ($1): ?>',
+            '<?php elseif ($1): ?>',
+            '<?php else: ?>',
+            '<?php endif; ?>',
+            '<?php foreach ($1 as $2 => $3): ?>',
+            '<?php foreach ($1 as $2): ?>',
+            '<?php endforeach; ?>',
+
+            '$1$2',
+            '$1$2',
+            '$1$2',
+            '$1$2',
+            '$1$2',
+            '$1$2',
+            '$1$2',
+            '$1$2',
+            '$1$2',
+        ];
+
+        $content = preg_replace($pattern, $replace, $content);
     }
 
     /**
