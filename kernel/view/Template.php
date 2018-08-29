@@ -108,7 +108,7 @@ class Template extends Service
      */
     private function parseEol(&$content)
     {
-        $content = preg_replace('/\r?\n(\r?\n)*( |\t)*(\r?\n)*\r\n/s', "\n", $content);
+        $content = preg_replace('/\r?\n(\r?\n)*[ |\t]*(\r?\n)*\r\n/s', "\n", $content);
     }
 
     /**
@@ -128,7 +128,7 @@ class Template extends Service
     private function parseNative(&$content, $revert = false)
     {
         if ($revert) {
-            $regex = '/<!--###native(\d)evitan###-->/s';
+            $regex = '/<!--###native(\d)evitan###-->/';
             if (preg_match_all($regex, $content, $matches, PREG_SET_ORDER)) {
                 foreach ($matches as $match) {
                     $content = str_replace($match[0], $this->_native[$match[1]], $content);
@@ -155,7 +155,7 @@ class Template extends Service
      */
     private function parseBlock(&$content)
     {
-        $regex = '/\{block name=([\'"])(\S+?)\1\}(.*?)\{\/block\}/s';
+        $regex = '/\{block[ \t]+name[ \t]*=[ \t]*([\'"])(\S+?)\1[ \t]*\}(.*?)\{\/block\}/s';
         $blocks = [];
         if (preg_match_all($regex, $content, $matches, PREG_SET_ORDER)) {
             foreach ($matches as $match) {
@@ -172,7 +172,7 @@ class Template extends Service
      */
     private function parseExtend(&$content)
     {
-        $regex = '/^\s*\{extend name=([\'"])(\S+?)\1\}\r?\n/';
+        $regex = '/^\s*\{extend[ \t]+name[ \t]*=[ \t]*([\'"])(\S+?)\1[ \t]*\}\r?\n/';
 
         $blocks = [];
 
@@ -227,7 +227,7 @@ class Template extends Service
      */
     private function parseInclude(&$content)
     {
-        $regex = '/\{include name=([\'"])(\S+?)\1\}/s';
+        $regex = '/\{include[ \t]+name[ \t]*=[ \t]*([\'"])(\S+?)\1[ \t]*\}/s';
 
         if (preg_match_all($regex, $content, $matches, PREG_SET_ORDER)) {
 
@@ -265,15 +265,18 @@ class Template extends Service
             '/\{loop[ \t]+(\S+.*?)[ \t]+(\$[A-Za-z_]\w*?)[ \t]*\}/',
             '/\{\/loop\}/',
 
+            '/^(\s*\{)!(extend[ \t]+name[ \t]*=[ \t]*([\'"])\S+?\3[ \t]*\}\r?\n)/',
+            '/(\{)!(native\})/',
+            '/(\{)!(block[ \t]+name[ \t]*=[ \t]*([\'"])\S+?\3[ \t]*\})/',
+            '/(\{)!(include[ \t]+name[ \t]*=[ \t]*([\'"])\S+?\3[ \t]*\})/',
             '/(\{)!(\$\S+.*?[ \t]*\})/',
             '/(\{)!(:\S+.*?[ \t]*\})/',
             '/(\{)!(if[ \t]+\S+.*?[ \t]*\})/',
             '/(\{)!(else[ \t]*if[ \t]+\S+.*?[ \t]*\})/',
             '/(\{)!(else\})/',
-            '/(\{)!(\/if\})/',
             '/(\{)!(loop[ \t]+\S+.*?[ \t]+\$[A-Za-z_]\w*?[ \t]+\$[A-Za-z_]\w*?[ \t]*\})/',
             '/(\{)!(loop[ \t]+\S+.*?[ \t]+\$[A-Za-z_]\w*?[ \t]*\})/',
-            '/(\{)!(\/loop\})/',
+            '/(\{)!(\/(?:loop|if|native|block)\})/',
         ];
 
         $replace = [
@@ -287,6 +290,9 @@ class Template extends Service
             '<?php foreach ($1 as $2): ?>',
             '<?php endforeach; ?>',
 
+            '$1$2',
+            '$1$2',
+            '$1$2',
             '$1$2',
             '$1$2',
             '$1$2',
