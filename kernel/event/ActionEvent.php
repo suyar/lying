@@ -17,6 +17,11 @@ use lying\service\Event;
 class ActionEvent extends Event
 {
     /**
+     * @var bool 是否不再继续执行后面的操作
+     */
+    public $return = false;
+
+    /**
      * @var string 方法名
      */
     public $action;

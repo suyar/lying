@@ -68,8 +68,7 @@ class Controller extends Service
      * @throws \Exception 当CSRF验证未通过的时候抛出400
      */
     public function beforeAction(ActionEvent $event) {
-        $this->action = $event->action;
-        if (\Lying::$maker->request()->validateCsrfToken() === false) {
+        if (\Lying::$maker->request->validateCsrfToken() === false) {
             throw new HttpException('Unable to verify your data submission.', 400);
         }
     }

@@ -62,9 +62,17 @@ class Dispatch extends Service
             if (isset($instance)) {
                 $method = new \ReflectionMethod($instance, $a);
                 if ($method->isPublic() && $this->checkAccess($instance->deny, $a)) {
-                    $instance->trigger($instance::EVENT_BEFORE_ACTION, new ActionEvent(['action'=>$raw[2]]));
-                    $response = call_user_func_array([$instance, $a], $this->parseArgs($method->getParameters(), $params));
-                    $instance->trigger($instance::EVENT_AFTER_ACTION, new ActionEvent(['action'=>$raw[2], 'response'=>$response]));
+                    $response = null;
+                    $event = new ActionEvent(['action'=>$raw[2]]);
+                    $instance->trigger($instance::EVENT_BEFORE_ACTION, $event);
+                    if (!$event->return) {
+                        $instance->action = $raw[2];
+                        $response = call_user_func_array([$instance, $a], $this->parseArgs($method->getParameters(), $params));
+                        $event->action = $raw[2];
+                        $event->response = $response;
+                        $event->stop = false;
+                        $instance->trigger($instance::EVENT_AFTER_ACTION, $event);
+                    }
                     return $response;
                 }
             }
