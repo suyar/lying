@@ -264,9 +264,12 @@ class Template extends Service
             '/\{loop[ \t]+(\S+.*?)[ \t]+(\$[A-Za-z_]\w*?)[ \t]+(\$[A-Za-z_]\w*?)[ \t]*\}/',
             '/\{loop[ \t]+(\S+.*?)[ \t]+(\$[A-Za-z_]\w*?)[ \t]*\}/',
             '/\{\/loop\}/',
+            '/\{for[ \t]+(.*?)[ \t]*;[ \t]*(.*?)[ \t]*;[ \t]*(.*?)[ \t]*\}/',
+            '/\{\/for\}/',
+            '/\{(break|continue)\}/',
 
             '/^(\s*\{)!(extend[ \t]+name[ \t]*=[ \t]*([\'"])\S+?\3[ \t]*\}\r?\n)/',
-            '/(\{)!(native\})/',
+            '/(\{)!((?:native|break|continue)\})/',
             '/(\{)!(block[ \t]+name[ \t]*=[ \t]*([\'"])\S+?\3[ \t]*\})/',
             '/(\{)!(include[ \t]+name[ \t]*=[ \t]*([\'"])\S+?\3[ \t]*\})/',
             '/(\{)!(\$\S+.*?[ \t]*\})/',
@@ -276,7 +279,8 @@ class Template extends Service
             '/(\{)!(else\})/',
             '/(\{)!(loop[ \t]+\S+.*?[ \t]+\$[A-Za-z_]\w*?[ \t]+\$[A-Za-z_]\w*?[ \t]*\})/',
             '/(\{)!(loop[ \t]+\S+.*?[ \t]+\$[A-Za-z_]\w*?[ \t]*\})/',
-            '/(\{)!(\/(?:loop|if|native|block)\})/',
+            '/(\{)!(for[ \t]+.*?[ \t]*;[ \t]*.*?[ \t]*;[ \t]*.*?[ \t]*\})/',
+            '/(\{)!(\/(?:loop|if|native|block|for)\})/',
         ];
 
         $replace = [
@@ -289,7 +293,11 @@ class Template extends Service
             '<?php foreach ($1 as $2 => $3): ?>',
             '<?php foreach ($1 as $2): ?>',
             '<?php endforeach; ?>',
+            '<?php for ($1; $2; $3): ?>',
+            '<?php endfor; ?>',
+            '<?php $1; ?>',
 
+            '$1$2',
             '$1$2',
             '$1$2',
             '$1$2',
