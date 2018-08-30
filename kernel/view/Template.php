@@ -339,6 +339,8 @@ class Template extends Service
 
         $head = '<?php /*' . serialize($this->_include) . "*/ ?>\n";
 
+        $this->_include = [];
+
         $this->cache->set($viewPath . $file, $head . $content);
     }
 }
