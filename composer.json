@@ -4,12 +4,13 @@
 	"type": "project",
 	"keywords": ["Lying", "PHP", "Framework"],
 	"homepage": "https://github.com/carolkey/lying",
-	"time": "2018-08-29",
+	"time": "2018-08-31",
 	"license": "MIT",
 	"authors": [
 		{"name": "su", "email": "su@revoke.cc", "homepage": "https://github.com/carolkey", "role": "Developer"}
 	],
 	"require":{
-		"php": ">=5.5.0"
+		"php": ">=5.5.0",
+		"ext-pdo": "*"
 	}
 }

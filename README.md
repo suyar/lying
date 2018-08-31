@@ -1,4 +1,4 @@
-~~~
+~~~html
      __        __
     / / __ __ /_/__  __ ____
    / / / // // //  \/ // _  \
@@ -13,6 +13,9 @@
 
 > 因为采用了Yii2的部分设计，所以Lying和Yii2的使用方式有诸多的相同点。
 
+项目地址 [https://github.com/carolkey/lying](https://github.com/carolkey/lying)
+
+
 INSTALL
 -------
 `git clone git@github.com:carolkey/lying.git`  
@@ -20,11 +23,11 @@ INSTALL
 REQUIREMENTS
 ------------
 > * php : >= 5.5.0
-> * pdo : *
-> * apcu : *（可选）
-> * memcached : *（可选）
-> * redis : (可选)
-> * Smarty : (可选)
+> * ext-pdo : *
+> * ext-apcu : *（可选）
+> * ext-memcached : *（可选）
+> * ext-redis : (可选)
+> * ext-gd : (可选)
 
 DOCUMENTATION
 -------------
@@ -35,19 +38,25 @@ FEATURES
 * 单入口经典MVC。
 * 代码库0依赖。
 * 代码遵循PSR-2规范。
-* 基于PSR-0，PSR-4，classMap多种自动加载方式。
-* 基于Service Locator的设计，懒加载、配置和逻辑代码分离，扩展方便。
+* 支持PSR-0，PSR-4（推荐），classMap多种自动加载方式。
+* 基于Service Locator的设计，服务懒加载,，配置和逻辑代码分离，扩展方便。
 * 统一功能接口，功能相同的服务类在配置文件即可自由无缝切换，不影响逻辑代码。
 * PDO实现的MySQL QueryBuilder + ActiveRecord支持，数据库支持主从分离。
 * Apcu/Memcached/File/Redis多种缓存实现。
 * 高性能FileLog日志实现。
+* 支持模块和域名绑定。
 * 路由支持正反向解析（路由仅支持rewrite模式，如果服务器不支持，请移步其他框架）。
-* 完善的CLI制度。
-* 模块<->域名绑定。
+* 支持CLI调度。
 * 工厂`\Lying::$maker`简便使用服务类。
-* 支持原生PHP模板，支持使用Smarty。
+* 支持简易的模板引擎（模板继承、模板引用、模板注释、原样显示等），当然也可以使用原生PHP模板。
 * Apache，Nginx，IIS，虚拟主机简易部署。
 * And so on...
+
+TODO
+-------
+* CURL服务
+* 数据验证器
+* 其他优化
 
 LICENCE
 -------
@@ -55,4 +64,4 @@ LICENCE
 
 FEEDBACK
 --------
-* MAIL：<su@revoke.cc>
+* email：<su@revoke.cc>

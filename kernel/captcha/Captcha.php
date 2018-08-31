@@ -80,8 +80,9 @@ class Captcha extends Service
     /**
      * 生成验证码
      * @param string $scene 验证码场景值
+     * @param int $expire 验证码有效期,不填写则使用默认配置
      */
-    public function render($scene = 'default')
+    public function render($scene = 'default', $expire = 0)
     {
         //验证码字符串
         $codeStr = substr(str_shuffle(self::$_chars), 0, $this->length);
@@ -120,7 +121,7 @@ class Captcha extends Service
         }
 
         //写入session
-        \Lying::$maker->session->set('captcha_' . $scene, [$codeStr, time() + $this->expire]);
+        \Lying::$maker->session->set('captcha_' . $scene, [$codeStr, time() + ($expire ?: $this->expire)]);
 
         //输出图片头
         \Lying::$maker->response->setHeader('Content-Type', 'image/png')->send();
@@ -133,15 +134,16 @@ class Captcha extends Service
      * 校验验证码
      * @param string $code 验证码
      * @param string $scene 验证码场景值
+     * @param bool $once 是否一次性验证
      * @return bool 成功返回true,失败返回false
      */
-    public function check($code, $scene = 'default')
+    public function check($code, $scene = 'default', $once = true)
     {
         if ($code) {
             $key = 'captcha_' . $scene;
             $scode = \Lying::$maker->session->get($key);
             if ($scode) {
-                \Lying::$maker->session->remove($key);
+                $once && \Lying::$maker->session->remove($key);
                 return $scode[1] >= time() && strval(strtolower($code)) === strval(strtolower($scode[0]));
             }
         }
