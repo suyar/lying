@@ -50,36 +50,36 @@ class Upload extends Service
         if ($file->error !== UPLOAD_ERR_OK) {
             switch ($file->error) {
                 case UPLOAD_ERR_INI_SIZE:
-                    $this->setError('上传文件超出INI配置大小');
+                    $this->setError('The uploaded file exceeds the upload_max_filesize directive in php.ini');
                     break;
                 case UPLOAD_ERR_FORM_SIZE:
-                    $this->setError('上传文件超出表单配置大小');
+                    $this->setError('The uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the HTML form');
                     break;
                 case UPLOAD_ERR_PARTIAL:
-                    $this->setError('上传的文件不完整');
+                    $this->setError('The uploaded file was only partially uploaded');
                     break;
                 case UPLOAD_ERR_NO_FILE:
-                    $this->setError('没有文件被上传');
+                    $this->setError('No file was uploaded');
                     break;
                 case UPLOAD_ERR_NO_TMP_DIR:
-                    $this->setError('找不到临时文件夹');
+                    $this->setError('Missing a temporary folder');
                     break;
                 case UPLOAD_ERR_CANT_WRITE:
-                    $this->setError('文件写入失败');
+                    $this->setError('Failed to write file to disk');
                     break;
             }
             return false;
         } elseif ($ext && !in_array($file->getExtension(), $ext)) {
-            $this->setError('不支持的文件扩展名');
+            $this->setError('Unsupported file extension');
             return false;
         } elseif ($size && $file->size > $size) {
-            $this->setError('上传的文件超出配置大小');
+            $this->setError('Uploaded file exceeds size');
             return false;
         } elseif ($type && !in_array($file->type, $type)) {
-            $this->setError('不支持的文件类型');
+            $this->setError('Unsupported file MIME');
             return false;
         } elseif (!is_uploaded_file($file->tmp_name)) {
-            $this->setError('非上传文件');
+            $this->setError('Non-uploaded file');
             return false;
         } else {
             $this->setError('');
@@ -102,7 +102,7 @@ class Upload extends Service
                 $destination = $dir . DS . $file->getSaveName();
                 return move_uploaded_file($file->tmp_name, $destination);
             } else {
-                $this->setError('文件夹创建失败');
+                $this->setError('Failed to create directory');
                 return false;
             }
         }
