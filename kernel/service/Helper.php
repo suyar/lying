@@ -142,4 +142,54 @@ class Helper
     {
         return new Pagination($total, $page, $limit);
     }
+
+    /**
+     * CURL进行HTTP GET请求
+     * @param string $url 请求的URL
+     * @param array $options 额外的CURL选项
+     * @param string $curlError CURL错误信息
+     * @param array $curlInfo CURL请求信息
+     * @return mixed
+     */
+    public function httpGet($url, $options = [], &$curlError = '', &$curlInfo = [])
+    {
+        $ch = curl_init($url);
+        curl_setopt_array($ch, $options + [
+            CURLOPT_HEADER => false,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_SSL_VERIFYPEER => false,
+        ]);
+        $res = curl_exec($ch);
+        $curlError = curl_error($ch);
+        $curlInfo = curl_getinfo($ch);
+        curl_close($ch);
+        return $res;
+    }
+
+    /**
+     * CURL进行HTTP POST请求
+     * @param string $url 请求的URL
+     * @param mixed $data POST的数据
+     * @param array $options 额外的CURL选项
+     * @param string $curlError CURL错误信息
+     * @param array $curlInfo CURL请求信息
+     * @return mixed
+     */
+    public function httpPost($url, $data, $options = [], &$curlError = '', &$curlInfo = [])
+    {
+        $ch = curl_init($url);
+        curl_setopt_array($ch, $options + [
+            CURLOPT_POST => true,
+            CURLOPT_HEADER => false,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_SAFE_UPLOAD => true,
+            CURLOPT_POSTFIELDS => $data,
+            CURLOPT_SSL_VERIFYPEER => false,
+        ]);
+        $res = curl_exec($ch);
+        $curlError = curl_error($ch);
+        $curlInfo = curl_getinfo($ch);
+        curl_close($ch);
+        return $res;
+    }
 }

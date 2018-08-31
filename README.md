@@ -54,7 +54,6 @@ FEATURES
 
 TODO
 -------
-* CURL服务
 * 数据验证器
 * 其他优化
 
