@@ -74,6 +74,9 @@ return [
         'password' => '',
         'options' => [],
     ],
+    'arraycache' => [
+        'class' => 'lying\cache\ArrayCache',
+    ],
     'redis' => [
         'class' => 'lying\service\Redis',
         'host' => '127.0.0.1',
