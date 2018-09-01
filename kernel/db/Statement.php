@@ -8,6 +8,7 @@
 
 namespace lying\db;
 
+use lying\service\Event;
 use lying\service\Service;
 
 /**
@@ -195,7 +196,10 @@ class Statement extends Service
     private function execute($isRead = null)
     {
         $this->prepare($isRead);
+        $event = new Event();
+        $this->trigger(self::EVENT_BEFORE_EXECUTE, $event);
         $this->_statement->execute();
+        $this->trigger(self::EVENT_AFTER_EXECUTE, $event);
     }
 
     /**
