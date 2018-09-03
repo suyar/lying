@@ -131,6 +131,19 @@ class ActiveRecord extends BaseActive
     }
 
     /**
+     * 载入数据
+     * @param array $data 要载入的数据
+     * @return $this
+     */
+    public function load($data)
+    {
+        if (is_array($data)) {
+            $this->_attr = array_merge($this->_attr, $data);
+        }
+        return $this;
+    }
+
+    /**
      * 查找数据
      * @return ActiveQuery
      */
