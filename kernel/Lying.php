@@ -112,7 +112,7 @@ class Lying
     {
         $config = self::$_config;
         foreach (explode('.', $key) as $k) {
-            if (isset($config[$k])) {
+            if (array_key_exists($k, $config)) {
                 $config = $config[$k];
             } else {
                 return $default;

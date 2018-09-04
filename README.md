@@ -62,6 +62,7 @@ TODO
 * 全局错误信息规范
 * 全局isset代码review，是否需要用array_key_exists替换
 * session支持多维数组操作
+* request的get/post操作支持多维数组
 
 LICENCE
 -------

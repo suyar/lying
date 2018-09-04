@@ -54,7 +54,7 @@ class Cookie extends Service
      */
     public function exists($name)
     {
-        return array_key_exists($name, $_COOKIE);
+        return isset($_COOKIE[$name]);
     }
     
     /**
