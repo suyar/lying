@@ -57,6 +57,12 @@ TODO
 * 数据验证器
 * 其他优化
 
+* 多语言(语言包)
+* 文件上传优化(获取MIME等)
+* 全局错误信息规范
+* 全局isset代码review，是否需要用array_key_exists替换
+* session支持多维数组操作
+
 LICENCE
 -------
 [MIT](https://opensource.org/licenses/MIT)
