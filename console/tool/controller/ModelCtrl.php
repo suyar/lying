@@ -32,7 +32,7 @@ class ModelCtrl extends Std
     protected function init()
     {
         parent::init();
-        $this->stdOut('Enter the service name of db(the default is \'db\'):', false);
+        $this->stdOut('--with-connection=(db):', false);
         $this->dbName = $this->stdIn() ?: 'db';
         $this->db = $this->maker->db($this->dbName);
     }

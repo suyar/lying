@@ -52,14 +52,14 @@ EOL;
         foreach (self::$TOOLS as $id => $tool) {
             $this->stdOut("{$id}: {$tool[0]}");
         }
-        $this->stdOut("Type the number into the corresponding tool:", false);
+        $this->stdOut("--with-tool:", false);
         $toolId = $this->stdIn();
         if ($toolId === '0') {
             exit(0);
         } if (isset(self::$TOOLS[$toolId])) {
             $this->maker->dispatch->run(self::$TOOLS[$toolId][1]);
         } else {
-            $this->stdErr("Unknown tool");
+            $this->stdErr("Undefined tool:{$toolId}");
         }
     }
 }
