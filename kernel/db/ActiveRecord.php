@@ -112,13 +112,13 @@ class ActiveRecord extends BaseActive
     }
     
     /**
-     * 属性是否存在
+     * 属性是否存在(键是否存在)
      * @param string $name 属性名
      * @return bool
      */
     public function __isset($name)
     {
-        return isset($this->_attr[$name]);
+        return array_key_exists($name, $this->_attr[$name]);
     }
     
     /**
