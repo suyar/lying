@@ -192,4 +192,56 @@ class Helper
         curl_close($ch);
         return $res;
     }
+
+    /**
+     * 数组取值,支持点分割的键
+     * @param array $data 要取值的数组
+     * @param string $key 要取的键,如果键为null,则返回整个数组
+     * @param mixed $default 默认值
+     * @param bool $exists 引用返回键是否存在
+     * @return mixed
+     */
+    public function arrGetter(array $data, $key, $default = null, &$exists = null)
+    {
+        if ($key === null) {
+            return $data;
+        }
+
+        foreach (explode('.', $key) as $k) {
+            if (is_array($data) && array_key_exists($k, $data)) {
+                $data = $data[$k];
+            } else {
+                $exists = false;
+                return $default;
+            }
+        }
+
+        $exists = true;
+        return $data;
+    }
+
+    /**
+     * 数组赋值,支持点分割的键
+     * @param array $data 要赋值的数组
+     * @param string $key 赋值的键,如果为null,就把整个数组改变为$value
+     * @param mixed $value 要设置的值
+     * @return array 返回最后一维数组
+     */
+    public function arrSetter(array &$data, $key, $value)
+    {
+        if ($key === null) {
+            return $data = $value;
+        }
+
+        $keys = explode('.', $key);
+        while (count($keys) > 1) {
+            $key = array_shift($keys);
+            if (!is_array($data[$key]) || !array_key_exists($key, $data)) {
+                $data[$key] = [];
+            }
+            $data = &$data[$key];
+        }
+        $data[array_shift($keys)] = $value;
+        return $data;
+    }
 }
