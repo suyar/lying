@@ -69,32 +69,24 @@ class Request extends Service
 
     /**
      * 返回GET参数,如果不设置$name,则返回整个GET数组
-     * @param string|null $name 参数名,放空则返回整个GET数组
+     * @param string $name 参数名,放空则返回整个GET数组
      * @param mixed $default 参数不存在的时候,返回的默认值
-     * @return array|mixed|null 返回请求的GET参数
+     * @return mixed 返回请求的GET参数
      */
     public function get($name = null, $default = null)
     {
-        if ($name === null) {
-            return $this->_getParams;
-        } else {
-            return isset($this->_getParams[$name]) ? $this->_getParams[$name] : $default;
-        }
+        return \Lying::$maker->helper->arrGetter($this->_getParams, $name, $default);
     }
 
     /**
      * 返回POST参数,如果不设置$name,则返回整个POST数组
-     * @param string|null $name 参数名,放空则返回整个POST数组
+     * @param string $name 参数名,放空则返回整个POST数组
      * @param mixed $default 参数不存在的时候,返回的默认值
-     * @return array|mixed|null 返回请求的POST参数
+     * @return mixed 返回请求的POST参数
      */
     public function post($name = null, $default = null)
     {
-        if ($name === null) {
-            return $this->_postParams;
-        } else {
-            return isset($this->_postParams[$name]) ? $this->_postParams[$name] : $default;
-        }
+        return \Lying::$maker->helper->arrGetter($this->_postParams, $name, $default);
     }
 
     /**

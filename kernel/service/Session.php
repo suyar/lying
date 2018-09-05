@@ -62,7 +62,8 @@ class Session extends Service
      */
     public function get($key, $default = null)
     {
-        return $this->exists($key) ? $_SESSION[$key] : $default;
+        $this->open();
+        return \Lying::$maker->helper->arrGetter($_SESSION, $key, $default);
     }
 
     /**
@@ -72,17 +73,20 @@ class Session extends Service
      */
     public function set($key, $value)
     {
-        $this->open() && ($_SESSION[$key] = $value);
+        $this->open();
+        \Lying::$maker->helper->arrSetter($_SESSION, $key, $value);
     }
 
     /**
-     * SESSION是否存在
+     * SESSION键是否存在
      * @param string $key 键名
      * @return bool 返回SESSION是否存在
      */
     public function exists($key)
     {
-        return $this->open() && isset($_SESSION[$key]);
+        $this->open();
+        \Lying::$maker->helper->arrGetter($_SESSION, $key, null, $exists);
+        return $exists;
     }
 
     /**
@@ -95,12 +99,10 @@ class Session extends Service
         $this->open();
         if ($key === null) {
             $_SESSION = [];
-            return true;
-        } elseif (isset($_SESSION[$key])) {
-            unset($_SESSION[$key]);
-            return true;
+        } else {
+            \Lying::$maker->helper->arrUnset($_SESSION, $key);
         }
-        return false;
+        return true;
     }
 
     /**

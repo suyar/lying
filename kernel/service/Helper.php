@@ -194,7 +194,7 @@ class Helper
     }
 
     /**
-     * 数组取值,支持点分割的键
+     * 数组取值,支持点分割的键,为了避免歧义,数组的键不要有`.`
      * @param array $data 要取值的数组
      * @param string $key 要取的键,如果键为null,则返回整个数组
      * @param mixed $default 默认值
@@ -221,7 +221,7 @@ class Helper
     }
 
     /**
-     * 数组赋值,支持点分割的键
+     * 数组赋值,支持点分割的键,为了避免歧义,数组的键不要有`.`
      * @param array $data 要赋值的数组
      * @param string $key 赋值的键,如果为null,就把整个数组改变为$value
      * @param mixed $value 要设置的值
@@ -236,12 +236,31 @@ class Helper
         $keys = explode('.', $key);
         while (count($keys) > 1) {
             $key = array_shift($keys);
-            if (!is_array($data[$key]) || !array_key_exists($key, $data)) {
+            if (!isset($data[$key]) || !is_array($data[$key])) {
                 $data[$key] = [];
             }
             $data = &$data[$key];
         }
         $data[array_shift($keys)] = $value;
         return $data;
+    }
+
+    /**
+     * 数组删除某个键,为了避免歧义,数组的键不要有`.`
+     * @param array $data 要操作的数组
+     * @param string $key 要删除的键
+     */
+    public function arrUnset(array &$data, $key)
+    {
+        $keys = explode('.', $key);
+        while (count($keys) > 1) {
+            $key = array_shift($keys);
+            if (isset($data[$key]) && is_array($data[$key])) {
+                $data = &$data[$key];
+            } else {
+                return;
+            }
+        }
+        unset($data[array_shift($keys)]);
     }
 }
