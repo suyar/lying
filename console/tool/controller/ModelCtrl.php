@@ -141,7 +141,7 @@ class ModelCtrl extends Std
     private function getInputTables()
     {
         $tables = $this->db->schema()->getTableNames();
-        $this->stdOut('Enter the table name(split width \'|\' or just enter for all):', false);
+        $this->stdOut('--with-table=(all):', false);
         $table = $this->stdIn();
         if ($table === '') {
             $tableArr = $tables;
@@ -161,7 +161,7 @@ class ModelCtrl extends Std
      */
     private function getInputNamespace($cdir = true)
     {
-        $this->stdOut('Enter a namespace(use psr-0 with path `ROOT`):', false);
+        $this->stdOut('--with-namespace=:', false);
         $namespace = str_replace('/', '\\', trim($this->stdIn(), '/\\'));
         $namespace || $this->stdErr('Unable to use \'\' or / for namespace');
         $this->stdOut("Use namespace `$namespace`");

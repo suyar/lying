@@ -118,7 +118,7 @@ class ActiveRecord extends BaseActive
      */
     public function __isset($name)
     {
-        return array_key_exists($name, $this->_attr[$name]);
+        return isset($this->_attr[$name]);
     }
     
     /**
@@ -135,12 +135,20 @@ class ActiveRecord extends BaseActive
      * @param array $data 要载入的数据
      * @return $this
      */
-    public function load($data)
+    public function load(array $data)
     {
-        if (is_array($data)) {
-            $this->_attr = array_merge($this->_attr, $data);
-        }
+        $this->_attr = array_merge($this->_attr, $data);
         return $this;
+    }
+
+    /**
+     * 属性是否存在,null也会被判定为存在
+     * @param string $name 属性名
+     * @return bool
+     */
+    public function exists($name)
+    {
+        return array_key_exists($name, $this->_attr);
     }
 
     /**
