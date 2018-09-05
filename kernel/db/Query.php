@@ -690,7 +690,7 @@ class Query extends BaseActive
      */
     private function buildLimit()
     {
-        if (isset($this->_limit[1]) && $this->_limit[1] !== null) {
+        if (isset($this->_limit[1])) {
             return 'LIMIT ' . $this->_limit[0] . ', ' . $this->_limit[1];
         } elseif (isset($this->_limit[0])) {
             return 'LIMIT ' . $this->_limit[0];
