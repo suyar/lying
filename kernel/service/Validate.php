@@ -45,13 +45,10 @@ class Validate extends Service
             ->rule('name', 'require', '不能为空', 'login');
     }
 
-    /**
-     * 设置错误信息
-     * @param string $error
-     */
-    protected function setError($error)
+
+    protected function setError($column, $message, $ruleName = '')
     {
-        $this->_error = $error;
+        $this->_error = $message;
     }
 
     /**
@@ -67,53 +64,99 @@ class Validate extends Service
      * 添加校验规则
      * @param string $column 字段名
      * @param string|array|\Closure $rule 规则
-     * @param string|array $msg 错误提示
-     * @param string|array $scene 字段校验场景
+     * @param string|array $message 错误提示
+     * @param string|array $onscene 字段校验场景
      * @return $this
      */
-    public function rule($column, $rule, $msg, $scene = null)
+    public function rule($column, $rule, $message, $onscene = '')
     {
-        foreach ((array)$scene as $s) {
-            $this->_rules[$column . '.' . $s] = [$column, $rule, $msg, $s];
+        foreach ((array)$onscene as $scene) {
+            $this->_rules[$column . '.' . $scene] = [$column, $rule, $message, $scene];
         }
         return $this;
     }
 
-    /**
-     * 获取数组的键(支持引用返回,引用返回的变量修改时,也会改变原来数组的内容)
-     * @param array $data 要检索的数组
-     * @param string $key 要检索的键,支持`.`分隔的键
-     * @param mixed $default 键不存在返回的默认值
-     * @param bool $exists 引用传递键是否存在
-     * @return mixed 如果检索到相关的键,则返回内容,否则返回默认值
-     */
-    protected function &getValue(array &$data, $key, $default = null, &$exists = true)
-    {
-        foreach (explode('.', $key) as $k) {
-            if (array_key_exists($k, $data)) {
-                $data = &$data[$k];
-            } else {
-                $exists = false;
-                return $default;
-            }
-        }
 
-        return $data;
+    public function check(array $data, $scene = '')
+    {
+        $helper = \Lying::$maker->helper;
+
+        foreach ($this->_rules as $item) {
+
+            list($column, $rule, $message, $onscene) = $item;
+
+            if ($onscene == $scene) {
+
+                $value = $helper->arrGetter($data, $column, null, $exists);
+
+                if (is_callable($rule)) {
+                    $result = call_user_func_array($rule, [&$value, $column, $data, $exists]);
+                    if ($result === true) {
+                        //如果函数使用引用传值,则应该要改变原始数组的值
+                        $helper->arrSetter($data, $column, $value);
+                    } else {
+
+                    }
+
+                } elseif (is_string($rule)) {
+                    $method = 'valid' . ucfirst($rule);
+                    if (method_exists($this, $method)) {
+                        $result = call_user_func_array([$this, $method], [$value]);
+                    }
+
+                } elseif (is_array($rule)) {
+                    //设置了过滤器
+                    if (array_key_exists('filter', $rule)) {
+                        $filter = $rule['filter'];
+                        if (is_callable($filter)) {
+                            $value = call_user_func_array($filter, [$value]);
+                            $helper->arrSetter($data, $column, $value);
+                        }
+                        unset($rule['filter']);
+                    }
+
+                    if (array_key_exists('default', $rule)) {
+                        $default = $rule['default'];
+                        unset($rule['default']);
+                    }
+
+
+
+
+
+                    foreach ($rule as $name => $r) {
+                        if (is_string($name)) {
+                            $method = $method = 'valid' . ucfirst($name);
+                            $result = $this->$method($value, $r);
+
+                        } else {
+
+                        }
+                    }
+
+                }
+
+
+
+            }
+
+        }
     }
 
 
-    public function check($data, $onscene = null)
+    /**
+     * 校验字段值是否不为空
+     * @param mixed $value 检验的值
+     * @param mixed $default 默认值
+     * @return bool
+     */
+    public function validRequire(&$value, $default = null)
     {
-        foreach ($this->_rules as $item) {
-            list($column, $rule, $msg, $scene) = $item;
-            if ($onscene == $scene) {
-                $value = $this->getValue($data, $column, null, $exists);
-                if ($rule instanceof \Closure) {
-                    $result = $rule($column, $value, $data);
-                }
-
-            }
-
+        $result = $value === null || $value === '' || (is_array($value) && count($value) < 1);
+        if ($result === true && isset($default)) {
+            $value = $default;
+            $result = false;
         }
+        return !$result;
     }
 }
