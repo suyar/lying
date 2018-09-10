@@ -20,6 +20,16 @@ class Validate extends Service
     private $_rules = [];
 
     /**
+     * @var array 校验的数据
+     */
+    private $_data = [];
+
+    /**
+     * @var string 当前正在校验的字段
+     */
+    private $_column;
+
+    /**
      * @var string 错误信息
      */
     private $_error = '';
@@ -46,7 +56,7 @@ class Validate extends Service
     }
 
 
-    protected function setError($column, $message, $ruleName = '')
+    protected function setError($column, $message, $ruleName = null)
     {
         $this->_error = $message;
     }
@@ -79,54 +89,102 @@ class Validate extends Service
 
     public function check(array $data, $scene = '')
     {
+        $this->_data = $data;
+
         $helper = \Lying::$maker->helper;
 
         foreach ($this->_rules as $item) {
-
-            list($column, $rule, $message, $onscene) = $item;
-
+            list($this->_column, $rule, $message, $onscene) = $item;
             if ($onscene == $scene) {
-
-                $value = $helper->arrGetter($data, $column, null, $exists);
-
+                $value = $helper->arrGetter($this->_data, $this->_column, null, $exists);
+                //自定义验证
                 if (is_callable($rule)) {
-                    $result = call_user_func_array($rule, [&$value, $column, $data, $exists]);
+                    $result = call_user_func_array($rule, [&$value, $this->_column, $this->_data, $exists]);
                     if ($result === true) {
                         //如果函数使用引用传值,则应该要改变原始数组的值
-                        $helper->arrSetter($data, $column, $value);
+                        $helper->arrSetter($this->_data, $this->_column, $value);
                     } else {
-
+                        $this->setError($this->_column, $message);
                     }
+                } else {
+                    $rule = (array)$rule;
 
-                } elseif (is_string($rule)) {
-                    $method = 'valid' . ucfirst($rule);
-                    if (method_exists($this, $method)) {
-                        $result = call_user_func_array([$this, $method], [$value]);
-                    }
-
-                } elseif (is_array($rule)) {
                     //设置了过滤器
                     if (array_key_exists('filter', $rule)) {
                         $filter = $rule['filter'];
                         if (is_callable($filter)) {
                             $value = call_user_func_array($filter, [$value]);
-                            $helper->arrSetter($data, $column, $value);
+                            $helper->arrSetter($this->_data, $this->_column, $value);
                         }
                         unset($rule['filter']);
                     }
 
+                    //字段必须
+                    if (array_key_exists('require', $rule) || ($key = array_search('require', $rule)) !== false) {
+                        if (isset($key)) {
+
+                        } else {
+
+                        }
+
+
+                    }
+
+
+
+                }
+
+                if (is_string($rule)) {
+                    $method = 'validate' . ucfirst($rule);
+                    if (method_exists($this, $method)) {
+                        $result = call_user_func_array([$this, $method], [$value]);
+                        if ($result !== true) {
+                            $this->setError($this->_column, $message, $rule);
+                        }
+                    }
+                } elseif (is_array($rule)) {
+
+
+                    //设置了默认值
+                    $default = null;
                     if (array_key_exists('default', $rule)) {
                         $default = $rule['default'];
                         unset($rule['default']);
                     }
 
+                    //字段必须
+                    if (isset($rule['require'])) {
+                        if (is_callable($rule['require'])) {
+                            $result = call_user_func_array($rule['require'], [$value, $this->_column, $this->_data]);
+                        } else {
+                            $result = false;
+                        }
 
+                        if ($result === true) {
+                            $helper->arrSetter($this->_data, $this->_column, $value);
+                        } else {
+                            $this->setError($this->_column, $message, $rule);
+                        }
 
+                        unset($rule['require']);
+                    } elseif (($key = array_search('require', $rule)) !== false) {
+                        $result = $this->validateRequire($value, $default);
+
+                        if ($result === true) {
+                            $helper->arrSetter($this->_data, $this->_column, $value);
+                        } else {
+                            $this->setError($this->_column, $message, $rule);
+                        }
+
+                        unset($rule[$key]);
+                    }
 
 
                     foreach ($rule as $name => $r) {
                         if (is_string($name)) {
-                            $method = $method = 'valid' . ucfirst($name);
+                            $method = $method = 'validate' . ucfirst($name);
+
+
                             $result = $this->$method($value, $r);
 
                         } else {
@@ -137,17 +195,16 @@ class Validate extends Service
                 }
 
 
-
             }
 
         }
     }
 
 
+    protected function validateRequire(&$value, $default = null)
+    {
 
-
-
-
+    }
 
     /**
      * 验证是否为整型
@@ -167,6 +224,16 @@ class Validate extends Service
     protected function validateFloat($value)
     {
         return filter_var($value, FILTER_VALIDATE_FLOAT) !== false;
+    }
+
+    /**
+     * 校验数据是否为字符串
+     * @param mixed $value 数据
+     * @return bool
+     */
+    protected function validateString($value)
+    {
+        return is_string($value);
     }
 
     /**
@@ -208,6 +275,17 @@ class Validate extends Service
     protected function validateBool($value, $booleanOnly = false)
     {
         return in_array($value, $booleanOnly ? [true, false] : [true, false, 0, 1, '0', '1'], true);
+    }
+
+    /**
+     * 验证字段是否为['yes', 'on', '1', 1, true, 'true']
+     * @param mixed $value 数据
+     * @param mixed $only 如果设置了此字段,则仅当字段等于此值才返回true
+     * @return bool
+     */
+    protected function validateAccepted($value, $only = null)
+    {
+        return isset($only) ? $value === $only : in_array($value, ['yes', 'on', '1', 1, true, 'true'], true);
     }
 
     /**
@@ -380,6 +458,17 @@ class Validate extends Service
     }
 
     /**
+     * 验证数据是否等于某个值
+     * @param mixed $value 数据
+     * @param mixed $eq
+     * @return bool
+     */
+    protected function validateEq($value, $eq = null)
+    {
+        return $value == $eq;
+    }
+
+    /**
      * 验证数据是否大于某个值,仅用于数字验证
      * @param mixed $value 数据
      * @param mixed $gt
@@ -423,13 +512,6 @@ class Validate extends Service
         return isset($elt) && $value > $elt;
     }
 
-
-
-
-
-
-
-
     /**
      * 获取数据长度
      * @param mixed $value 数据
@@ -440,82 +522,130 @@ class Validate extends Service
         if (is_array($value)) {
             return count($value);
         } elseif ($value instanceof \lying\upload\UploadFile) {
-            //todo:文件上传优化得修改此地方
+            //todo:文件上传优化要修改此地方
             return $value->size;
         } else {
-            return mb_strlen((string)$value, 'UTF-8');
+            return mb_strlen(strval($value), 'UTF-8');
         }
     }
 
     /**
      * 验证数据长度是否在某个区间,适用于字符串/数组/上传的文件
      * @param mixed $value 数据
-     * @param array $size 区间
+     * @param array $length 区间
      * @return bool
      */
-    protected function validateSize($value, $size = [])
+    protected function validateLength($value, $length = [])
     {
-        if (isset($size[0]) && isset($size[1])) {
-            list($min, $max) = $size;
-            if (is_array($value)) {
-                $value = count($value);
-            } elseif ($value instanceof \lying\upload\UploadFile) {
-                //todo:文件上传优化得修改此地方
-                $value = $value->size;
-            } else {
-                $value = mb_strlen((string)$value, 'UTF-8');
-            }
+        if (isset($length[0]) && isset($length[1])) {
+            list($min, $max) = $length;
+            $value = $this->getSize($value);
             return $value >= $min && $value <= $max;
         }
         return false;
     }
 
-
     /**
-     * 验证数据是否大于某个数
+     * 验证数据是否大于某个数,适用于字符串/数组/上传的文件
      * @param mixed $value 数据
-     * @param mixed $min
+     * @param mixed $min 最小长度
      * @return bool
-     * todo:
      */
-    public function validateMin($value, $min = null)
+    protected function validateMin($value, $min = null)
     {
-        return isset($min) && $value >= $min;
+        return isset($min) && $this->getSize($value) >= $min;
     }
 
     /**
-     * 验证数据是否小于某个数
+     * 验证数据是否小于某个数,适用于字符串/数组/上传的文件
      * @param mixed $value 数据
-     * @param mixed $max
+     * @param mixed $max 最大长度
      * @return bool
-     * todo:
      */
-    public function validateMax($value, $max)
+    protected function validateMax($value, $max)
     {
-        return isset($max) && $value <= $max;
-    }
-
-
-    public function validateConfirm($value, $columns)
-    {
-
-    }
-
-    public function validateRegex($value, $regex = null)
-    {
-
+        return isset($max) && $this->getSize($value) <= $max;
     }
 
     /**
-     * 验证字段是否为['yes', 'on', '1', 1, true, 'true']
+     * 校验数据是否和某个字段一致
      * @param mixed $value 数据
-     * @param mixed $only 如果设置了此字段,则仅当字段等于此值才返回true
+     * @param string $column 字段名
      * @return bool
      */
-    public function validateAccepted($value, $only = null)
+    protected function validateConfirm($value, $column = null)
     {
-        return isset($only) ? $value === $only : in_array($value, ['yes', 'on', '1', 1, true, 'true'], true);
+        $other = \Lying::$maker->helper->arrGetter($this->_data, $column);
+        return $value === $other;
+    }
+
+    /**
+     * 校验数据是否和某个字段不一致
+     * @param mixed $value 数据
+     * @param string $column 字段名
+     * @return bool
+     */
+    protected function validateDiff($value, $column = null)
+    {
+        $other = \Lying::$maker->helper->arrGetter($this->_data, $column);
+        return $value !== $other;
+    }
+
+    /**
+     * 校验数据是否符合某个正则
+     * @param mixed $value 数据
+     * @param string $regex 正则表达式
+     * @return bool
+     */
+    protected function validateRegex($value, $regex = null)
+    {
+        if (isset($regex) && (is_string($value) || is_numeric($value))) {
+            return preg_match($regex, $value) > 0;
+        }
+        return false;
+    }
+
+    /**
+     * 校验数据是否不符合某个正则
+     * @param mixed $value 数据
+     * @param string $regex 正则表达式
+     * @return bool
+     */
+    protected function validateNotRegex($value, $regex = null)
+    {
+        if (isset($regex) && (is_string($value) || is_numeric($value))) {
+            return preg_match($regex, $value) < 1;
+        }
+        return false;
+    }
+
+    /**
+     * 校验数据是否为一个可解析的json
+     * @param mixed $value 数据
+     * @return bool
+     */
+    protected function validateJson($value)
+    {
+        if (is_scalar($value) || method_exists($value, '__toString')) {
+            json_decode($value);
+            return json_last_error() === JSON_ERROR_NONE;
+        }
+        return false;
     }
 
 
+    protected function validateFile()
+    {
+
+    }
+
+    protected function validateExt()
+    {
+
+    }
+
+    protected function validateMime()
+    {
+
+    }
 }
