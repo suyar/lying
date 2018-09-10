@@ -96,15 +96,21 @@ class Exception
      */
     private function handleFallbackExceptionMessage($exception, $previousException) {
         http_response_code(500);
+
+        $msg = "An Error occurred while handling another error:\n";
+        $msg .= (string)$exception . "\n";
+        $msg .= "Previous exception:\n";
+        $msg .= (string)$previousException . "\n";
+
         if ($this->_debug) {
-            $msg = "An Error occurred while handling another error:\n";
-            $msg .= (string)$exception . "\n";
-            $msg .= "Previous exception:\n";
-            $msg .= (string)$previousException . "\n";
             echo PHP_SAPI === 'cli' ? $msg : '<pre>' . htmlspecialchars($msg, ENT_QUOTES, 'UTF-8') . '</pre>';
         } else {
             echo 'An internal server error occurred.';
         }
+
+        $msg .= "\n\$_SERVER = " . \Lying::$maker->helper->export($_SERVER);
+        error_log($msg);
+        exit(1);
     }
     
     /**
