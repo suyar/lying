@@ -22,17 +22,17 @@ class Validate extends Service
     /**
      * @var array 校验的数据
      */
-    private $_data = [];
+    private $_data;
 
     /**
-     * @var string 当前正在校验的字段
+     * @var string 校验的字段
      */
     private $_column;
 
     /**
-     * @var string 错误信息
+     * @var array 字段的规则
      */
-    private $_error = '';
+    private $_rule;
 
     /**
      * @inheritdoc
@@ -49,11 +49,38 @@ class Validate extends Service
      */
     protected static function rules(Validate $validate)
     {
-        $validate->rule('name', 'require', '不能为空', 'login')
-            ->rule('name', 'require', '不能为空', 'login')
-            ->rule('name', 'require', '不能为空', 'login')
-            ->rule('name', 'require', '不能为空', 'login');
+
     }
+
+    /**
+     * 添加校验规则
+     * @param string $column 字段名
+     * @param string|array|\Closure $rule 规则
+     * @param string|array $message 错误提示
+     * @param string|array $onscene 字段校验场景
+     * @return $this
+     */
+    public function rule($column, $rule, $message, $onscene = '')
+    {
+        foreach ((array)$onscene as $scene) {
+            $this->_rules[$scene . '->' . $column] = [$column, $rule, $message, $scene];
+        }
+        return $this;
+    }
+
+
+
+
+
+
+    /**
+     * @var string 错误信息
+     */
+    private $_error = '';
+
+
+
+
 
 
     protected function setError($column, $message, $ruleName = null)
@@ -70,21 +97,7 @@ class Validate extends Service
         return $this->_error;
     }
 
-    /**
-     * 添加校验规则
-     * @param string $column 字段名
-     * @param string|array|\Closure $rule 规则
-     * @param string|array $message 错误提示
-     * @param string|array $onscene 字段校验场景
-     * @return $this
-     */
-    public function rule($column, $rule, $message, $onscene = '')
-    {
-        foreach ((array)$onscene as $scene) {
-            $this->_rules[$column . '.' . $scene] = [$column, $rule, $message, $scene];
-        }
-        return $this;
-    }
+
 
 
     public function check(array $data, $scene = '')

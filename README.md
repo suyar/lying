@@ -24,10 +24,10 @@ REQUIREMENTS
 ------------
 > * php : >= 5.5.0
 > * ext-pdo : *
-> * ext-apcu : *（可选）
-> * ext-memcached : *（可选）
-> * ext-redis : (可选)
-> * ext-gd : (可选)
+> * ext-apcu : (可选)
+> * ext-memcached : (可选)
+> * ext-redis :  (可选)
+> * ext-gd :  (可选)
 
 DOCUMENTATION
 -------------
