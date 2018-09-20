@@ -24,10 +24,11 @@ REQUIREMENTS
 ------------
 > * php : >= 5.5.0
 > * ext-pdo : *
+> * ext-gd : *
+> * ext-fileinfo : *
 > * ext-apcu : (可选)
 > * ext-memcached : (可选)
 > * ext-redis :  (可选)
-> * ext-gd :  (可选)
 
 DOCUMENTATION
 -------------
@@ -47,7 +48,7 @@ FEATURES
 * 支持模块和域名绑定。
 * 路由支持正反向解析（路由仅支持rewrite模式，如果服务器不支持，请移步其他框架）。
 * 支持CLI调度。
-* 工厂`\Lying::$maker`简便使用服务类。
+* 工厂`\Lying::$maker`统一使用服务类。
 * 支持简易的模板引擎（模板继承、模板引用、模板注释、原样显示等），当然也可以使用原生PHP模板。
 * Apache，Nginx，IIS，虚拟主机简易部署。
 * And so on...
