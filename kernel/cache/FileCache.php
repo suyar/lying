@@ -45,7 +45,7 @@ class FileCache extends Service implements Cache
         $this->dir = rtrim($this->dir, '/\\') ?: (DIR_RUNTIME . DS . 'cache');
 
         if (!\Lying::$maker->helper->mkdir($this->dir)) {
-            throw new \Exception("Failed to create directory: {$this->dir}");
+            throw new \Exception("Unable to create directory: {$this->dir}");
         }
     }
     

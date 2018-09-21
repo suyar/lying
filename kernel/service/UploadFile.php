@@ -45,38 +45,15 @@ class UploadFile extends Service
      */
     protected $error;
 
-
+    /**
+     * @var string 当前指向文件路径
+     */
+    private $_file;
 
     /**
-     * @var string 文件名
+     * @var string 错误信息
      */
-    private $_baseName;
-
-    /**
-     * @var string 文件的扩展名
-     */
-    private $_extension;
-
-    /**
-     * @var string 文件的真实MIME
-     */
-    private $_mimeType;
-
-    /**
-     * @var string 文件的MD5
-     */
-    private $_md5;
-
-    /**
-     * @var string 文件的SHA1
-     */
-    private $_sha1;
-
-
-
-
-
-
+    private $_error;
 
     /**
      * @inheritdoc
@@ -84,13 +61,17 @@ class UploadFile extends Service
     protected function init()
     {
         parent::init();
-        $this->_baseName = pathinfo($this->name, PATHINFO_BASENAME);;
-        $this->_extension = pathinfo($this->name, PATHINFO_EXTENSION);
-        $this->_mimeType = (new \finfo(FILEINFO_MIME_TYPE))->file($this->tmp_name);
-        $this->_md5 = md5_file($this->tmp_name);
-        $this->_sha1 = sha1_file($this->tmp_name);
+        $this->_file = $this->tmp_name;
+    }
 
-
+    /**
+     * 获取私有属性的值
+     * @param string $name
+     * @return mixed
+     */
+    public function __get($name)
+    {
+        return $this->$name;
     }
 
     /**
@@ -126,7 +107,7 @@ class UploadFile extends Service
      */
     public function getClientExtension()
     {
-        return $this->_extension;
+        return pathinfo($this->name, PATHINFO_EXTENSION);
     }
 
     /**
@@ -135,7 +116,7 @@ class UploadFile extends Service
      */
     public function getClientBaseName()
     {
-        return $this->_baseName;
+        return pathinfo($this->name, PATHINFO_BASENAME);
     }
 
     /**
@@ -144,94 +125,94 @@ class UploadFile extends Service
      */
     public function getMimeType()
     {
-        return $this->_mimeType;
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    /**
-     * 获取上传的文件名(不包含扩展名)
-     * @return string
-     */
-    public function getBaseName()
-    {
-        return $this->_baseName;
+        return (new \finfo(FILEINFO_MIME_TYPE))->file($this->_file);
     }
 
     /**
-     * 获取上传文件的扩展名(不包含.)
-     * @return string
-     */
-    public function getExtension()
-    {
-        return $this->_extension;
-    }
-
-    /**
-     * 返回上传文件的MD5值
+     * 获取文件的MD5
      * @return string
      */
     public function getMd5()
     {
-        return $this->_md5;
+        return md5_file($this->_file);
     }
 
     /**
-     * 返回保存的文件名,默认为MD5.扩展名,如果没有扩展名,则默认不加`.扩展名`
+     * 获取文件的sha1
      * @return string
      */
-    public function getSaveName()
+    public function getSha1()
     {
-        return $this->_saveName;
+        return sha1_file($this->_file);
     }
 
     /**
-     * 手动设置文件保存时的名称
-     * @param string $saveName 文件保存时使用的名称(带后缀,不带路径,/或者\会被转换成-)
+     * 判断文件是否为图片类型
+     * @return bool
      */
-    public function setSaveName($saveName)
+    public function isImage()
     {
-        $this->_saveName = str_replace(['/', '\\'], '-', $saveName);
+        return in_array(strtolower($this->getClientExtension()), ['gif', 'jpg', 'jpeg', 'bmp', 'png']) && in_array($this->getImageType(), [1, 2, 3, 6]);
     }
 
     /**
-     * 当做字符串输出
-     * @return string
+     * 返回图像类型
+     * @return bool|int
      */
-    public function __toString()
+    protected function getImageType()
     {
-        return $this->name;
+        if (function_exists('exif_imagetype')) {
+            return exif_imagetype($this->_file);
+        } else {
+            $info = @getimagesize($this->_file);
+            return $info ? $info[2] : false;
+        }
     }
 
     /**
-     * 获取私有属性的值
-     * @param string $name 属性
-     * @return mixed
+     * 返回是否是合法的上传文件
+     * @return bool
      */
-    public function __get($name)
+    public function isValid()
     {
-        return $this->$name;
+        return is_uploaded_file($this->_file);
     }
 
-    /**
-     * 设置未知属性的值报错
-     * @param string $name 属性名
-     * @param mixed $value 属性值
-     * @throws \Exception
-     */
-    public function __set($name, $value)
+
+    public function move($directory, $name = null)
     {
-        throw new \Exception("Unable to reset property value: {$name}.");
+        if ($this->error) {
+            switch ($this->error) {
+                case UPLOAD_ERR_INI_SIZE:
+                    $this->_error = 'The file exceeds your upload_max_filesize ini directive.';
+                    break;
+                case UPLOAD_ERR_FORM_SIZE:
+                    $this->_error = 'The file exceeds the upload limit defined in your form.';
+                    break;
+                case UPLOAD_ERR_PARTIAL:
+                    $this->_error = 'The file was only partially uploaded.';
+                    break;
+                case UPLOAD_ERR_NO_FILE:
+                    $this->_error = 'No file was uploaded.';
+                    break;
+                case UPLOAD_ERR_CANT_WRITE:
+                    $this->_error = 'The file could not be written on disk.';
+                    break;
+                case UPLOAD_ERR_NO_TMP_DIR:
+                    $this->_error = 'File could not be uploaded: missing temporary directory.';
+                    break;
+                case UPLOAD_ERR_EXTENSION:
+                    $this->_error = 'File upload was stopped by a PHP extension.';
+                    break;
+                default:
+                    $this->_error = 'The file was not uploaded due to an unknown error.';
+            }
+            return false;
+        }
+
+
+        
+
+
     }
 }
