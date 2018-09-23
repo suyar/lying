@@ -12,7 +12,6 @@ use lying\cache\Cache;
 use lying\captcha\Captcha;
 use lying\db\Connection;
 use lying\exception\InvalidConfigException;
-use lying\upload\Upload;
 use lying\view\View;
 
 /**
@@ -33,8 +32,7 @@ use lying\view\View;
  * @method Cache cache(string $id = 'cache')
  * @method Redis redis(string $id = 'redis')
  * @method Connection db(string $id = 'db')
- * @method Upload upload()
- * @method Captcha captcha()
+ * @method Captcha captcha(string $id = 'captcha')
  * 
  * @property Hook $hook
  * @property Request $request
@@ -50,7 +48,6 @@ use lying\view\View;
  * @property Cache $cache
  * @property Redis $redis
  * @property Connection $db;
- * @property Upload $upload
  * @property Captcha $captcha
  */
 class Maker
