@@ -8,8 +8,6 @@
 
 namespace lying\service;
 
-use lying\upload\UploadFile;
-
 /**
  * Class Request
  * @package lying\service
@@ -91,45 +89,56 @@ class Request extends Service
 
     /**
      * 获取上传的文件
-     * @param string $name 文件字段名,如果是数组,就直接写数组名,不要写下标;如果不写这个字段,就是取所有上传的文件
-     * @return UploadFile|UploadFile[]|false 如果只有一个文件,则返回File对象,多个文件返回File对象数组,没有文件返回false
+     * @param string $name 文件字段名,支持`.`操作获取多维数组
+     * @return UploadFile|UploadFile[]|null 如果只有一个文件,则返回File对象,多个文件返回File对象数组,没有文件返回null
      */
     public function file($name = null)
     {
-        $files = [];
-        if ($name === null) {
-            foreach ($this->_fileParams as $key => $file) {
-                if (is_array($file['name'])) {
-                    foreach ($file['name'] as $i => $fname) {
-                        $files[$key . '[' . $i . ']'] = new UploadFile([
-                            'name' => $fname,
-                            'type' => $file['type'][$i],
-                            'size' => $file['size'][$i],
-                            'tmp_name' => $file['tmp_name'][$i],
-                            'error' => $file['error'][$i],
-                        ]);
+        static $init;
+        $helper = \Lying::$maker->helper;
+        if ($init === null) {
+            foreach ($this->_fileParams as &$item) {
+                if (is_array($item['name'])) {
+                    $files = $this->fixPhpFilesArray($item['name'], $item);
+                    $item = [];
+                    foreach ($files as $key => $file) {
+                        $helper->arrSetter($item, $key, $file);
                     }
                 } else {
-                    $files[$key] = new UploadFile($file);
+                    $item = new UploadFile($item);
                 }
             }
-        } elseif (isset($this->_fileParams[$name])) {
-            $file = $this->_fileParams[$name];
-            if (is_array($file['name'])) {
-                foreach ($file['name'] as $i => $fname) {
-                    $files[$name . '[' . $i . ']'] = new UploadFile([
-                        'name' => $fname,
-                        'type' => $file['type'][$i],
-                        'size' => $file['size'][$i],
-                        'tmp_name' => $file['tmp_name'][$i],
-                        'error' => $file['error'][$i],
-                    ]);
-                }
+            $init = true;
+        }
+        return $helper->arrGetter($this->_fileParams, $name);
+    }
+
+    /**
+     * 格式化PHP上传数组
+     * @param array $names 名称数组
+     * @param array $item 所有数组
+     * @param string $key 键前缀
+     * @return UploadFile[]
+     */
+    protected function fixPhpFilesArray(array $names, $item, $key = null)
+    {
+        $files = [];
+        foreach ($names as $k => $name) {
+            $key === null || ($k = $key . '.' . $k);
+            if (is_array($name)) {
+                $files = array_merge($files, $this->fixPhpFilesArray($name, $item, $k));
             } else {
-                $files[$name] = new UploadFile($file);
+                $helper = \Lying::$maker->helper;
+                $files[$k] = new UploadFile([
+                    'name' => $name,
+                    'type' => $helper->arrGetter($item['type'], $k),
+                    'tmp_name' => $helper->arrGetter($item['tmp_name'], $k),
+                    'error' => $helper->arrGetter($item['error'], $k),
+                    'size' => $helper->arrGetter($item['size'], $k),
+                ]);
             }
         }
-        return $files ? (count($files) == 1 ? reset($files) : $files) : false;
+        return $files;
     }
 
     /**

@@ -95,13 +95,6 @@ return [
             ['frameworkEnd', function () {}],
         ],
     ],
-    //上传组件
-    'upload' => [
-        'class' => 'lying\upload\Upload',
-        'ext' => ['jpg', 'jpeg', 'png', 'gif', 'mp3', 'zip', 'rar'], //允许上传的扩展名
-        'size' => 8388608, //允许上传的文件大小
-        'type' => [], //允许上传的MIME
-    ],
     //验证码组件
     'captcha' => [
         'class' => 'lying\captcha\Captcha',

@@ -53,7 +53,7 @@ class UploadFile extends Service
     /**
      * @var string 错误信息
      */
-    private $_error;
+    private $_error = '';
 
     /**
      * @inheritdoc
@@ -111,12 +111,12 @@ class UploadFile extends Service
     }
 
     /**
-     * 获取客户端文件扩展名文件名
+     * 获取客户端文件文件名
      * @return string
      */
-    public function getClientBaseName()
+    public function getClientFilename()
     {
-        return pathinfo($this->name, PATHINFO_BASENAME);
+        return pathinfo($this->name, PATHINFO_FILENAME);
     }
 
     /**
@@ -178,7 +178,30 @@ class UploadFile extends Service
         return is_uploaded_file($this->_file);
     }
 
+    /**
+     * 获取错误信息
+     * @return string
+     */
+    public function getError()
+    {
+        return $this->_error;
+    }
 
+    /**
+     * 获取文件的绝对路径
+     * @return string
+     */
+    public function getRealPath()
+    {
+        return realpath($this->_file);
+    }
+
+    /**
+     * 移动上传的文件
+     * @param string $directory 目标文件夹
+     * @param string $name 保存的文件名
+     * @return bool|string 成功返回保存后的文件路径,失败返回false
+     */
     public function move($directory, $name = null)
     {
         if ($this->error) {
@@ -208,11 +231,32 @@ class UploadFile extends Service
                     $this->_error = 'The file was not uploaded due to an unknown error.';
             }
             return false;
+        } else if (!$this->isValid()) {
+            $this->_error = 'The file is not a valid upload file.';
+            return false;
+        } else if (!is_dir($directory) && !\Lying::$maker->helper->mkdir($directory)) {
+            $this->_error = "Unable to create the directory: {$directory}.";
+            return false;
+        } else if (!is_writable($directory)) {
+            $this->_error = "Unable to write in the directory: {$directory}.";
+            return false;
         }
 
+        if ($name === null) {
+            $name = $this->getMd5() . '.' . $this->getClientExtension();
+        } else {
+            $name = str_replace('\\', '/', $name);
+            $pos = strrpos($name, '/');
+            $name = false === $pos ? $name : substr($name, $pos + 1);
+        }
 
+        $target = rtrim($directory, '/\\') . DS . $name;
 
-
-
+        try {
+            return move_uploaded_file($this->_file, $target) ? ($this->_file = $target) : false;
+        } catch (\Exception $e) {
+            $this->_error = "Could not move the file to {$target}.";
+            return false;
+        }
     }
 }
