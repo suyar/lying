@@ -34,7 +34,7 @@ class ModelCtrl extends Std
         parent::init();
         $this->stdOut('--with-connection=(db):', false);
         $this->dbName = $this->stdIn() ?: 'db';
-        $this->db = $this->maker->db($this->dbName);
+        $this->db = \Lying::$maker->db($this->dbName);
     }
 
     /**
@@ -168,7 +168,7 @@ class ModelCtrl extends Std
         $dir = DIR_ROOT . DS . str_replace('\\', DS, $namespace);
         if (is_dir($dir)) {
             $this->stdOut("Use directory `$dir`");
-        } else if ($cdir && $this->maker->helper->mkdir($dir)) {
+        } else if ($cdir && \Lying::$maker->helper->mkdir($dir)) {
             $this->stdOut("Created directory `$dir`");
         } else if ($cdir) {
             $this->stdErr("Failed to create directory `$dir`");

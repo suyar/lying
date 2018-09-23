@@ -57,7 +57,7 @@ EOL;
         if ($toolId === '0') {
             exit(0);
         } if (isset(self::$TOOLS[$toolId])) {
-            $this->maker->dispatch->run(self::$TOOLS[$toolId][1]);
+            \Lying::$maker->dispatch->run(self::$TOOLS[$toolId][1]);
         } else {
             $this->stdErr("Undefined tool:{$toolId}");
         }

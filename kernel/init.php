@@ -16,3 +16,5 @@ define('DIR_MODULE', DIR_ROOT . DS . 'module');
 define('DIR_RUNTIME', DIR_ROOT . DS . 'runtime');
 
 require __DIR__ . DS . 'Lying.php';
+
+require __DIR__ . DS . 'function.php';

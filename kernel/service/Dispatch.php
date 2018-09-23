@@ -48,7 +48,6 @@ class Dispatch extends Service
                         $props = [
                             'module' => $raw[0],
                             'id' => $raw[1],
-                            'maker' => \Lying::$maker,
                             'viewPath' => DIR_MODULE . DS . $m . DS . 'view',
                         ];
                         $instance = $this->_controllers[$class] = new $class($props);
