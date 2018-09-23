@@ -11,12 +11,6 @@ namespace lying\service;
 /**
  * Class UploadFile
  * @package lying\service
- *
- * @property string $name 文件的原名称
- * @property string $type 文件的MIME类型
- * @property int $size 文件的大小,单位为字节
- * @property string $tmp_name 文件被上传后在服务端储存的临时文件名
- * @property int $error 和该文件上传相关的错误代码
  */
 class UploadFile extends Service
 {
@@ -62,16 +56,6 @@ class UploadFile extends Service
     {
         parent::init();
         $this->_file = $this->tmp_name;
-    }
-
-    /**
-     * 获取私有属性的值
-     * @param string $name
-     * @return mixed
-     */
-    public function __get($name)
-    {
-        return $this->$name;
     }
 
     /**

@@ -143,15 +143,4 @@ class Pagination
     {
         return $this->$name;
     }
-
-    /**
-     * 设置未知属性的值报错
-     * @param string $name 属性名
-     * @param mixed $value 属性值
-     * @throws \Exception
-     */
-    public function __set($name, $value)
-    {
-        throw new \Exception("Unable to reset property value: {$name}.");
-    }
 }
