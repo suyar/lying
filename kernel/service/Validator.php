@@ -56,6 +56,36 @@ class Validator extends Service
         return $this;
     }
 
+    /**
+     * 判断当前字段是否存在某些规则,只要有一个匹配就返回true
+     * @param string|array $rules
+     * @return bool
+     */
+    protected function hasRule($rules)
+    {
+        foreach ((array)$rules as $rule) {
+            if (array_key_exists($rule, $this->_rule)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 获取验证规则的值
+     * @param string $rule
+     * @param mixed $value
+     * @return bool
+     */
+    protected function getRule($rule, &$value)
+    {
+        if ($this->hasRule($rule)) {
+            $value = $this->_rule[$rule];
+            return true;
+        }
+        return false;
+    }
+
     public function verify(array $data, $onscene = '')
     {
         $helper = \Lying::$maker->helper;
@@ -70,13 +100,23 @@ class Validator extends Service
                 } else {
                     $rules = [];
                     foreach ((array)$this->_rule as $k => $rule) {
-                        if (is_int($k) && is_string($value) && method_exists($this, 'valid' . ucfirst($value))) {
-                            $rules[$value] = null;
+                        if (is_int($k) && is_string($rule) && method_exists($this, 'valid' . ucfirst($rule))) {
+                            $rules[$rule] = null;
                         } elseif (method_exists($this, 'valid' . ucfirst($k)) || in_array($k, ['filter', 'default'])) {
-                            $rules[$k] = $value;
+                            $rules[$k] = $rule;
                         }
                     }
                     $this->_rule = $rules;
+
+                    //过滤器
+                    if ($this->getRule('filter', $filter) && is_callable($filter)) {
+                        $value = $filter($value);
+                    }
+
+                    if (!$exists || $value === '' || $value === null) {
+
+                    }
+
 
 
 
