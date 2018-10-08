@@ -58,7 +58,7 @@ class Validator extends Service
 
     /**
      * 判断当前字段是否存在某些规则,只要有一个匹配就返回true
-     * @param string|array $rules
+     * @param string|array $rules 要查找的规则,可以多个
      * @return bool
      */
     protected function hasRule($rules)
@@ -73,9 +73,9 @@ class Validator extends Service
 
     /**
      * 获取验证规则的值
-     * @param string $rule
-     * @param mixed $value
-     * @return bool
+     * @param string $rule 要获取的规则
+     * @param mixed $value 引用返回规则的值
+     * @return bool 如果规则存在返回true,否则返回false
      */
     protected function getRule($rule, &$value)
     {
@@ -89,11 +89,17 @@ class Validator extends Service
     public function verify(array $data, $onscene = '')
     {
         $helper = \Lying::$maker->helper;
+
         $this->_data = $data;
+
         foreach ($this->_rules as $item) {
+
             list($this->_column, $this->_rule, $message, $scene) = $item;
+
             if ($scene == $onscene) {
+
                 $value = $helper->arrGetter($this->_data, $this->_column, null, $exists);
+
                 if (is_callable($this->_rule)) {
                     $result = call_user_func_array($this->_rule, [&$value, $this->_column, $this->_data, $exists]);
                     $result && $helper->arrSetter($this->_data, $this->_column, $value);
