@@ -48,14 +48,10 @@ class Session extends Service
      */
     public function destroy()
     {
-        if ($this->isActive()) {
-            $this->close();
-            $this->open();
-            session_unset();
-            session_destroy();
-            return true;
-        }
-        return false;
+        $this->open();
+        session_unset();
+        session_destroy();
+        return true;
     }
 
     /**
