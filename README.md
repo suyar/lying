@@ -24,6 +24,7 @@ REQUIREMENTS
 > * apcu : *（可选）
 > * memcached : *（可选）
 > * redis : (可选)
+> * Smarty : (可选)
 
 DOCUMENTATION
 -------------
