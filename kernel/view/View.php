@@ -8,6 +8,7 @@
 
 namespace lying\view;
 
+use lying\service\Controller;
 use lying\service\Service;
 
 /**
@@ -17,151 +18,141 @@ use lying\service\Service;
 class View extends Service
 {
     /**
-     * @var array 模板渲染引擎
+     * @var string 默认的模板文件后缀
      */
-    protected $engine = [
-        'smarty' => [],
-        'twig' => [],
+    protected $suffix = 'php';
+
+    /**
+     * @var array|Render[] 模板渲染引擎
+     * @todo twig support
+     */
+    protected $render = [
+        'tpl' => [],
+        //'twig' => [],
     ];
 
     /**
-     * @var array 要渲染输出的参数
+     * @var array 后缀和类对应
+     * @todo twig support
      */
-    private $_params = [];
+    protected $renderMap = [
+        'tpl' => 'lying\view\Smarty',
+        //'twig' => 'lying\view\Twig',
+    ];
 
     /**
-     * @var mixed 上下文,一般用于控制器中渲染
+     * @var Controller 上下文,一般用于控制器中渲染
      */
     private $_context;
 
     /**
-     * 输出数据
-     * @param string|array $key 参数名,如果为数组,则判断为批量输出数据
-     * @param mixed $value 参数值,如果key为数组,此参数可不填写
-     * @return $this
-     */
-    public function assign($key, $value = null)
-    {
-        if (is_array($key)) {
-            $this->_params = array_merge($this->_params, $key);
-        } else {
-            $this->_params[$key] = $value;
-        }
-        return $this;
-    }
-
-    /**
      * 渲染模板
      * @param string $view 模板
-     * @param array $context 上下文
+     * @param array $params 模板参数
+     * @param Controller $context 上下文
      * @return string 返回渲染后的模板
      */
-    public function render($view, array $context = null)
+    public function render($view, $params, Controller $context = null)
     {
         $oldContext = $this->_context;
         $context && ($this->_context = $context);
-        $content = $this->renderFile($this->inc($view));
+        $content = $this->renderFile($this->inc($view), $params);
         $this->_context = $oldContext;
         return $content;
     }
 
     /**
      * 渲染模板文件
-     * @param string $file 模板文件
-     * @param array $context 上下文
+     * @param string $file 模板文件绝对路径
+     * @param array $params 模板参数
+     * @param Controller $context 上下文
      * @return string 返回渲染后的模板
+     * @throws \Throwable|\Exception
      */
-    public function renderFile($file, array $context = null)
+    private function renderFile($file, $params, Controller $context = null)
     {
-        if (is_file($file)) {
-            $oldContext = $this->_context;
-            $context && ($this->_context = $context);
-
-            //这一步是防止extract后变量名和$file冲突
-            $fileHash = sha1($file);
-            $$fileHash = $file;
-
-            $_obInitialLevel_ = ob_get_level();
-            ob_start();
-            ob_implicit_flush(false);
-            extract($this->_params, EXTR_OVERWRITE);
-            try {
-                require $$fileHash;
-                $content = ob_get_clean();
-            } catch (\Exception $e) {
-                while (ob_get_level() > $_obInitialLevel_) {
-                    if (!@ob_end_clean()) {
-                        ob_clean();
-                    }
-                }
-                throw $e;
-            } catch (\Throwable $e) {
-                while (ob_get_level() > $_obInitialLevel_) {
-                    if (!@ob_end_clean()) {
-                        ob_clean();
-                    }
-                }
-                throw $e;
-            }
-
-            $this->_context = $oldContext;
-            return $content;
-        } else {
+        if (false === is_file($file)) {
             throw new \Exception("The view file does not exist: $file");
+        }
+
+        $oldContext = $this->_context;
+        $context && ($this->_context = $context);
+
+        if (isset($this->render[$this->suffix])) {
+            if (!$this->render[$this->suffix] instanceof Render) {
+                $opt = isset($this->render[$this->suffix]) && is_array($this->render[$this->suffix]) ? $this->render[$this->suffix] : [];
+                $this->render[$this->suffix] = new $this->renderMap[$this->suffix]($opt);
+            }
+            $render = $this->render[$this->suffix];
+            $content = $render->render($file, $params, $this->_context);
+        } else {
+            $content = $this->renderPhp($file, $params);
+        }
+
+        $this->_context = $oldContext;
+        return $content;
+    }
+
+    /**
+     * 渲染php模板
+     * @param string $file 模板文件
+     * @param array $params 模板参数
+     * @return string 返回渲染结果
+     * @throws \Throwable|\Exception
+     */
+    private function renderPhp($file, $params)
+    {
+        //这一步是防止extract后变量名和$file冲突
+        $fileHash = sha1($file);
+        $$fileHash = $file;
+
+        $_obInitialLevel_ = ob_get_level();
+        ob_start();
+        ob_implicit_flush(false);
+        extract($params, EXTR_OVERWRITE);
+        try {
+            require $$fileHash;
+            return ob_get_clean();
+        } catch (\Exception $e) {
+            while (ob_get_level() > $_obInitialLevel_) {
+                if (!@ob_end_clean()) {
+                    ob_clean();
+                }
+            }
+            throw $e;
+        } catch (\Throwable $e) {
+            while (ob_get_level() > $_obInitialLevel_) {
+                if (!@ob_end_clean()) {
+                    ob_clean();
+                }
+            }
+            throw $e;
         }
     }
 
     /**
      * 解析视图路径
      * @param string $view 解析的视图
-     * @param array $context 上下文
+     * @param Controller $context 上下文
      * @return string 返回视图文件的绝对路径
      */
-    public function inc($view, array $context = null)
+    public function inc($view, Controller $context = null)
     {
         $oldContext = $this->_context;
         $context && ($this->_context = $context);
         if ($this->_context) {
-            list($m, $c, $a) = $this->_context;
-            $m = lcfirst(str_replace(' ', '', ucwords(str_replace('-', ' ', $m))));
-            $path = DIR_MODULE . DS;
+            $path = $this->_context->viewPath . DS;
             if (strncmp($view, '/', 1) === 0) {
-                $path .= $m . DS . 'view' . str_replace('/', DS, rtrim($view, '/')) . '.php';
-            } elseif ($view == '') {
-                $path .= $m . DS . 'view' . DS . $c . DS . $a . '.php';
+                $path .= str_replace('/', DS, trim($view, '/'));
+            } elseif ($view) {
+                $path .= $this->_context->id . DS . str_replace('/', DS, trim($view, '/'));
             } else {
-                $cview = trim($view, '/');
-                $viewArr = explode('/', $cview);
-                switch (count($viewArr)) {
-                    case 1:
-                        $path .= $m . DS . 'view' . DS . $c . DS . $cview . '.php';
-                        break;
-                    case 2:
-                        $path .= $m . DS . 'view' . DS . str_replace('/', DS, $cview) . '.php';
-                        break;
-                    case 3:
-                        $viewArr[0] = lcfirst(str_replace(' ', '', ucwords(str_replace('-', ' ', $viewArr[0]))));
-                        $path .= $viewArr[0] . DS . 'view' . DS . $viewArr[1] . DS . $viewArr[2] . '.php';
-                        break;
-                    default:
-                        throw new \Exception("Unable to locate view file for view '$view'.");
-                }
-
+                $path .= $this->_context->id . DS . $this->_context->action;
             }
-
         } else {
-            $path = $view;
+            throw new \Exception("Unable to resolve view file for view '$view': no active view context.");
         }
         $this->_context = $oldContext;
-        return $path;
-    }
-
-    /**
-     * 清空上一次渲染的数据及上下文关系
-     */
-    public function clear()
-    {
-        $this->_params = [];
-        $this->_context = null;
+        return $path . '.' . $this->suffix;
     }
 }

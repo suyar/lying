@@ -10,7 +10,6 @@ namespace lying\service;
 
 use lying\event\ActionEvent;
 use lying\exception\HttpException;
-use lying\view\View;
 
 /**
  * Class Controller
@@ -29,29 +28,39 @@ class Controller extends Service
     const EVENT_AFTER_ACTION = 'afterAction';
 
     /**
-     * @var string 所属模块,用户不应该修改此变量
+     * @var array 将要传递给模板的参数
      */
-    protected $module;
+    private $_assign = [];
+
+    /**
+     * @var string 所属模块ID,用户不应该修改此变量
+     */
+    public $module;
 
     /**
      * @var string 此控制器ID,用户不应该修改此变量
      */
-    protected $id;
+    public $id;
 
     /**
-     * @var string 当前被执行的方法,用户不应该修改此变量
+     * @var string 当前被执行的方法ID,用户不应该修改此变量
      */
-    protected $action;
+    public $action;
 
     /**
      * @var Maker 工厂实例,方便在控制器使用
      */
-    protected $maker;
+    public $maker;
 
     /**
      * @var array 设置不被访问的方法,用正则匹配,此属性必须设置为public
      */
     public $deny = [];
+
+    /**
+     * @var string 设置视图目录的基本路径
+     */
+    public $viewPath;
 
     /**
      * 在执行action之前执行
@@ -75,11 +84,16 @@ class Controller extends Service
      * 渲染输出参数
      * @param string|array $key 参数名,如果为数组,则判断为批量输出数据
      * @param mixed $value 参数值,如果key为数组,此参数可不填写
-     * @return View
+     * @return $this
      */
     final public function assign($key, $value = null)
     {
-        return \Lying::$maker->view->assign($key, $value);
+        if (is_array($key)) {
+            $this->_assign = array_merge($this->_assign, $key);
+        } else {
+            $this->_assign[$key] = $value;
+        }
+        return $this;
     }
 
     /**
@@ -89,6 +103,8 @@ class Controller extends Service
      */
     final public function render($view = '')
     {
-        return \Lying::$maker->view->render($view, [$this->module, $this->id, $this->action]);
+        $content = \Lying::$maker->view->render($view, $this->_assign, $this);
+        $this->_assign = [];
+        return $content;
     }
 }
