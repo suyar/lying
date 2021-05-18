@@ -67,9 +67,8 @@ class View extends Service
      * @param array $params 模板参数
      * @param Controller $context 上下文
      * @return string 返回渲染后的模板
-     * @throws \Throwable|\Exception
      */
-    private function renderFile($file, $params, Controller $context = null)
+    public function renderFile($file, $params, Controller $context = null)
     {
         if (false === is_file($file)) {
             throw new \Exception("The view file does not exist: $file");
@@ -150,7 +149,7 @@ class View extends Service
                 $path .= $this->_context->id . DS . $this->_context->action;
             }
         } else {
-            throw new \Exception("Unable to resolve view file for view '$view': no active view context.");
+            $path = $view;
         }
         $this->_context = $oldContext;
         return $path . '.' . $this->suffix;
