@@ -6,7 +6,9 @@
  * @license MIT
  */
 
-namespace lying\service;
+namespace lying\view;
+
+use lying\service\Service;
 
 /**
  * Class View
@@ -14,6 +16,14 @@ namespace lying\service;
  */
 class View extends Service
 {
+    /**
+     * @var array 模板渲染引擎
+     */
+    protected $engine = [
+        'smarty' => [],
+        'twig' => [],
+    ];
+
     /**
      * @var array 要渲染输出的参数
      */

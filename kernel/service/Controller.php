@@ -10,6 +10,7 @@ namespace lying\service;
 
 use lying\event\ActionEvent;
 use lying\exception\HttpException;
+use lying\view\View;
 
 /**
  * Class Controller

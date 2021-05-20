@@ -13,6 +13,7 @@ use lying\captcha\Captcha;
 use lying\db\Connection;
 use lying\exception\InvalidConfigException;
 use lying\upload\Upload;
+use lying\view\View;
 
 /**
  * Class Maker
@@ -70,7 +71,7 @@ class Maker
         'encrypter' => ['class' => 'lying\service\Encrypter'],
         'dispatch' => ['class' => 'lying\service\Dispatch'],
         'response' => ['class' => 'lying\service\Response'],
-        'view' => ['class' => 'lying\service\View'],
+        'view' => ['class' => 'lying\view\View'],
         'session' => ['class' => 'lying\service\Session'],
         'helper' => ['class' => 'lying\service\Helper'],
     ];
