@@ -153,29 +153,20 @@ class Exception
     {
         $exception = $event->e;
 
-        if ($exception instanceof HttpException) {
-            $httpCode = $exception->getCode();
-        } else {
-            $httpCode = 500;
-        }
+        $httpCode = $exception instanceof HttpException ? $exception->getCode() : 500;
 
         if ($this->_debug) {
-            $view = \Lying::$maker->view;
-            $view->clear();
-            $view->assign('code', $exception->getCode())
-                ->assign('info', $exception->getMessage())
-                ->assign('line', $exception->getLine())
-                ->assign('file', $exception->getFile())
-                ->assign('trace', explode("\n", $exception->getTraceAsString()));
-            $content = $view->renderFile(DIR_KERNEL . DS . 'view' . DS . 'exception.php');
-            $view->clear();
+            $content = "An internal server error occurred.\n";
+            $content .= "Error Info: {$exception->getMessage()}\n";
+            $content .= "Error Code: {$exception->getCode()}\n";
+            $content .= "Error File: {$exception->getFile()}\n";
+            $content .= "Error Line: {$exception->getLine()}\n";
+            $content .= $exception->getTraceAsString();
+            PHP_SAPI === 'cli' || ($content = "<pre>{$content}</pre>");
         } else {
             $content = 'An internal server error occurred.';
         }
 
-        \Lying::$maker->response->clear()
-            ->setStatusCode($httpCode)
-            ->setContent($content)
-            ->send();
+        \Lying::$maker->response->clear()->setStatusCode($httpCode)->setContent($content)->send();
     }
 }
