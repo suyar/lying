@@ -99,6 +99,7 @@ return [
     ],
     //验证码组件
     'captcha' => [
+        'class' => 'lying\captcha\Captcha',
         'length' => 4, //验证码长度
         'width' => 120, //宽
         'height' => 40, //高
