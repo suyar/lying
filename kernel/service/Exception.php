@@ -159,15 +159,20 @@ class Exception
             $httpCode = 500;
         }
 
-        $view = \Lying::$maker->view;
-        $view->clear();
-        $view->assign('code', $exception->getCode())
-            ->assign('info', $exception->getMessage())
-            ->assign('line', $exception->getLine())
-            ->assign('file', $exception->getFile())
-            ->assign('trace', explode("\n", $exception->getTraceAsString()));
-        $content = $view->renderFile(DIR_KERNEL . DS . 'view' . DS . 'exception.php');
-        $view->clear();
+        if ($this->_debug) {
+            $view = \Lying::$maker->view;
+            $view->clear();
+            $view->assign('code', $exception->getCode())
+                ->assign('info', $exception->getMessage())
+                ->assign('line', $exception->getLine())
+                ->assign('file', $exception->getFile())
+                ->assign('trace', explode("\n", $exception->getTraceAsString()));
+            $content = $view->renderFile(DIR_KERNEL . DS . 'view' . DS . 'exception.php');
+            $view->clear();
+        } else {
+            $content = 'An internal server error occurred.';
+        }
+
         \Lying::$maker->response->clear()->setStatusCode($httpCode)->setContent($content)->send();
     }
 }
