@@ -1291,6 +1291,8 @@ class Response extends Service
 
         $this->setStatusCode(200);
 
+        $this->setContent($content);
+
         return $this;
     }
 
