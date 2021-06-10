@@ -85,6 +85,7 @@ return [
     //全局事件
     'hook' => [
         'events' => [
+            ['frameworkError', function ($event) {}], //注册自定义全局错误处理
             ['frameworkBegin', function () {}],
             ['frameworkEnd', function () {}],
         ],

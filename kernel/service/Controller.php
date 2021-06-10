@@ -43,6 +43,11 @@ class Controller extends Service
     protected $action;
 
     /**
+     * @var Maker 工厂实例,方便在控制器使用
+     */
+    protected $maker;
+
+    /**
      * @var array 设置不被访问的方法,用正则匹配,此属性必须设置为public
      */
     public $deny = [];
