@@ -8,6 +8,8 @@
 
 namespace lying\service;
 
+use lying\upload\UploadFile;
+
 /**
  * Class Request
  * @package lying\service
@@ -23,6 +25,11 @@ class Request extends Service
      * @var array POST数组
      */
     private $_postParams;
+
+    /**
+     * @var array FILES数组
+     */
+    private $_fileParams;
 
     /**
      * @var array HTTP头
@@ -55,6 +62,7 @@ class Request extends Service
             $this->_route = [$router->module(), $router->controller(), $router->action()];
             $this->_getParams = $_GET;
             $this->_postParams = $_POST;
+            $this->_fileParams = $_FILES;
         }
         return $this->_route;
     }
@@ -87,6 +95,49 @@ class Request extends Service
         } else {
             return isset($this->_postParams[$name]) ? $this->_postParams[$name] : $default;
         }
+    }
+
+    /**
+     * 获取上传的文件
+     * @param string $name 文件字段名,如果是数组,就直接写数组名,不要写下标;如果不写这个字段,就是取所有上传的文件
+     * @return UploadFile|UploadFile[]|false 如果只有一个文件,则返回File对象,多个文件返回File对象数组,没有文件返回false
+     */
+    public function file($name = null)
+    {
+        $files = [];
+        if ($name === null) {
+            foreach ($this->_fileParams as $key => $file) {
+                if (is_array($file['name'])) {
+                    foreach ($file['name'] as $i => $fname) {
+                        $files[$key . '[' . $i . ']'] = new UploadFile([
+                            'name' => $fname,
+                            'type' => $file['type'][$i],
+                            'size' => $file['size'][$i],
+                            'tmp_name' => $file['tmp_name'][$i],
+                            'error' => $file['error'][$i],
+                        ]);
+                    }
+                } else {
+                    $files[$key] = new UploadFile($file);
+                }
+            }
+        } elseif (isset($this->_fileParams[$name])) {
+            $file = $this->_fileParams[$name];
+            if (is_array($file['name'])) {
+                foreach ($file['name'] as $i => $fname) {
+                    $files[$name . '[' . $i . ']'] = new UploadFile([
+                        'name' => $fname,
+                        'type' => $file['type'][$i],
+                        'size' => $file['size'][$i],
+                        'tmp_name' => $file['tmp_name'][$i],
+                        'error' => $file['error'][$i],
+                    ]);
+                }
+            } else {
+                $files[$name] = new UploadFile($file);
+            }
+        }
+        return $files ? (count($files) == 1 ? reset($files) : $files) : false;
     }
 
     /**
