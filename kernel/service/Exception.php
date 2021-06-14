@@ -154,9 +154,9 @@ class Exception
         $exception = $event->e;
 
         if ($exception instanceof HttpException) {
-            http_response_code($exception->getCode());
+            $httpCode = $exception->getCode();
         } else {
-            http_response_code(500);
+            $httpCode = 500;
         }
 
         $view = \Lying::$maker->view;
@@ -168,6 +168,6 @@ class Exception
             ->assign('trace', explode("\n", $exception->getTraceAsString()));
         $content = $view->renderFile(DIR_KERNEL . DS . 'view' . DS . 'exception.php');
         $view->clear();
-        echo $content;
+        \Lying::$maker->response->clear()->setStatusCode($httpCode)->setContent($content)->send();
     }
 }
