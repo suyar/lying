@@ -1117,6 +1117,20 @@ class Response extends Service
     private $_stream;
 
     /**
+     * 重置状态
+     * @return $this
+     */
+    public function clear()
+    {
+        $this->_headers = [];
+        $this->_statusCode = 200;
+        $this->_isSent = false;
+        $this->_content = null;
+        $this->_stream = null;
+        return $this;
+    }
+
+    /**
      * 设置要发送的头
      * @param string|array $name header名,如果此参数是一个数组,则会判断为一个header数组,value无效
      * @param string $value header值
