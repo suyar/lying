@@ -800,7 +800,8 @@ class Query extends BaseActive
      */
     public function count($column = '*')
     {
-        return $this->select(['count' => "COUNT([[$column]])"])->scalar();
+        $column = $column == '*' ? $column : "[[$column]]";
+        return $this->select(['count' => "COUNT($column)"])->scalar();
     }
 
     /**
