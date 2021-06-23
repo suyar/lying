@@ -1215,7 +1215,6 @@ class Response extends Service
 
     /**
      * 发送响应
-     * @throws \Exception 发送的内容格式不正确时抛出异常
      */
     public function send()
     {
