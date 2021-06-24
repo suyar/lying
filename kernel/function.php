@@ -15,29 +15,27 @@
  */
 function url($path, $params = [], $host = true, $normal = false)
 {
-    return \Lying::$maker->router()->createUrl($path, $params, $host, $normal);
+    return \Lying::$maker->router->createUrl($path, $params, $host, $normal);
 }
 
 /**
  * 获取GET参数
  * @param string $name 参数名
  * @param mixed $defaultValue 默认值
- * @return array|mixed|string
+ * @return mixed
  */
 function G($name = null, $defaultValue = null)
 {
-    $value = Lying::$maker->request()->get($name, $defaultValue);
-    return is_string($value) ? trim($value) : $value;
+    return Lying::$maker->request->get($name, $defaultValue);
 }
 
 /**
  * 获取POST参数
  * @param string $name 参数名
  * @param null $defaultValue 默认值
- * @return array|mixed|string
+ * @return mixed
  */
 function P($name = null, $defaultValue = null)
 {
-    $value = Lying::$maker->request()->post($name, $defaultValue);
-    return is_string($value) ? trim($value) : $value;
+    return Lying::$maker->request->post($name, $defaultValue);
 }
