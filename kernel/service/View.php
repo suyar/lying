@@ -134,6 +134,7 @@ class View extends Service
                         break;
                     case 3:
                         $path .= $viewArr[0] . DS . 'view' . DS . $viewArr[1] . DS . $viewArr[2] . '.php';
+                        break;
                     default:
                         throw new \Exception("Unable to locate view file for view '$view'.");
                 }
