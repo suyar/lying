@@ -145,26 +145,18 @@ class ActiveRecord extends Service
 
     /**
      * 查找一条记录
-     * @param string|int|array $condition 如果为字符串并且参数绑定为空匹配第一个主键,否则为正常查询条件
+     * @param string|array $condition 查找条件
      * @param array $params 参数绑定,在查询条件为字符串的时候有效
      * @return static|false 返回查询结果,失败返回false
      */
     public static function findOne($condition, $params = [])
     {
-        if (!is_array($condition) && empty($params)) {
-            $primaryKeys = static::db()->schema()->getTableSchema(static::table())->primaryKeys;
-            if ($primaryKeys) {
-                $condition = [reset($primaryKeys) => $condition];
-            } else {
-                throw new \Exception(static::table() . ' does not have a primary key.');
-            }
-        }
         return self::find()->where($condition, $params)->limit(1)->one();
     }
 
     /**
      * 查找所有符合条件的记录
-     * @param string|array $condition 查找条件数组
+     * @param string|array $condition 查找条件
      * @param array $params 参数绑定,在查询条件为字符串的时候有效
      * @return static[]|false 返回查询结果数组,失败返回false
      */
