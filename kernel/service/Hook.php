@@ -29,6 +29,7 @@ class Hook extends Service
                 $event = array_values($event);
                 $count = count($event);
                 if ($count >= 2) {
+                    array_push($event, null);
                     list($name, $handler, $data) = $event;
                     if (is_string($name) && is_callable($handler)) {
                         $this->on($name, $handler, $data);
