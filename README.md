@@ -7,16 +7,15 @@
     /____/          \____/
 ~~~
 
-> Yii2是我的PHP Framework入门老师，我心怀尊敬。我看过Yii2的绝大部分核心源码，大轮子虽然功能完善，但是在写小项目的时候有点拖沓的感觉。怀着“PHP是世界上最好的语言”的信念，我自以为是的造了个轮子—Lying。
+> Yii2是我的PHP的入门老师，我心怀尊敬。我看过Yii2的绝大部分核心源码，大轮子虽然功能完善，但是在写小项目的时候有点拖沓的感觉。怀着“PHP是世界上最好的语言”的信念，我自以为是的造了个轮子—Lying。
 
-> 通过不断探索，改进，总结后编写而成的Lying，身怀100k+的代码，麻雀虽小，五脏俱全。这话说的有点过于夸张，但是我相信你在使用的过程中会发现它的美。有兴趣的同学可以fork去看看代码，如果它能给你的PHP之路带来一点启发，那是再好不过了。当然，如果你觉得Lying的某些地方有缺陷，你可以提Issue或者PR，我会根据你的意见对Lying进行完善。如果你喜欢Lying，欢迎你来学习、使用。但是如果你不喜欢它，也请你不要玷污它，因为每个人心中都有一门世界上最好的语言（比如PHP）和一个世界上最好的框架（比如Lying）。
+> 有兴趣的同学可以fork去看看代码，如果它能给你的PHP之路带来一点启发，那是再好不过了。当然，如果你觉得Lying的某些地方有缺陷，你可以提Issue或者PR，我会根据你的意见对Lying进行完善。如果你喜欢Lying，欢迎你来学习、使用。但是如果你不喜欢它，也请你不要玷污它，因为每个人心中都有一门世界上最好的语言（比如PHP）和一个世界上最好的框架（比如Lying）。
 
-> 因为参考了Yii2的部分设计，所以Lying和Yii2的使用方式有诸多的相同点。
+> 因为抄袭了Yii2的部分设计，所以Lying和Yii2的使用方式有诸多的相同点。
 
 INSTALL
 -------
 `git clone git@github.com:carolkey/lying.git`  
-`composer create-project carolkey/lying lying`
 
 REQUIREMENTS
 ------------
@@ -29,10 +28,6 @@ REQUIREMENTS
 DOCUMENTATION
 -------------
 <http://www.kancloud.cn/carol/lying>
-
-TODO
-----
-* MongoDB封装
 
 FEATURES
 --------
@@ -49,7 +44,7 @@ FEATURES
 * 完善的CLI制度。
 * 模块<->域名绑定，让你快速实现前后台分离。
 * 工厂`\Lying::$maker`简便使用服务类。
-* 基于layout的PHP原生模板，渲染更快。
+* 原生PHP模板，渲染更快。
 * Apache，Nginx，IIS，虚拟主机简易部署。
 * And so on...
 
@@ -59,6 +54,5 @@ LICENCE
 
 FEEDBACK
 --------
-* Issue：[Lying](https://github.com/carolkey/lying/issues)
 * QQ：[296399959](http://wpa.qq.com/msgrd?v=3&uin=296399959&site=qq&menu=yes)
 * MAIL：<su@revoke.cc>

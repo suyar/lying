@@ -1,5 +1,5 @@
 <?php
-version_compare(PHP_VERSION, '5.5.0', '>=') || die('Lying require 5.5.0 or higher PHP version :)');
+version_compare(PHP_VERSION, '5.5.0', '>=') || die('Lying requires 5.5.0 or higher PHP version :)');
+require __DIR__ . '/vendor/autoload.php';
 require __DIR__ . '/kernel/init.php';
-$config = require DIR_CONFIG . '/cli.php';
-Lying::run($config);
+(new Lying(require DIR_CONFIG . '/cli.php'))->run();
