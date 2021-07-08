@@ -9,31 +9,20 @@
 namespace lying\db;
 
 /**
- * Class ActiveRecordQuery
+ * Class ActiveQuery
  * @package lying\db
  */
-class ActiveRecordQuery extends Query
+class ActiveQuery extends Query
 {
     /**
      * @var string 类名
      */
-    private $class;
+    protected $class;
     
     /**
      * @var bool 是否返回数组
      */
-    private $array;
-    
-    /**
-     * 初始化连接
-     * @param Connection $connection 数据库连接
-     * @param string $class 要实例化的类名
-     */
-    public function __construct(Connection $connection, $class = null)
-    {
-        parent::__construct($connection);
-        $this->class = $class;
-    }
+    private $_isArray;
 
     /**
      * 调用此方法则返回数组
@@ -41,7 +30,7 @@ class ActiveRecordQuery extends Query
      */
     public function asArray()
     {
-        $this->array = true;
+        $this->_isArray = true;
         return $this;
     }
     
@@ -53,7 +42,7 @@ class ActiveRecordQuery extends Query
      */
     public function one($obj = false, $class = null)
     {
-        $row = $this->array ? parent::one() : parent::one(true, $this->class);
+        $row = $this->_isArray ? parent::one() : parent::one(true, $this->class);
         return $row instanceof ActiveRecord ? $row->reload() : $row;
     }
     
@@ -65,8 +54,8 @@ class ActiveRecordQuery extends Query
      */
     public function all($obj = false, $class = null)
     {
-        $rows = $this->array ? parent::all() : parent::all(true, $this->class);
-        if (!$this->array && is_array($rows)) {
+        $rows = $this->_isArray ? parent::all() : parent::all(true, $this->class);
+        if (!$this->_isArray && is_array($rows)) {
             foreach ($rows as $key => $row) {
                 $rows[$key] = $row->reload();
             }

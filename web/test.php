@@ -2,6 +2,8 @@
 ini_set('display_errors',1);
 
 
+echo strtolower(preg_replace('/((?<=[a-z])(?=[A-Z]))/', '_', 'user'));
+die;
 
 
 $dsn = 'mysql:host=127.0.0.1;dbname=lying;charset=utf8';
