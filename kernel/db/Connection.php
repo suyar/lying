@@ -189,6 +189,8 @@ class Connection extends Service
             $this->_schema = new Schema([
                 'db' => $this,
                 'prefix' => $this->prefix,
+                'cache' => $this->cache,
+                'cacheKey' => $this->dsn,
             ]);
         }
         return $this->_schema;

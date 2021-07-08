@@ -28,6 +28,77 @@ class Schema extends Service
     protected $prefix = '';
 
     /**
+     * @var Cache 缓存服务
+     */
+    protected $cache;
+
+    /**
+     * @var string 缓存键名
+     */
+    protected $cacheKey;
+
+    /**
+     * @var array 所有的表名
+     */
+    private $_tableNames = [];
+
+    /**
+     * @var TableSchema[] 所有的表结构
+     */
+    private $_tables = [];
+
+    /**
+     * @inheritdoc
+     */
+    protected function init()
+    {
+        parent::init();
+        $this->cache = $this->cache ? \Lying::$maker->cache($this->cache) : null;
+        if ($this->cache) {
+            if ($this->cache->exists($this->cacheKey)) {
+                $this->_tables = $this->cache->get($this->cacheKey);
+            }
+        }
+    }
+
+    /**
+     * 获取数据库中所有的表名
+     * @return array 返回数据库中所有的表名
+     */
+    public function getTableNames()
+    {
+        if (empty($this->_tableNames)) {
+            $this->_tableNames = $this->db->prepare('SHOW TABLES')->column();
+        }
+        return $this->_tableNames;
+    }
+
+    /**
+     * 获取表结构
+     * @param string $tableName 完整的表名
+     * @return TableSchema 获取表信息
+     */
+    public function getTableSchema($tableName)
+    {
+        $tableName = $this->quoteTableName($tableName);
+        if (!isset($this->_tables[$tableName])) {
+            $columnsInfo = $this->db->prepare("DESC $tableName")->all();
+            $this->_tables[$tableName] = new TableSchema($tableName, $columnsInfo);
+            $this->cache && $this->cache->set($this->cacheKey, $this->_tables);
+        }
+        return $this->_tables[$tableName];
+    }
+
+    /**
+     * 清除表结构缓存(当开启了缓存时,更改表结构后调用)
+     * @return bool 成功返回true,失败返回false
+     */
+    public function clearSchemaCache()
+    {
+        return $this->cache && $this->cache->del($this->cacheKey);
+    }
+
+    /**
      * 简单的给字段名加上反引号
      * @param string $name 字段
      * @return string 字段
@@ -149,152 +220,4 @@ class Schema extends Service
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    /**
-     * @var Cache 缓存服务
-     */
-    private $cache;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    /**
-     * @var array 所有的表名
-     */
-    private $tableNames = [];
-
-    /**
-     * @var TableSchema[] 所有的表结构
-     */
-    private $tables = [];
-
-
-
-
-
-    /**
-     * @var string 缓存键名
-     */
-    private $cacheKey;
-
-    /**
-     * Schema constructor.
-     * @param Connection $db 数据库连接实例
-     * @param string $dsn 实例唯一标识
-     * @param string $cache 使用的缓存服务名
-     */
-    /*public function __construct(Connection $db, $dsn, $cache)
-    {
-        $this->db = $db;
-        $this->cacheKey = $dsn;
-        $this->cache = $cache ? \Lying::$maker->cache($cache) : null;
-        if ($cache) {
-            $this->cache = \Lying::$maker->cache($cache);
-            if ($this->cache->exists($this->cacheKey)) {
-                $this->tables = $this->cache->get($this->cacheKey);
-            }
-        }
-    }*/
-
-    /**
-     * 获取数据库中所有的表名
-     * @return array 返回数据库中所有的表名
-     */
-    public function getTableNames()
-    {
-        if (empty($this->tableNames)) {
-            $this->tableNames = $this->db->createQuery()->raw('SHOW TABLES')->fetchAll(\PDO::FETCH_COLUMN);
-        }
-        return $this->tableNames;
-    }
-
-    /**
-     * 获取表结构
-     * @param string $tableName 完整的表名
-     * @return TableSchema 获取表信息
-     */
-    public function getTableSchema($tableName)
-    {
-        if (!isset($this->tables[$tableName])) {
-            $query = $this->db->createQuery();
-            $columnsInfo = $query->query("DESC $tableName");
-            $this->tables[$tableName] = new TableSchema($tableName, $columnsInfo);
-            if ($this->cache instanceof Cache) {
-                $this->cache->set($this->cacheKey, $this->tables);
-            }
-        }
-        return $this->tables[$tableName];
-    }
-
-    /**
-     * 清除表结构缓存(当开启了缓存时,更改表结构后调用)
-     * @return bool 总是返回true
-     */
-    public function clearCache()
-    {
-        if ($this->cache instanceof Cache) {
-            $this->cache->del($this->cacheKey);
-        }
-        return true;
-    }
-
-    /**
-     * 获取数据表创建语句
-     * @param string $tableName 表名
-     * @return string SQL语句
-     */
-    public function getCreateTableSql($tableName)
-    {
-        $row = $this->db->createQuery()->raw("SHOW CREATE TABLE $tableName")->fetch();
-        return $row['Create Table'];
-    }
 }
