@@ -7,15 +7,14 @@
 
 $dsn = 'mysql:host=;dbname=lying;charset=utf8';
 $user = 'root';
-$pass = '#';
+$pass = '';
 
 $pdo = new \PDO($dsn, $user, $pass);
 $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 $pdo->setAttribute(\PDO::ATTR_EMULATE_PREPARES, false);
+$pdo->setAttribute(\PDO::ATTR_DEFAULT_FETCH_MODE, \PDO::FETCH_ASSOC);
 
-$statement = $pdo->prepare('select * from user where id=:id or username=:id1');
-$statement->bindValue(':id', 1);
-$statement->bindValue(':id1', 1);
+$statement = $pdo->prepare('select id,id from user');
 $statement->execute();
 
 var_dump($statement->fetchAll());
