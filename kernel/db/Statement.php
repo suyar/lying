@@ -163,7 +163,7 @@ class Statement extends Service
     }
 
     /**
-     * 绑定变量到语句
+     * 绑定变量到语句;注意:使用变量绑定后已经生成预处理语句,所以再使用useMaster()已经不再有效果
      * @param string|int $name 参数名
      * @param mixed $value 变量
      * @param int $dataType PDO数据类型
