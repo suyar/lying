@@ -5,13 +5,19 @@
 
 
 
-$dsn = 'mysql:host=121.196.204.163;dbname=lying;charset=utf8';
+$dsn = 'mysql:host=;dbname=lying;charset=utf8';
 $user = 'root';
-$pass = 'Suyaqi1992#';
+$pass = '#';
 
 $pdo = new \PDO($dsn, $user, $pass);
+$pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+$pdo->setAttribute(\PDO::ATTR_EMULATE_PREPARES, false);
 
-$statement = $pdo->prepare('insert into user (id,username) values (10,"testname1")');
+$statement = $pdo->prepare('select * from user where id=:id or username=:id1');
+$statement->bindValue(':id', 1);
+$statement->bindValue(':id1', 1);
 $statement->execute();
 
-echo $pdo->lastInsertId('username');
+var_dump($statement->fetchAll());
+
+//echo $pdo->lastInsertId('username');
