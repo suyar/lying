@@ -136,9 +136,9 @@ class Statement extends Service
             }
 
             if ($params_num) {
-                ksort($params_num, SORT_NUMERIC);
-                $sql = preg_replace_callback('/\?/', function ($matches) use (&$params_num) {
-                    return $params_num ? array_shift($params_num) : $matches[0];
+                $sql = preg_replace_callback('/\?/', function ($matches) use (&$params_num, &$i) {
+                    $i++;
+                    return isset($params_num[$i]) ? $params_num[$i] : $matches[0];
                 }, $sql);
             }
         }

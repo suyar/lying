@@ -127,27 +127,7 @@ class Connection extends Service
         }
         return $this->_slave->pdo();
     }
-    
-    /**
-     * 创建查询构造器
-     * @return Query
-     */
-    public function createQuery()
-    {
-        return new Query($this);
-    }
 
-
-
-    /**
-     * 返回最后插入行的自增ID
-     * @return string 返回ID
-     */
-    public function lastInsertId()
-    {
-        return $this->masterPdo()->lastInsertId();
-    }
-    
     /**
      * 启动一个事务
      * @return bool 成功时返回true,或者在失败时返回false
@@ -156,7 +136,7 @@ class Connection extends Service
     {
         return $this->masterPdo()->beginTransaction();
     }
-    
+
     /**
      * 提交一个事务
      * @return bool 成功时返回true,或者在失败时返回false
@@ -165,7 +145,7 @@ class Connection extends Service
     {
         return $this->masterPdo()->commit();
     }
-    
+
     /**
      * 回滚一个事务
      * @return bool 成功时返回true,或者在失败时返回false
@@ -175,19 +155,14 @@ class Connection extends Service
         return $this->masterPdo()->rollBack();
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+    /**
+     * 返回最后插入行的自增ID
+     * @return string 返回ID
+     */
+    public function lastInsertId()
+    {
+        return $this->masterPdo()->lastInsertId();
+    }
 
     /**
      * 预处理语句
@@ -217,5 +192,29 @@ class Connection extends Service
             ]);
         }
         return $this->_schema;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    /**
+     * 创建查询构造器
+     * @return Query
+     */
+    public function createQuery()
+    {
+        return new Query($this);
     }
 }
