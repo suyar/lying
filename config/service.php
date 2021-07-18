@@ -35,7 +35,7 @@ return [
         'class' => 'lying\db\Connection',
         'dsn' => 'mysql:host=127.0.0.1;dbname=lying;charset=utf8',
         'user' => 'root',
-        'pass' => '123456',
+        'pass' => '',
         'options' => [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_SILENT],
         'prefix' => 'b_',
         'cache' => false,

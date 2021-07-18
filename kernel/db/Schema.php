@@ -103,6 +103,44 @@ class Schema extends Service
         }, $sql);
     }
 
+    /**
+     * 获取php数据类型对应的PDO数据类型
+     * @param mixed $data
+     * @return int PDO数据类型
+     */
+    public function getPdoType($data)
+    {
+        static $typeMap = [
+            'boolean' => \PDO::PARAM_BOOL,
+            'integer' => \PDO::PARAM_INT,
+            'string' => \PDO::PARAM_STR,
+            'resource' => \PDO::PARAM_LOB,
+            'NULL' => \PDO::PARAM_NULL,
+        ];
+        $type = gettype($data);
+        return isset($typeMap[$type]) ? $typeMap[$type] : \PDO::PARAM_STR;
+    }
+
+    /**
+     * 是否是查询语句
+     * @param string $statement 要检测的语句
+     * @return bool 返回是否是查询语句
+     */
+    public function isReadStatement($statement)
+    {
+        $pattern = '/^\s*(SELECT|SHOW|DESCRIBE|DESC|EXPLAIN)\b/i';
+        return preg_match($pattern, $statement) > 0;
+    }
+
+    /**
+     * 处理值
+     * @param string $str 要被处理的值
+     * @return string 返回处理后的值
+     */
+    public function quoteValue($str)
+    {
+        return is_string($str) ? $this->db->slavePdo()->quote($str) : $str;
+    }
 
 
 
