@@ -84,18 +84,10 @@ class Connection extends Service
     protected function pdo()
     {
         if ($this->_dbh === null) {
-            //$options =
-            //$this->_dbh = new \PDO($this->dsn, $this->user, $this->pass, is_array($));
-
-            $options = [
-                \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
-                \PDO::ATTR_EMULATE_PREPARES => false,
-                \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
-            ];
-            if ($this->options && is_array($this->options)) {
-                $options = [\PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC] + $this->options + $options;
-            }
-            $this->_dbh = new \PDO($this->dsn, $this->user, $this->pass, $options);
+            $this->_dbh = new \PDO($this->dsn, $this->user, $this->pass, $this->options);
+            $this->_dbh->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+            $this->_dbh->setAttribute(\PDO::ATTR_EMULATE_PREPARES, false);
+            $this->_dbh->setAttribute(\PDO::ATTR_DEFAULT_FETCH_MODE, \PDO::FETCH_ASSOC);
         }
         return $this->_dbh;
     }
