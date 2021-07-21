@@ -42,7 +42,7 @@ class Statement extends Service
     protected function init()
     {
         parent::init();
-        $this->sql = $this->db->quoteSql($this->sql);
+        $this->sql = $this->db->schema()->quoteSql($this->sql);
     }
 
 
