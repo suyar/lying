@@ -9,13 +9,166 @@
 namespace lying\db;
 
 use lying\cache\Cache;
+use lying\service\Service;
 
 /**
  * Class Schema
  * @package lying\db
  */
-class Schema
+class Schema extends Service
 {
+    /**
+     * @var Connection 数据库连接实例
+     */
+    protected $db;
+
+    /**
+     * @var string 表前缀
+     */
+    protected $prefix = '';
+
+    /**
+     * 简单的给字段名加上反引号
+     * @param string $name 字段
+     * @return string 字段
+     */
+    public function quoteSimpleColumnName($name)
+    {
+        return $name === '*' || strpos($name, '`') === false ? "`$name`" : $name;
+    }
+
+    /**
+     * 简单的给表名加上反引号
+     * @param string $name 表名
+     * @return string 返回处理后的表名
+     */
+    public function quoteSimpleTableName($name)
+    {
+        return strpos($name, '`') === false ? "`$name`" : $name;
+    }
+
+    /**
+     * 处理字段名
+     * @param string $name 要处理的字段名(如果字段名包含前缀,也会被一同处理;如果字段名有'('或者'[['或者'{{'将不被处理)
+     * @return string 返回处理后的字段名
+     */
+    public function quoteColumnName($name)
+    {
+        if (strpos($name, '(') !== false || strpos($name, '[[') !== false) {
+            return $name;
+        }
+        if (($pos = strrpos($name, '.')) !== false) {
+            $prefix = $this->quoteTableName(substr($name, 0, $pos)) . '.';
+            $name = substr($name, $pos + 1);
+        } else {
+            $prefix = '';
+        }
+        if (strpos($name, '{{') !== false) {
+            return $name;
+        }
+
+        return $prefix . $this->quoteSimpleColumnName($name);
+    }
+
+    /**
+     * 处理表名
+     * @param string $name 要处理的表名(如果表名包含前缀,也会被一同处理;如果表名有'('或者'{{'将不被处理)
+     * @return string 返回被处理后的表名
+     */
+    public function quoteTableName($name)
+    {
+        if (strpos($name, '(') !== false || strpos($name, '{{') !== false) {
+            return $name;
+        }
+        if (strpos($name, '.') === false) {
+            return $this->quoteSimpleTableName($name);
+        }
+        $parts = explode('.', $name);
+        foreach ($parts as $i => $part) {
+            $parts[$i] = $this->quoteSimpleTableName($part);
+        }
+
+        return implode('.', $parts);
+    }
+
+    /**
+     * 处理SQL语句的表名和字段名
+     * @param string $sql
+     * @return string
+     */
+    public function quoteSql($sql)
+    {
+        return preg_replace_callback('/(\\{\\{(%?[\w\-\. ]+%?)\\}\\}|\\[\\[([\w\-\. ]+)\\]\\])/', function ($matches) {
+            return isset($matches[3]) ? $this->quoteColumnName($matches[3]) : str_replace('%', $this->prefix, $this->quoteTableName($matches[2]));
+        }, $sql);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /**
+     * @var Cache 缓存服务
+     */
+    private $cache;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     /**
      * @var array 所有的表名
      */
@@ -26,15 +179,9 @@ class Schema
      */
     private $tables = [];
 
-    /**
-     * @var Connection 数据库连接实例
-     */
-    private $db;
 
-    /**
-     * @var Cache 缓存服务
-     */
-    private $cache;
+
+
 
     /**
      * @var string 缓存键名
@@ -47,7 +194,7 @@ class Schema
      * @param string $dsn 实例唯一标识
      * @param string $cache 使用的缓存服务名
      */
-    public function __construct(Connection $db, $dsn, $cache)
+    /*public function __construct(Connection $db, $dsn, $cache)
     {
         $this->db = $db;
         $this->cacheKey = $dsn;
@@ -58,7 +205,7 @@ class Schema
                 $this->tables = $this->cache->get($this->cacheKey);
             }
         }
-    }
+    }*/
 
     /**
      * 获取数据库中所有的表名
