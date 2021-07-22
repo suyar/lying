@@ -60,12 +60,12 @@ class Connection extends Service
     /**
      * @var \PDO PDO实例
      */
-    private $dbh;
+    private $_dbh;
 
     /**
      * @var Schema 数据库表的结构
      */
-    private $schema;
+    private $_schema;
 
     /**
      * @var Connection 主库实例
@@ -83,7 +83,7 @@ class Connection extends Service
      */
     protected function pdo()
     {
-        if ($this->dbh === null) {
+        if ($this->_dbh === null) {
             $options = [
                 \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
                 \PDO::ATTR_EMULATE_PREPARES => false,
@@ -92,9 +92,9 @@ class Connection extends Service
             if ($this->options && is_array($this->options)) {
                 $options = [\PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC] + $this->options + $options;
             }
-            $this->dbh = new \PDO($this->dsn, $this->user, $this->pass, $options);
+            $this->_dbh = new \PDO($this->dsn, $this->user, $this->pass, $options);
         }
-        return $this->dbh;
+        return $this->_dbh;
     }
 
     /**
@@ -157,10 +157,10 @@ class Connection extends Service
      */
     public function schema()
     {
-        if ($this->schema == null) {
-            $this->schema = new Schema($this, $this->dsn, $this->cache);
+        if ($this->_schema == null) {
+            $this->_schema = new Schema($this, $this->dsn, $this->cache);
         }
-        return $this->schema;
+        return $this->_schema;
     }
 
     /**
@@ -197,5 +197,98 @@ class Connection extends Service
     public function rollBack()
     {
         return $this->masterPdo()->rollBack();
+    }
+
+
+
+
+
+
+
+    /**
+     * 处理字段名
+     * @param string $name 要处理的字段名(如果字段名包含前缀,也会被一同处理;如果字段名有'('或者'[['或者'{{'将不被处理)
+     * @return string 返回处理后的字段名
+     */
+    public function quoteColumnName($name)
+    {
+        if (strpos($name, '(') !== false || strpos($name, '[[') !== false) {
+            return $name;
+        }
+        if (($pos = strrpos($name, '.')) !== false) {
+            $prefix = $this->quoteTableName(substr($name, 0, $pos)) . '.';
+            $name = substr($name, $pos + 1);
+        } else {
+            $prefix = '';
+        }
+        if (strpos($name, '{{') !== false) {
+            return $name;
+        }
+
+        return $prefix . $this->quoteSimpleColumnName($name);
+    }
+
+    /**
+     * 处理表名
+     * @param string $name 要处理的表名(如果表名包含前缀,也会被一同处理;如果表名有'('或者'{{'将不被处理)
+     * @return string 返回被处理后的表名
+     */
+    public function quoteTableName($name)
+    {
+        if (strpos($name, '(') !== false || strpos($name, '{{') !== false) {
+            return $name;
+        }
+        if (strpos($name, '.') === false) {
+            return $this->quoteSimpleTableName($name);
+        }
+        $parts = explode('.', $name);
+        foreach ($parts as $i => $part) {
+            $parts[$i] = $this->quoteSimpleTableName($part);
+        }
+
+        return implode('.', $parts);
+    }
+
+    /**
+     * 简单的给字段名加上反引号
+     * @param string $name 字段
+     * @return string 字段
+     */
+    protected function quoteSimpleColumnName($name)
+    {
+        return $name === '*' || strpos($name, '`') === false ? "`$name`" : $name;
+    }
+
+    /**
+     * 简单的给表名加上反引号
+     * @param string $name 表名
+     * @return string 返回处理后的表名
+     */
+    protected function quoteSimpleTableName($name)
+    {
+        return strpos($name, '`') === false ? "`$name`" : $name;
+    }
+
+    /**
+     * 处理SQL语句的表名和字段名
+     * @param string $sql
+     * @return string
+     */
+    public function quoteSql($sql)
+    {
+        return preg_replace_callback('/(\\{\\{(%?[\w\-\. ]+%?)\\}\\}|\\[\\[([\w\-\. ]+)\\]\\])/', function ($matches) {
+            return isset($matches[3]) ? $this->quoteColumnName($matches[3]) : str_replace('%', $this->prefix, $this->quoteTableName($matches[2]));
+        }, $sql);
+    }
+
+    /**
+     * 预处理语句
+     * @param string $sql 要执行的SQL语句
+     * @param array $params SQL语句绑定的参数
+     * @return Statement 返回处理语句对象
+     */
+    public function prepare($sql, array $params = [])
+    {
+        return new Statement(['db'=>$this, 'sql'=>$sql, 'params'=>$params]);
     }
 }
