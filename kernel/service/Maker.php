@@ -16,10 +16,8 @@ use lying\exception\InvalidConfigException;
  * Class Maker
  * @package lying\service
  *
- * @method Cache cache(string $id = 'cache')
  * @method Connection db(string $id = 'db')
  * @method Redis redis(string $id = 'redis')
- *
  *
  * @method Hook hook()
  * @method Request request()
@@ -32,6 +30,7 @@ use lying\exception\InvalidConfigException;
  * @method Session session()
  * @method Helper helper()
  * @method Logger logger(string $id = 'logger')
+ * @method Cache cache(string $id = 'cache')
  * 
  * @property Hook $hook
  * @property Request $request
@@ -44,6 +43,7 @@ use lying\exception\InvalidConfigException;
  * @property Session $session
  * @property Helper $helper
  * @property Logger $logger
+ * @property Cache $cache
  */
 class Maker
 {
@@ -73,6 +73,7 @@ class Maker
      */
     private static $_extends = [
         'logger' => ['class' => 'lying\service\Logger'],
+        'cache' => ['class' => 'lying\cache\FileCache'],
     ];
     
     /**
