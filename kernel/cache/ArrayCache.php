@@ -11,60 +11,15 @@ namespace lying\cache;
 use lying\service\Service;
 
 /**
- * Class FileCache
+ * Class ArrayCache
  * @package lying\cache
  */
-class FileCache extends Service implements Cache
+class ArrayCache extends Service implements Cache
 {
     /**
-     * @var string 缓存文件存放的目录
+     * @var array 缓存数组
      */
-    protected $dir;
-    
-    /**
-     * @var float GC频率,数值为0到100之间,越小GC越频繁
-     */
-    protected $gc = 100;
-
-    /**
-     * 初始化缓存文件夹
-     * @throws \Exception 文件夹创建失败抛出异常
-     */
-    protected function init()
-    {
-        empty($this->dir) && ($this->dir = DIR_RUNTIME . DS . 'cache');
-
-        if (!\Lying::$maker->helper->mkdir($this->dir)) {
-            throw new \Exception("Failed to create directory: {$this->dir}");
-        }
-    }
-    
-    /**
-     * 获取缓存文件名
-     * @param string $key 键名
-     * @return string 生成的文件名
-     */
-    private function cacheFile($key)
-    {
-        return $this->dir . DS . md5($key) . '.bin';
-    }
-    
-    /**
-     * GC
-     * @param bool $all 是否全部删除
-     */
-    private function gc($all = false)
-    {
-        if ($all || mt_rand(0, 100) > $this->gc) {
-            foreach (glob($this->dir . DS . '*.bin') as $file) {
-                if ($all) {
-                    @unlink($file);
-                } elseif (@filemtime($file) < time()) {
-                    @unlink($file);
-                }
-            }
-        }
-    }
+    private $_cache = [];
 
     /**
      * 添加一个缓存,如果缓存已经存在,此次设置的值不会覆盖原来的值,并返回false
@@ -75,7 +30,6 @@ class FileCache extends Service implements Cache
      */
     public function add($key, $value, $ttl = 0)
     {
-        $this->gc();
         return $this->exists($key) ? false : $this->set($key, $value, $ttl);
     }
 
@@ -105,12 +59,8 @@ class FileCache extends Service implements Cache
      */
     public function set($key, $value, $ttl = 0)
     {
-        $this->gc();
-        $cacheFile = $this->cacheFile($key);
-        if (@file_put_contents($cacheFile, serialize($value), LOCK_EX) !== false) {
-            return @touch($cacheFile, time() + ($ttl > 0 ? $ttl : 31536000));
-        }
-        return false;
+        $this->_cache[$key] = [$value, $ttl > 0 ? (microtime(true) + $ttl) : 0];
+        return true;
     }
 
     /**
@@ -137,18 +87,7 @@ class FileCache extends Service implements Cache
      */
     public function get($key)
     {
-        if ($this->exists($key)) {
-            $cacheFile = $this->cacheFile($key);
-            $fp = @fopen($cacheFile, 'r');
-            if ($fp !== false) {
-                @flock($fp, LOCK_SH);
-                $value = @unserialize(stream_get_contents($fp));
-                @flock($fp, LOCK_UN);
-                @fclose($fp);
-                return $value;
-            }
-        }
-        return false;
+        return $this->exists($key) ? $this->_cache[$key][0] : false;
     }
 
     /**
@@ -174,8 +113,7 @@ class FileCache extends Service implements Cache
      */
     public function exists($key)
     {
-        $cacheFile = $this->cacheFile($key);
-        return @filemtime($cacheFile) > time();
+        return isset($this->_cache[$key]) && ($this->_cache[$key][1] === 0 || $this->_cache[$key][1] > microtime(true));
     }
 
     /**
@@ -185,7 +123,8 @@ class FileCache extends Service implements Cache
      */
     public function del($key)
     {
-        return @unlink($this->cacheFile($key));
+        unset($this->_cache[$key]);
+        return true;
     }
 
     /**
@@ -194,7 +133,7 @@ class FileCache extends Service implements Cache
      */
     public function flush()
     {
-        $this->gc(true);
+        $this->_cache = [];
         return true;
     }
 }
