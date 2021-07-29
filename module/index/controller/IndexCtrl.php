@@ -21,7 +21,7 @@ class IndexCtrl extends Controller
     public function s()
     {
         $mem = \Lying::$maker->cache('memcached');
-        var_dump($mem->set('name', 'suyaqi'));
+        var_dump($mem->set('name', 'suyaqi', 10));
     }
 
     public function m()
