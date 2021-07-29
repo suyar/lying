@@ -17,16 +17,4 @@ class IndexCtrl extends Controller
     {
         return $this->render('index');
     }
-
-    public function s()
-    {
-        $mem = \Lying::$maker->cache('memcached');
-        var_dump($mem->set('name', 'suyaqi', 10));
-    }
-
-    public function m()
-    {
-        $mem = \Lying::$maker->cache('memcached');
-        var_dump($mem->exists('name'), $mem->get('name'));
-    }
 }
