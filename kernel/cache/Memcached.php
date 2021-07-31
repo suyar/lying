@@ -58,7 +58,7 @@ class Memcached extends Service implements Cache
     /**
      * @var \Memcached Memcached的实例
      */
-    private $instance;
+    private $_instance;
     
     /**
      * 初始化实例
@@ -66,18 +66,18 @@ class Memcached extends Service implements Cache
     protected function init()
     {
         //实例化Memcached
-        $this->instance = $this->persistentId ? new \Memcached($this->persistentId) : new \Memcached();
-        $this->instance->setOption(\Memcached::OPT_TCP_NODELAY, true);
-        $this->options && $this->instance->setOptions($this->options);
+        $this->_instance = $this->persistentId ? new \Memcached($this->persistentId) : new \Memcached();
+        $this->_instance->setOption(\Memcached::OPT_TCP_NODELAY, true);
+        $this->options && $this->_instance->setOptions($this->options);
         if ($this->username || $this->password) {
-            $this->instance->setOption(\Memcached::OPT_BINARY_PROTOCOL, true);
-            $this->instance->setSaslAuthData($this->username, $this->password);
+            $this->_instance->setOption(\Memcached::OPT_BINARY_PROTOCOL, true);
+            $this->_instance->setSaslAuthData($this->username, $this->password);
         }
 
         //排除Memcached服务器(长连接时)
         $exist = [];
         if ($this->persistentId) {
-            foreach ($this->instance->getServerList() as $s) {
+            foreach ($this->_instance->getServerList() as $s) {
                 $exist[$s['host'] . ':' . $s['port']] = true;
             }
         }
@@ -86,7 +86,7 @@ class Memcached extends Service implements Cache
         foreach ($this->servers as $server) {
             isset($server[1]) || ($server[1] = 11211);
             if (empty($exist) || !isset($exist[$server[0] . ':' . $server[1]])) {
-                $this->instance->addServer($server[0], $server[1], isset($server[2]) ? $server[2] : 1);
+                $this->_instance->addServer($server[0], $server[1], isset($server[2]) ? $server[2] : 1);
             }
         }
     }
@@ -100,7 +100,7 @@ class Memcached extends Service implements Cache
      */
     public function add($key, $value, $ttl = 0)
     {
-        return $this->instance->add($key, $value, $ttl > 0 ? time() + $ttl : 0);
+        return $this->_instance->add($key, $value, $ttl > 0 ? (time() + $ttl) : 0);
     }
 
     /**
@@ -129,7 +129,7 @@ class Memcached extends Service implements Cache
      */
     public function set($key, $value, $ttl = 0)
     {
-        return $this->instance->set($key, $value, $ttl > 0 ? time() + $ttl : 0);
+        return $this->_instance->set($key, $value, $ttl > 0 ? (time() + $ttl) : 0);
     }
 
     /**
@@ -140,8 +140,7 @@ class Memcached extends Service implements Cache
      */
     public function mset($data, $ttl = 0)
     {
-        $res = $this->instance->setMulti($data, $ttl > 0 ? time() + $ttl : 0);
-        return $res === false ? array_keys($data) : [];
+        return $this->_instance->setMulti($data, $ttl > 0 ? (time() + $ttl) : 0) ? [] : array_keys($data);
     }
 
     /**
@@ -151,7 +150,7 @@ class Memcached extends Service implements Cache
      */
     public function get($key)
     {
-        return $this->instance->get($key);
+        return $this->_instance->get($key);
     }
 
     /**
@@ -161,7 +160,7 @@ class Memcached extends Service implements Cache
      */
     public function mget($keys)
     {
-        return $this->instance->getMulti($keys);
+        return $this->_instance->getMulti($keys);
     }
 
     /**
@@ -172,7 +171,7 @@ class Memcached extends Service implements Cache
     public function exists($key)
     {
         $this->get($key);
-        return $this->instance->getResultCode() !== \Memcached::RES_NOTFOUND;
+        return $this->_instance->getResultCode() !== \Memcached::RES_NOTFOUND;
     }
 
     /**
@@ -182,7 +181,7 @@ class Memcached extends Service implements Cache
      */
     public function del($key)
     {
-        return $this->instance->delete($key);
+        return $this->_instance->delete($key);
     }
 
     /**
@@ -191,6 +190,6 @@ class Memcached extends Service implements Cache
      */
     public function flush()
     {
-        return $this->instance->flush();
+        return $this->_instance->flush();
     }
 }
