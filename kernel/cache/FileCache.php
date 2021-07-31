@@ -25,14 +25,18 @@ class FileCache extends Service implements Cache
      * @var float GC频率,数值为0到100之间,越小GC越频繁
      */
     protected $gc = 100;
-    
+
     /**
      * 初始化缓存文件夹
+     * @throws \Exception 文件夹创建失败抛出异常
      */
     protected function init()
     {
         empty($this->dir) && ($this->dir = DIR_RUNTIME . DS . 'cache');
-        !is_dir($this->dir) && @mkdir($this->dir, 0777, true);
+
+        if (!\Lying::$maker->helper->mkdir($this->dir)) {
+            throw new \Exception("Failed to create directory: {$this->dir}");
+        }
     }
     
     /**
@@ -103,7 +107,7 @@ class FileCache extends Service implements Cache
     {
         $this->gc();
         $cacheFile = $this->cacheFile($key);
-        if (file_put_contents($cacheFile, serialize($value), LOCK_EX) !== false) {
+        if (@file_put_contents($cacheFile, serialize($value), LOCK_EX) !== false) {
             return @touch($cacheFile, time() + ($ttl > 0 ? $ttl : 31536000));
         }
         return false;
@@ -133,13 +137,16 @@ class FileCache extends Service implements Cache
      */
     public function get($key)
     {
-        $cacheFile = $this->cacheFile($key);
-        if ($this->exists($key) && $fp = @fopen($cacheFile, 'r')) {
-            @flock($fp, LOCK_SH);
-            $value = unserialize(stream_get_contents($fp));
-            @flock($fp, LOCK_UN);
-            @fclose($fp);
-            return $value;
+        if ($this->exists($key)) {
+            $cacheFile = $this->cacheFile($key);
+            $fp = @fopen($cacheFile, 'r');
+            if ($fp !== false) {
+                @flock($fp, LOCK_SH);
+                $value = @unserialize(stream_get_contents($fp));
+                @flock($fp, LOCK_UN);
+                @fclose($fp);
+                return $value;
+            }
         }
         return false;
     }
@@ -153,9 +160,7 @@ class FileCache extends Service implements Cache
     {
         $values = [];
         foreach ($keys as $key) {
-            if ($this->exists($key)) {
-                $values[$key] = $this->get($key);
-            }
+            $values[$key] = $this->get($key);
         }
         return $values;
     }
