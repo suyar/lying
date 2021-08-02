@@ -30,16 +30,8 @@ class Helper
         return is_dir($dir);
     }
 
-
-
-
-
-
-
-
-
     /**
-     * 返回一个变量的字符串表示,其返回的表示是合法的 PHP 代码
+     * 返回一个变量的字符串表示
      * @param mixed $var 要导出的变量
      * @return string 返回变量的字符串表示
      */
@@ -49,7 +41,7 @@ class Helper
     }
 
     /**
-     * 递归返回一个变量的字符串表示,其返回的表示是合法的 PHP 代码
+     * 递归返回一个变量的字符串表示
      * @param mixed $var 要导出的变量
      * @param int $level 层级
      * @return string 返回变量的字符串表示
@@ -63,34 +55,29 @@ class Helper
                 if (empty($var)) {
                     return '[]';
                 } else {
+                    $keys = array_keys($var);
+                    $showKeys = ($keys !== range(0, count($var) - 1));
                     $spaces = str_repeat(' ', $level * 4);
-                    $tmp = "[";
+                    $tmp = '[';
                     foreach ($var as $key => $val) {
                         $tmp .= "\n" . $spaces . '    ';
-                        $tmp .= $this->exportInternal($key, 0) . ' => ' . $this->exportInternal($val, $level + 1) . ',';
+                        if ($showKeys) {
+                            $tmp .= $this->exportInternal($key, 0) . ' => ';
+                        }
+                        $tmp .= $this->exportInternal($val, $level + 1) . ',';
                     }
                     $tmp .= "\n" . $spaces . ']';
                     return $tmp;
                 }
             case 'object':
-                if ($var instanceof \Closure) {
-                    return $this->exportClosure($var);
-                } else {
-                    try {
+                try {
+                    if ($var instanceof \Closure) {
+                        return $this->exportClosure($var);
+                    } else {
                         return 'unserialize(' . var_export(serialize($var), true) . ')';
-                    } catch (\Exception $e) {
-                        if ($var instanceof \IteratorAggregate) {
-                            $varAsArray = [];
-                            foreach ($var as $key => $value) {
-                                $varAsArray[$key] = $value;
-                            }
-                            return $this->exportInternal($varAsArray, $level);
-                        } elseif ('__PHP_Incomplete_Class' !== get_class($var) && method_exists($var, '__toString')) {
-                            return var_export($var->__toString(), true);
-                        } else {
-                            return var_export($this->dump($var), true);
-                        }
                     }
+                } catch (\Exception $e) {
+                    return var_export($var, true);
                 }
             default:
                 return var_export($var, true);
@@ -98,9 +85,10 @@ class Helper
     }
 
     /**
-     * 导出匿名函数的字符串表示
+     * 导出匿名函数的实例
      * @param \Closure $closure 匿名函数实例
-     * @return string 返回匿名函数的字符串表示
+     * @return string 返回匿名函数的实例
+     * @throws \ReflectionException 反射出错抛出异常
      */
     private function exportClosure(\Closure $closure)
     {
@@ -141,87 +129,5 @@ class Helper
         }
 
         return implode('', $closureTokens);
-    }
-
-    /**
-     * 返回变量的相关信息
-     * @param mixed $var 要打印的变量
-     * @param bool $highlight 是否高亮代码
-     * @return string 返回要打印的变量
-     */
-    public function dump($var, $highlight = false)
-    {
-        $output = $this->dumpInternal($var, 0);
-        if ($highlight) {
-            $result = highlight_string("<?php\n" . $output, true);
-            $output = preg_replace('/&lt;\\?php<br \\/>/', '', $result, 1);
-        }
-        return $output;
-    }
-
-    /**
-     * 递归返回变量打印信息
-     * @param mixed $var 要打印的变量
-     * @param int $level 变量层级
-     * @param array $objects 相同的对象
-     * @return string 返回打印的字符串
-     * @throws \Exception __debuginfo返回非数组的时候抛出异常
-     */
-    private function dumpInternal($var, $level, &$objects = [])
-    {
-        switch (gettype($var)) {
-            case 'boolean':
-                return $var ? 'true' : 'false';
-            case 'integer':
-                return "$var";
-            case 'double':
-                return "$var";
-            case 'string':
-                return "'" . addslashes($var) . "'";
-            case 'resource':
-                return '{resource}';
-            case 'NULL':
-                return 'null';
-            case 'unknown type':
-                return '{unknown}';
-            case 'array':
-                if (empty($var)) {
-                    return '[]';
-                } else {
-                    $spaces = str_repeat(' ', $level * 4);
-                    $tmp = '[';
-                    foreach ($var as $key => $val) {
-                        $tmp .= "\n" . $spaces . '    ';
-                        $tmp .= $this->dumpInternal($key, 0, $objects) . ' => ' . $this->dumpInternal($val, $level + 1, $objects);
-                    }
-                    $tmp .= "\n" . $spaces . ']';
-                    return $tmp;
-                }
-            case 'object':
-                if (($id = array_search($var, $objects, true)) !== false) {
-                    return get_class($var) . '#' . ($id + 1) . '(...)';
-                } else {
-                    $id = array_push($objects, $var);
-                    $className = get_class($var);
-                    $spaces = str_repeat(' ', $level * 4);
-                    $tmp = "$className#$id\n" . $spaces . '(';
-                    if ('__PHP_Incomplete_Class' !== get_class($var) && method_exists($var, '__debugInfo')) {
-                        $dumpValues = $var->__debugInfo();
-                        if (!is_array($dumpValues)) {
-                            throw new \Exception('__debuginfo() must return an array');
-                        }
-                    } else {
-                        $dumpValues = (array) $var;
-                    }
-                    foreach ($dumpValues as $key => $value) {
-                        $keyDisplay = strtr(trim($key), "\0", ':');
-                        $tmp .= "\n" . $spaces . "    [$keyDisplay] => ";
-                        $tmp .= $this->dumpInternal($value, $level + 1, $objects);
-                    }
-                    $tmp .= "\n" . $spaces . ')';
-                    return $tmp;
-                }
-        }
-        return '';
     }
 }
