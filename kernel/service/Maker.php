@@ -18,8 +18,6 @@ use lying\exception\InvalidConfigException;
  *
  * @method Cache cache(string $id = 'cache')
  * @method Connection db(string $id = 'db')
- * @method Helper helper()
- * @method Logger logger(string $id = 'logger')
  * @method Redis redis(string $id = 'redis')
  *
  *
@@ -32,6 +30,8 @@ use lying\exception\InvalidConfigException;
  * @method Response response()
  * @method View view()
  * @method Session session()
+ * @method Helper helper()
+ * @method Logger logger(string $id = 'logger')
  * 
  * @property Hook $hook
  * @property Request $request
@@ -42,6 +42,8 @@ use lying\exception\InvalidConfigException;
  * @property Response $response
  * @property View $view
  * @property Session $session
+ * @property Helper $helper
+ * @property Logger $Logger
  */
 class Maker
 {
@@ -63,6 +65,7 @@ class Maker
         'response' => ['class' => 'lying\service\Response'],
         'view' => ['class' => 'lying\service\View'],
         'session' => ['class' => 'lying\service\Session'],
+        'helper' => ['class' => 'lying\service\Helper'],
     ];
 
     /**
