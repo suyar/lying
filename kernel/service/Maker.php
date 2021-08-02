@@ -43,7 +43,7 @@ use lying\exception\InvalidConfigException;
  * @property View $view
  * @property Session $session
  * @property Helper $helper
- * @property Logger $Logger
+ * @property Logger $logger
  */
 class Maker
 {
@@ -72,7 +72,7 @@ class Maker
      * @var array 默认扩展组件,可被重新定义的服务
      */
     private static $_extends = [
-        'cache' => ['class' => 'lying\cache\FileCache'],
+        'logger' => ['class' => 'lying\service\Logger'],
     ];
     
     /**
