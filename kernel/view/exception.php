@@ -16,7 +16,7 @@
     <h1>An error occurred while Lying running.</h1>
     <ul>
         <li>Lying Framework [Version <?= Lying::version(); ?>]. Copyright (c) 2017 Lying. All rights reserved.</li>
-        <li>Copyright (c) 2017 Lying. All rights reserved.</li>
+        <li>Copyright (c) 2018 Lying. All rights reserved.</li>
         <li>[Error Code] ：<?= $code; ?></li>
         <li>[Error Info] ：<?= $info; ?></li>
         <li>[Error File] ：<?= $file; ?></li>
