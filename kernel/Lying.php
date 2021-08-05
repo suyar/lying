@@ -63,6 +63,15 @@ class Lying
     }
 
     /**
+     * 获取Lying的版本号
+     * @return string 返回当前版本号
+     */
+    public static function version()
+    {
+        return '2.1';
+    }
+
+    /**
      * 启动框架
      * @throws \Exception 其他错误抛出异常
      * @throws \lying\exception\HttpException 路由解析错误抛出404

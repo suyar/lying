@@ -15,7 +15,7 @@
 <div class="trace">
     <h1>An error occurred while Lying running.</h1>
     <ul>
-        <li>Lying Framework [Version 2.0]. Copyright (c) 2017 Lying. All rights reserved.</li>
+        <li>Lying Framework [Version <?= Lying::version(); ?>]. Copyright (c) 2017 Lying. All rights reserved.</li>
         <li>Copyright (c) 2017 Lying. All rights reserved.</li>
         <li>[Error Code] ：<?= $code; ?></li>
         <li>[Error Info] ：<?= $info; ?></li>
@@ -23,7 +23,7 @@
         <li>[Error Line] ：<?= $line; ?></li>
         <li>&nbsp;</li>
         <?php foreach ($trace as $t): ?>
-            <li><?= var_export($t, true) ?></li>
+            <li><?= var_export($t, true); ?></li>
         <?php endforeach; ?>
     </ul>
 </div>
