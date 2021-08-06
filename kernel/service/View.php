@@ -70,12 +70,16 @@ class View extends Service
             $oldContext = $this->_context;
             $context && ($this->_context = $context);
 
+            //这一步是防止extract后变量名和$file冲突
+            $fileHash = sha1($file);
+            $$fileHash = $file;
+
             $_obInitialLevel_ = ob_get_level();
             ob_start();
             ob_implicit_flush(false);
             extract($this->_params, EXTR_OVERWRITE);
             try {
-                require $file;
+                require $$fileHash;
                 $content = ob_get_clean();
             } catch (\Exception $e) {
                 while (ob_get_level() > $_obInitialLevel_) {

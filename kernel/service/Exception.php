@@ -9,6 +9,7 @@
 namespace lying\service;
 
 use lying\event\ExceptionEvent;
+use lying\exception\HttpException;
 
 /**
  * Class Exception
@@ -16,78 +17,6 @@ use lying\event\ExceptionEvent;
  */
 class Exception
 {
-    /**
-     * @var array HTTP返回码
-     */
-    private static $_httpCode = [
-        100 => 'Continue',
-        101 => 'Switching Protocols',
-        102 => 'Processing',
-        118 => 'Connection timed out',
-        200 => 'OK',
-        201 => 'Created',
-        202 => 'Accepted',
-        203 => 'Non-Authoritative',
-        204 => 'No Content',
-        205 => 'Reset Content',
-        206 => 'Partial Content',
-        207 => 'Multi-Status',
-        208 => 'Already Reported',
-        210 => 'Content Different',
-        226 => 'IM Used',
-        300 => 'Multiple Choices',
-        301 => 'Moved Permanently',
-        302 => 'Found',
-        303 => 'See Other',
-        304 => 'Not Modified',
-        305 => 'Use Proxy',
-        306 => 'Reserved',
-        307 => 'Temporary Redirect',
-        308 => 'Permanent Redirect',
-        310 => 'Too many Redirect',
-        400 => 'Bad Request',
-        401 => 'Unauthorized',
-        402 => 'Payment Required',
-        403 => 'Forbidden',
-        404 => 'Not Found',
-        405 => 'Method Not Allowed',
-        406 => 'Not Acceptable',
-        407 => 'Proxy Authentication Required',
-        408 => 'Request Time-out',
-        409 => 'Conflict',
-        410 => 'Gone',
-        411 => 'Length Required',
-        412 => 'Precondition Failed',
-        413 => 'Request Entity Too Large',
-        414 => 'Request-URI Too Long',
-        415 => 'Unsupported Media Type',
-        416 => 'Requested range unsatisfiable',
-        417 => 'Expectation failed',
-        418 => 'I\'m a teapot',
-        421 => 'Misdirected Request',
-        422 => 'Unprocessable entity',
-        423 => 'Locked',
-        424 => 'Method failure',
-        425 => 'Unordered Collection',
-        426 => 'Upgrade Required',
-        428 => 'Precondition Required',
-        429 => 'Too Many Requests',
-        431 => 'Request Header Fields Too Large',
-        449 => 'Retry With',
-        450 => 'Blocked by Windows Parental Controls',
-        500 => 'Internal Server Error',
-        501 => 'Not Implemented',
-        502 => 'Bad Gateway or Proxy Error',
-        503 => 'Service Unavailable',
-        504 => 'Gateway Time-out',
-        505 => 'HTTP Version not supported',
-        507 => 'Insufficient storage',
-        508 => 'Loop Detected',
-        509 => 'Bandwidth Limit Exceeded',
-        510 => 'Not Extended',
-        511 => 'Network Authentication Required',
-    ];
-
     /**
      * @var bool 是否调试模式
      */
@@ -218,42 +147,27 @@ class Exception
     /**
      * 默认的异常处理
      * @param ExceptionEvent $event 异常事件
+     * @throws \Throwable 模板渲染出错抛出异常
      */
     public function renderException(ExceptionEvent $event)
     {
         $exception = $event->e;
-        var_dump($exception);
-        /*$errcode = $exception->getCode();
-        if ($exception instanceof HttpException && isset(self::$_httpCode[$errcode])) {
-            $message = self::$_httpCode[$errcode];
-            http_response_code(intval($errcode));
+
+        if ($exception instanceof HttpException) {
+            http_response_code($exception->getCode());
         } else {
-            $message = 'An internal server error occurred.';
             http_response_code(500);
         }
 
-        if (PHP_SAPI === 'cli') {
-            $err = "[Error Code] :" . $exception->getCode() . "\n";
-            $err .= "[Error Info] :" . $exception->getMessage() . "\n";
-            $err .= "[Error File] :" . $exception->getFile() . "\n";
-            $err .= "[Error Line] :" . $exception->getLine() . "\n";
-            foreach (explode("\n", $exception->getTraceAsString()) as $t) {
-                $err .= "$t\n";
-            }
-            fwrite(STDERR, $err);
-        } else {
-            try {
-                list($m, $c, $a) = \Lying::$maker->request()->resolve();
-                $errorAction = ['error', 'index', 'index'];
-                $res = \Lying::$maker->dispatch()->run($errorAction, ['exception'=>$exception, 'message'=>$message]);
-                var_dump($res);die;
-            } catch (InvalidRouteException $e) {
-                ob_start();
-                ob_implicit_flush(false);
-                extract(['exception'=>$exception, 'message'=>$message], EXTR_OVERWRITE);
-                require DIR_KERNEL . DS . 'view' . DS . ($this->_debug ? 'exception.php' : 'error.php');
-                echo ob_get_clean();
-            }
-        }*/
+        $view = \Lying::$maker->view;
+        $view->clear();
+        $view->assign('code', $exception->getCode())
+            ->assign('info', $exception->getMessage())
+            ->assign('line', $exception->getLine())
+            ->assign('file', $exception->getFile())
+            ->assign('trace', explode("\n", $exception->getTraceAsString()));
+        $content = $view->renderFile(DIR_KERNEL . DS . 'view' . DS . 'exception.php');
+        $view->clear();
+        echo $content;
     }
 }
