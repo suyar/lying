@@ -41,15 +41,17 @@ class Dispatch extends Service
             $class = "$moduleNamespace\\$m\\controller\\$c";
             if (isset($this->_controllers[$class]) && method_exists($this->_controllers[$class], $a)) {
                 $instance = $this->_controllers[$class];
-            } elseif (is_subclass_of($class, 'lying\service\Controller')) {
-                if (method_exists($class, $a)) {
-                    /** @var Controller $instance */
-                    $instance = $this->_controllers[$class] = new $class(['module'=>$raw[0], 'id'=>$raw[1]]);
-                    $instance->on($instance::EVENT_BEFORE_ACTION, [$instance, 'beforeAction']);
-                    $instance->on($instance::EVENT_AFTER_ACTION, [$instance, 'afterAction']);
+            } elseif (class_exists($class)) {
+                if (is_subclass_of($class, 'lying\service\Controller')) {
+                    if (method_exists($class, $a)) {
+                        /** @var Controller $instance */
+                        $instance = $this->_controllers[$class] = new $class(['module'=>$raw[0], 'id'=>$raw[1]]);
+                        $instance->on($instance::EVENT_BEFORE_ACTION, [$instance, 'beforeAction']);
+                        $instance->on($instance::EVENT_AFTER_ACTION, [$instance, 'afterAction']);
+                    }
+                } else {
+                    throw new \Exception('Controller class must extend from \\lying\\service\\Controller.');
                 }
-            } else {
-                throw new \Exception('Controller class must extend from \\lying\\service\\Controller.');
             }
             if (isset($instance)) {
                 $method = new \ReflectionMethod($instance, $a);
