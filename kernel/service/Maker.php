@@ -36,6 +36,7 @@ use lying\exception\InvalidConfigException;
  * @property Dispatch $dispatch
  * @property Response $response
  * @property View $view
+ * @property Session $session
  */
 class Maker
 {
@@ -56,9 +57,6 @@ class Maker
         'dispatch' => ['class' => 'lying\service\Dispatch'],
         'response' => ['class' => 'lying\service\Response'],
         'view' => ['class' => 'lying\service\View'],
-
-
-
         'session' => ['class' => 'lying\service\Session'],
     ];
 
