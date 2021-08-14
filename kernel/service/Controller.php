@@ -43,16 +43,6 @@ class Controller extends Service
     protected $action;
 
     /**
-     * @var View 视图实例
-     */
-    private $_view;
-    
-    /**
-     * @var string 布局文件
-     */
-    public $layout = false;
-
-    /**
      * @var array 设置不被访问的方法,用正则匹配,此属性必须设置为public
      */
     public $deny = [];
@@ -76,36 +66,24 @@ class Controller extends Service
     public function afterAction(ActionEvent $event) {}
 
     /**
-     * 获取视图实例
-     * @return View
-     */
-    private function getView()
-    {
-        if ($this->_view === null) {
-            $this->_view = new View();
-        }
-        return $this->_view;
-    }
-
-    /**
      * 渲染输出参数
      * @param string|array $key 参数名,如果为数组,则判断为批量输出数据
      * @param mixed $value 参数值,如果key为数组,此参数可不填写
+     * @return View
      */
     final public function assign($key, $value = null)
     {
-        $this->getView()->assign($key, $value);
+        return \Lying::$maker->view->assign($key, $value);
     }
 
     /**
      * 渲染页面
-     * @param string $view 视图文件名称
-     * @param string|bool $layout 布局文件
-     * @return string 渲染的HTML代码
-     * @throws \Exception
+     * @param string $view 视图文件名称,默认为当前方法名
+     * @return string 渲染后的HTML代码
+     * @throws \Throwable
      */
-    final public function render($view, $layout = false)
+    final public function render($view = '')
     {
-        return $this->getView()->render($view, $layout ?: $this->layout);
+        return \Lying::$maker->view->render($view, [$this->module, $this->id, $this->action]);
     }
 }
