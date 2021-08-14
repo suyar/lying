@@ -35,6 +35,7 @@ use lying\exception\InvalidConfigException;
  * @property Encrypter $encrypter
  * @property Dispatch $dispatch
  * @property Response $response
+ * @property View $view
  */
 class Maker
 {
@@ -54,6 +55,7 @@ class Maker
         'encrypter' => ['class' => 'lying\service\Encrypter'],
         'dispatch' => ['class' => 'lying\service\Dispatch'],
         'response' => ['class' => 'lying\service\Response'],
+        'view' => ['class' => 'lying\service\View'],
 
 
 
