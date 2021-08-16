@@ -25,6 +25,11 @@ class Request extends Service
     private $_postParams;
 
     /**
+     * @var array HTTP头
+     */
+    private $_headers;
+
+    /**
      * @var array 当前请求的路由
      */
     private $_route;
@@ -298,6 +303,41 @@ class Request extends Service
             }
         } else {
             return isset($_SERVER['REQUEST_TIME']) ? intval($_SERVER['REQUEST_TIME']) : null;
+        }
+    }
+
+    /**
+     * 获取请求header
+     * @param string $header 请求的header名,放空为获取所有header
+     * @return string|array|null 未获取到返回null
+     */
+    public function getHeader($header = null)
+    {
+        if ($this->_headers === null) {
+            $this->_headers = [];
+            if (function_exists('getallheaders')) {
+                foreach (getallheaders() as $name => $value) {
+                    $this->_headers[strtolower($name)] = $value;
+                }
+            } elseif (function_exists('http_get_request_headers')) {
+                foreach (http_get_request_headers() as $name => $value) {
+                    $this->_headers[strtolower($name)] = $value;
+                }
+            } else {
+                foreach ($_SERVER as $name => $value) {
+                    if (strncmp($name, 'HTTP_', 5) === 0) {
+                        $name = str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5)))));
+                        $this->_headers[strtolower($name)] = $value;
+                    }
+                }
+            }
+        }
+
+        if ($header === null) {
+            return $this->_headers;
+        } else {
+            $header = strtolower($header);
+            return isset($this->_headers[$header]) ? $this->_headers[$header] : null;
         }
     }
 
