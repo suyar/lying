@@ -1347,4 +1347,44 @@ class Response extends Service
 
         return $this;
     }
+
+    /**
+     * HTTP重定向
+     * ```
+     * redirect('get', ['id' => 100]);跳转到[当前模块/当前控制器/get]
+     * redirect('admin/post', ['id' => 100]);跳转到[当前模块/admin/post]
+     * redirect('lying/index/name', ['id' => 100]);跳转到[lying/index/name],参见URL生成
+     * redirect('/admin/post', ['id' => 100]);跳转到[/admin/post/?id=100]
+     * redirect('https://www.baidu.com') 必须带协议头,跳转到百度
+     * ```
+     * @param string $url 重定向的地址
+     * @param array $params URL参数
+     * @param bool $normal 是否把参数设置成?a=1&b=2,默认否,优先pathinfo,只对非/开头的path
+     * @param int $statusCode HTTP状态码,默认302,如果ajax请求出错,可以手动设置200
+     * @return $this
+     */
+    public function redirect($url, array $params = [], $normal = false, $statusCode = 302)
+    {
+        if (preg_match('/^https?:\/\/\S+/i', $url)) {
+            $query = http_build_query($params, '', '&', PHP_QUERY_RFC3986);
+            $url = rtrim($url, '?&');
+            if (empty($query)) {
+                $url .= (strpos($url, '?') === false ? "?$query" : "&$query");
+            }
+        } else {
+            $url = \Lying::$maker->router->createUrl($url, $params, true, $normal);
+        }
+
+        if (\Lying::$maker->request->isPjax()) {
+            $this->setHeader('X-Pjax-Url', $url);
+        } elseif (\Lying::$maker->request->isAjax()) {
+            $this->setHeader('X-Redirect', $url);
+        } else {
+            $this->setHeader('Location', $url);
+        }
+
+        $this->setStatusCode($statusCode);
+
+        return $this;
+    }
 }

@@ -302,43 +302,6 @@ class Request extends Service
     }
 
     /**
-     * 重定向
-     * ```
-     * redirect('get', ['id' => 100]);跳转到[当前模块/当前控制器/get]
-     * redirect('admin/post', ['id' => 100]);跳转到[当前模块/admin/post]
-     * redirect('lying/index/name', ['id' => 100]);跳转到[lying/index/name],参见URL生成
-     * redirect('https://www.baidu.com') 必须带协议头,跳转到百度
-     * ```
-     * @param string $url 跳转的地址
-     * @param array $params 要携带的参数,为一个关联数组
-     * @param bool $normal 是否把参数设置成?a=1&b=2,默认否,优先pathinfo(此参数对完整的URL无效)
-     */
-    public function redirect($url,array $params = [], $normal = false)
-    {
-        if (preg_match('/^https?:\/\/\S+\.\S+/i', $url)) {
-            $query = http_build_query($params, '', '&', PHP_QUERY_RFC3986);
-            $url = rtrim($url, '?&');
-            empty($query) || ($url .= (strpos($url, '?') === false ? "?$query" : "&$query"));
-        } else {
-            $url = \Lying::$maker->router->createUrl($url, $params, true, $normal);
-        }
-
-        while (ob_get_level() !== 0) {
-            @ob_end_clean() || ob_clean();
-        }
-
-        http_response_code(302);
-        if ($this->isPjax()) {
-            header("X-Pjax-Url: $url");
-        } else if ($this->isAjax()) {
-            header("X-Redirect: $url");
-        } else {
-            header("Location: $url");
-        }
-        exit(0);
-    }
-
-    /**
      * 获取csrfToken
      * @return string
      */
