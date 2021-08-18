@@ -146,7 +146,7 @@ class Router extends Service
             }
 
             //删除已经用过的参数,剩余的参数并入GET参数
-            $pathArr = array_slice($pathArr, $count_path);
+            $pathArr = array_slice($pathArr, $count_pattern);
             $more = [];
             while ($pathArr) {
                 $more[] = array_shift($pathArr) . '=' . array_shift($pathArr);
